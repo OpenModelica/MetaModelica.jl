@@ -1,0 +1,7 @@
+authors = ["Martin Sjölund <martin.sjolund@liu.se>"]
+name = "MetaModelica"
+uuid = "9d7f2a79-07b5-5542-8b19-c0100dda6b06"
+version = "0.0.0"
+
+[deps]
+MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
