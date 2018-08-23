@@ -21,7 +21,6 @@ supporting @matchcontinue (try the next case when any exception is thrown).
 
 import MacroTools
 import MacroTools: @capture
-import Compat: occursin
 
 macro splice(iterator, body)
   @assert iterator.head == :call
