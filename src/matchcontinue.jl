@@ -144,6 +144,10 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
             end
         end
     elseif @capture(pattern, T_(subpatterns__))
+        if string(T) == "=>"
+            # Syntactic sugar for head => tail
+            T = :Cons
+        end
         @assert occursin(r"^[A-Z]", string(T)) "Pattern $pattern looks like a struct pattern but $T is probably not a struct type."
         len = length(subpatterns)
         # show([pat.head for pat in subpatterns if pat isa Expr])
@@ -332,6 +336,7 @@ Patterns:
   * `_` matches anything
   * `foo` matches anything, binds value to `foo`
   * `Foo(x,y,z)` matches structs of type `Foo` with fields matching `x,y,z`
+  * `Foo(x=y)` matches structs of type `Foo` with a field named `x` matching `y`
   * `[x,y,z]` matches `AbstractArray`s with 3 entries matching `x,y,z`
   * `(x,y,z)` matches `Tuple`s with 3 entries matching `x,y,z`
   * `[x,y...,z]` matches `AbstractArray`s with at least 2 entries, where `x` matches the first entry, `z` matches the last entry and `y` matches the remaining entries.
@@ -340,6 +345,7 @@ Patterns:
   * `x || y` matches values which match either `x` or `y` (only variables which exist in both branches will be bound)
   * `x && y` matches values which match both `x` and `y`
   * `x where condition` matches only if `condition` is true (`condition` may use any variables that occur earlier in the pattern eg `(x, y, z where x + y > z)`)
+  * `x => y` is syntactic sugar for `cons(x,y)` [Preliminary]
   * Anything else is treated as a constant and tested for equality
 
 Patterns can be nested arbitrarily.
@@ -347,5 +353,3 @@ Patterns can be nested arbitrarily.
 Repeated variables only match if they are `==` eg `(x,x)` matches `(1,1)` but not `(1,2)`.
 """
 :(@matchcontinue)
-
-export @match, @matchcontinue, MatchFailure

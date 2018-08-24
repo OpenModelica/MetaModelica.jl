@@ -3,6 +3,8 @@ module TestMetaModelica
 using MetaModelica
 using Test
 
+@testset "MetaModelica" begin
+
 @testset "@match" begin
 
 @test 1 == @match Cons(1,nil()) begin
@@ -22,6 +24,10 @@ end
   Cons(tail=Nil()) => true
 end
 
+@test 3 == @match 1 => 2 => nil() begin
+  (x => y => Nil()) => x+y
+end
+
 end
 
 @testset "@matchcontinue" begin
@@ -30,6 +36,8 @@ end
   Cons(head=x) => throw(MatchFailure)
   Cons(x && 1,_) => 2*x
   _ => 3
+end
+
 end
 
 end
