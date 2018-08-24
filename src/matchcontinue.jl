@@ -348,4 +348,4 @@ Repeated variables only match if they are `==` eg `(x,x)` matches `(1,1)` but no
 """
 :(@matchcontinue)
 
-export @matchcontinue
+export @match, @matchcontinue, MatchFailure
