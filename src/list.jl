@@ -8,6 +8,9 @@ struct Cons{T} <: List{T}
     tail::List{T}
 end
 
+Base.convert(::Type{List{T}}, x::Nil{Any}) where T = Nil{T}()
+Base.convert(::Type{Nil{T}}, x::Nil) where T = Nil{T}()
+
 nil(T) = Nil{T}()
 nil() = Nil{Any}()
 

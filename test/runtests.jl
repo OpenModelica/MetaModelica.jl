@@ -48,6 +48,16 @@ end
 
 end
 
+@testset "list" begin
+
+@test 0 == begin
+  Ints = MetaModelica.List{Int}
+  a::Ints = nil()
+  length(a)
+end
+
+end
+
 end
 
 end
