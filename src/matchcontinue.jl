@@ -170,7 +170,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
             for field in named_fields
                 local tmp
                 tmp = quote $(Meta.quot(field)) in $struct_name end
-                assertcond = assertcond ? tmp : Expr(:&&, [tmp assertcond])
+                assertcond = Expr(:&&, tmp, assertcond)
             end
             push!(asserts, quote
                 if !(let

@@ -34,6 +34,11 @@ end
   (x => y => Nil()) => x+y
 end
 
+@test 1 == @match list(1,2) begin
+  # case x::2::{} then x
+  Cons(head=x, tail=Cons(head=2, tail=Nil())) => x
+end
+
 end
 
 @testset "@matchcontinue" begin

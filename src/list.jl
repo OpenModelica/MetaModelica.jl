@@ -18,7 +18,7 @@ list() = nil()
 function list(vs::T...) where {T}
   lst = nil(T)
   for i in length(vs):-1:1
-    lst = vs[i] | lst
+    lst = Cons{T}(vs[i], lst)
   end
   lst
 end
