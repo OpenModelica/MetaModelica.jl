@@ -19,9 +19,6 @@ changed to allow keyword argument matching on a struct as well as
 supporting @matchcontinue (try the next case when any exception is thrown).
 """
 
-import MacroTools
-import MacroTools: @capture
-
 macro splice(iterator, body)
   @assert iterator.head == :call
   @assert iterator.args[1] == :in
@@ -148,7 +145,15 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
             # Syntactic sugar for head => tail
             T = :Cons
         end
-        @assert occursin(r"^[A-Z]", string(T)) "Pattern $pattern looks like a struct pattern but $T is probably not a struct type."
+        if string(T) == "<|"
+            # Syntactic sugar for head <| tail
+            T = :Cons
+        end
+        if string(T) == "nil"
+          # Syntactic sugar for Nil
+          T = :Nil
+        end
+      @assert occursin(r"^[A-Z]", string(T)) "Pattern $pattern looks like a struct pattern but $T is probably not a struct type."
         len = length(subpatterns)
         # show([pat.head for pat in subpatterns if pat isa Expr])
         named_fields = [pat.args[1] for pat in subpatterns if (pat isa Expr) && pat.head == :(kw)]

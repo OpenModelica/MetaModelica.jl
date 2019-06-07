@@ -1,0 +1,9 @@
+export very_unsafe_get_pointer_from_objref
+export arrayGetNoBoundsChecking
+export arrayUpdateNoBoundsChecking
+export arrayCreateNoInit
+export stringGetNoBoundsChecking
+export listReverseInPlace
+export listSetFirst
+export listSetRest
+export listArrayLiteral
