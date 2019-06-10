@@ -1,8 +1,9 @@
 module MetaModelica
 
 include("list.jl")
-
 include("matchcontinue.jl")
-export @match, @matchcontinue, MatchFailure
+include("metaModelicaTypes.jl")
+
+export @match, @matchcontinue, MatchFailure, ModelicaReal, ModelicaInteger
 
 end

@@ -63,6 +63,28 @@ end
 
 end
 
+@testset "metaModelicatypes" begin
+    
+function f(a::ModelicaReal, b::ModelicaReal)::AbstractFloat
+    return a + b
 end
 
+function f2(a::ModelicaInteger)::ModelicaInteger
+    return a
+end        
+    
+@test_throws MethodError f(true, true)
+
+@test_throws MethodError f(true, 1)
+    
+@test_throws MethodError f(f2(1), f2(1))
+
+@test typeof(2.0) == typeof(f(1,1))
+
+@test typeof(2) != typeof(f(1,1))
+
 end
+
+end #= End MetaModelica testset =#
+
+end #= End of TestMetaModelica =#
