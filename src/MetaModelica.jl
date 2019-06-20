@@ -7,4 +7,5 @@ include("union.jl")
 
 export @match, @matchcontinue, MatchFailure, ModelicaReal, ModelicaInteger
 export @Uniontype, @Record, @UniontypeDecl
+
 end
