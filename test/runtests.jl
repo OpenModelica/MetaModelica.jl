@@ -167,6 +167,8 @@ end
     
 end #=End of uniontype =#
     
+end
+
 end #= End MetaModelica testset =#
 
 end #= End of TestMetaModelica =#
