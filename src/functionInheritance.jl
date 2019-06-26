@@ -126,7 +126,3 @@ end
 macro ExtendFunction(newFunction, functionToExtend)
     makeExtendedFunction(:($newFunction), functionToExtend)
 end
-
-println(@macroexpand @ExtendFunction pathStringNoQual pathString(usefq=false))
-
-@ExtendFunction pathStringNoQual pathString(usefq=false)
