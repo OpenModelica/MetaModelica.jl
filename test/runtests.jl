@@ -164,11 +164,21 @@ end
 end
 
 @test_nowarn REAL1(CONCRETE_NICE_NUMBER(BASE(4)))
-    
-end #=End of uniontype =#
-    
+function pathString(usefq=true)
+  usefq
 end
 
+@ExtendFunction pathStringNoQual pathString(usefq=false)
+
+@test pathStringNoQual() != pathString()
+   
+end #=End of uniontype =#
+
+#= Tests the MetaModelica.jl implementation of inheritance =#
+@testset "Function extension test" begin
+
+end #= Function extension test =#
+    
 end #= End MetaModelica testset =#
 
 end #= End of TestMetaModelica =#
