@@ -7,13 +7,12 @@ These functions should be remimplemented here or removed  all together
 
 #= The Info attribute provides location information for elements and classes. =#
 
-@Uniontype Option{T} begin
-  @Record SOME{T} begin
-    data::T
-  end
-  @Record NONE{T} begin
-  end
+struct SOME{T}
+  data::T
 end
+
+Option{T} = Union{SOME{T}, Nothing}
+NONE() = Nothing()
 
 #= Logically combine two Booleans with 'and' operator =#
 function boolAnd(b1::Bool, b2::Bool)::Bool
