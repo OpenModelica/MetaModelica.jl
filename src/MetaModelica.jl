@@ -23,6 +23,8 @@ export @Uniontype, @Record, @UniontypeDecl, @ExtendedFunction, @ExtendedAnonFunc
 export List, list, Nil, nil, Cons, cons, =>, Option, SOME, NONE, SourceInfo, SOURCEINFO
 export @do_threaded_for, <|
 
+export @reexport
+  
 include("exportmetaRuntime.jl")
 
 include("dangerous.jl")
