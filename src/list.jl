@@ -107,7 +107,7 @@ function list(vs::T...)::List where {T}
 end
 
 #=Support compound types =#
-function list(v::Any...)::List
+function list(vs::Any...)::List
   local lst::List = nil()
   for i in length(vs):-1:1
     lst = Cons{Any}(vs[i], lst)
