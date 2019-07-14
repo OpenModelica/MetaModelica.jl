@@ -97,10 +97,20 @@ nil(T) = Nil{T}()
 nil() = Nil{Any}()
 
 list() = nil()
+
 function list(vs::T...)::List where {T}
   local lst::List{T} = nil(T)
   for i in length(vs):-1:1
     lst = Cons{T}(vs[i], lst)
+  end
+  lst
+end
+
+#=Support compound types =#
+function list(v::Any...)::List
+  local lst::List = nil
+  for i in length(vs):-1:1
+    lst = Cons{Any}(vs[i], lst)
   end
   lst
 end
