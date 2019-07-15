@@ -79,4 +79,18 @@ end
 
 @test takeFoo(@ExtendedAnonFunction fooBar1()) == 4
 
+function pathString(path::String, delimiter::String=".", usefq::Bool=true, reverse::Bool=false)::String
+  usefq
+end
+
+@test 5 == begin
+  function zeroArgFoo()
+    5
+  end
+  function fooFoo()
+    takeFoo(@ExtendedAnonFunction zeroArgFoo())
+  end
+  fooFoo()
+end
+
 end
