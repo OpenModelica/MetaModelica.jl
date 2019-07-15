@@ -1,6 +1,6 @@
 module MetaModelica
 
-import reexport
+using Reexport
 import MacroTools
 import MacroTools: @capture
 #= Have to treat the types slightly different. 
