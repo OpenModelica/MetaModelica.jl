@@ -75,6 +75,11 @@ function takeFoo(a)
   a()
 end
 
+
+function takeFoo2(a)
+  a(1)
+end
+
 @test takeFoo(@ExtendedAnonFunction zeroArgFoo()) == 5
 
 @test takeFoo(@ExtendedAnonFunction fooBar1()) == 4
@@ -88,9 +93,22 @@ end
     5
   end
   function fooFoo()
-    takeFoo(@ExtendedAnonFunction zeroArgFoo())
+    f = takeFoo(@ExtendedAnonFunction zeroArgFoo())
+    f
   end
   fooFoo()
 end
+
+function twoArgFoo(a, b=4)
+  a + b
+end
+
+
+function fooFoo()
+  @ExtendedFunction X twoArgFoo(a=4, b=1)
+  X(1)
+end
+
+@test fooFoo() == 2
 
 end
