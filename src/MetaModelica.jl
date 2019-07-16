@@ -1,6 +1,5 @@
 module MetaModelica
 
-using Reexport
 import MacroTools
 import MacroTools: @capture
 #= Have to treat the types slightly different. 
@@ -23,8 +22,6 @@ export @match, @matchcontinue, MatchFailure, ModelicaReal, ModelicaInteger
 export @Uniontype, @Record, @UniontypeDecl, @ExtendedFunction, @ExtendedAnonFunction
 export List, list, Nil, nil, Cons, cons, =>, Option, SOME, NONE, SourceInfo, SOURCEINFO
 export @do_threaded_for, <|
-
-export @reexport
   
 include("exportmetaRuntime.jl")
 
