@@ -15,7 +15,12 @@
   parameters can be changed MetaModelica style.
 
 @Author John Tinnerholm, same license as the rest of this package
-  
+
+TODO: Note that ExtendedAnonFunction does not work for inline expressions 
+      Same with @ExtendedFunction. The reason being that certain variables will not be in use by 
+      then.
+      Implement @ExtendedAnonInlineFunction, which does the same but requires less available compile time 
+      information.  
 =#
 
 #= Used to indicate that a specific symbolic parameter does not have a default argument =#

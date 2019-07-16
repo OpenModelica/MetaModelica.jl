@@ -170,7 +170,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
         else
             # Uses keyword arguments
             struct_name = gensym("$(T)_match")
-            type_name = String(T)
+            type_name = string(T)
             assertcond = true
             for field in named_fields
                 local tmp
