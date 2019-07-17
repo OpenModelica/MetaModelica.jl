@@ -31,6 +31,9 @@ They can be used in that way with match.jl
 
 module UniontypeDef
 
+include("metaModelicaTypes.jl")
+import .MetaModelicaTypes
+
 function makeRecord(recordExpr::Expr)
   local arr = []
   for i in recordExpr.args
