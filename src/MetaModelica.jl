@@ -17,6 +17,7 @@ using .ListDef
 include("matchcontinue.jl")
 include("functionInheritance.jl")
 include("metaRuntime.jl")
+include("array.jl")
 
 
 export @match, @matchcontinue, MatchFailure, ModelicaReal, ModelicaInteger
