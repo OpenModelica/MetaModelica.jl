@@ -5,3 +5,5 @@
 function array(args...)
   [args...]
 end
+#=Currently use JArray as MArray=#
+MArray = Array
