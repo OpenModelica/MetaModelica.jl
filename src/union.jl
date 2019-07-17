@@ -28,7 +28,9 @@ They can be used in that way with match.jl
 #   i
 #  end
 =#
-
+#=
+  TODO: Sometimes when people use type aliasing @Uniontype will not know about the specific type during compilation time
+=#
 module UniontypeDef
 
 include("metaModelicaTypes.jl")
