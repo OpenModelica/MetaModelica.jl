@@ -5,6 +5,8 @@
 
 module Dangerous
 
+import ExportAll
+
 using ..MetaModelica
 
 #= O(1) =#
@@ -62,6 +64,6 @@ function listArrayLiteral(lst::List{A})::Array{A} where {A <: Any}
   arr
 end
 
-include("exportDangerous.jl")
+ExportAll.@exportAll()
 
 end #=End dangerous =#

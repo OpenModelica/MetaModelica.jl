@@ -5,4 +5,5 @@ version = "0.0.2"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+ExportAll = "ad2082ca-a69e-11e9-38fa-e96309a31fe4"
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
