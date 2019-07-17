@@ -185,7 +185,10 @@ Base.sort(lst::List) = let
   list(sort([lst...])...)
 end
 
-export List, list, Nil, nil, Cons, cons, <|
+#= Immutable list. List is short for it but cannot be used in all contexts=#
+IList = List
+
+export List, list, Nil, nil, Cons, cons, <|, IList
 export @do_threaded_for
 
 end
