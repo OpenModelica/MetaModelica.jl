@@ -765,6 +765,12 @@ end
   end
 end
 
+
+SOURCEINFO(fileName::String, isReadOnly::ModelicaInteger, lineNumberStart::ModelicaInteger, columnNumberSTart::ModelicaInteger, lineNumberEnd::ModelicaInteger, columnNumberEnd::ModelicaInteger) = let
+  #=No source info=#
+  SOURCEINFO(fileName, isReadOnly, lineNumberStart, columnNumberSTart, lineNumberEnd, columnNumberEnd, 0.0)
+end
+
 function sourceInfo()::SourceInfo
   local info::SourceInfo
   #= Defined in the runtime =#
