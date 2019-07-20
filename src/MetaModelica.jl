@@ -3,8 +3,10 @@ module MetaModelica
 import MacroTools
 import MacroTools: @capture
 import ExportAll
-#= Have to treat the types slightly different. 
-   Precompilation of the types need to occur before everything else =#
+  #=
+  Have to treat the types slightly different. 
+  Precompilation of the types need to occur before everything else 
+=#
 include("metaModelicaTypes.jl")
 import .MetaModelicaTypes
 using .MetaModelicaTypes
@@ -17,8 +19,6 @@ using .ListDef
 include("matchcontinue.jl")
 include("functionInheritance.jl")
 include("metaRuntime.jl")
-include("array.jl")
-
 
 export @match, @matchcontinue, MatchFailure, ModelicaReal, ModelicaInteger
 export @Uniontype, @Record, @UniontypeDecl, @ExtendedFunction, @ExtendedAnonFunction
@@ -27,5 +27,7 @@ export @do_threaded_for, <|, IList, MArray
 
 include("exportmetaRuntime.jl")
 include("dangerous.jl")
+include("array.jl")
+#= Expose libraries =#
 
 end

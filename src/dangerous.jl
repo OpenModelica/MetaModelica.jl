@@ -6,7 +6,6 @@
 module Dangerous
 
 import ExportAll
-
 using ..MetaModelica
 
 #= O(1) =#
