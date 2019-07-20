@@ -391,9 +391,7 @@ end
 #= O(s1+s2) =#
 function stringAppend(s1::String, s2::String)::String
   local s::String
-
-  s = s1 + s2
-  s
+  s1 * s2
 end
 
 function stringEq(s1::String, s2::String)::Bool
@@ -405,9 +403,7 @@ end
 
 function stringEqual(s1::String, s2::String)::Bool
   local b::Bool
-
   b = s1 == s2
-  b
 end
 
 function stringCompare(s1::String, s2::String)::ModelicaInteger
