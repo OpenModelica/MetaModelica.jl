@@ -157,7 +157,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
           # Syntactic sugar for Nil
         T = :Nil
       #=We have elements=#
-      else if string(T) == "list"
+      elseif string(T) == "list"
           # Syntactic sugar for Nil
           T = :Cons
       end
