@@ -28,6 +28,7 @@ export @do_threaded_for, <|, IList, MArray
 include("exportmetaRuntime.jl")
 include("dangerous.jl")
 include("array.jl")
-#= Expose libraries =#
-
+#======Expose libraries=======#
+push!(LOAD_PATH, ".")
+#=========================#
 end

@@ -4,8 +4,9 @@ authors = ["Martin Sjölund <martin.sjolund@liu.se>", "John Tinnerholm <john.tin
 version = "0.0.2"
 
 [deps]
-ArrayUtil = "2e078786-4f8d-5384-85bb-5c922126260d"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 ExportAll = "ad2082ca-a69e-11e9-38fa-e96309a31fe4"
-ListUtil = "a68bf5b6-8cfb-5291-ab1f-76d358662fea"
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
+
+[compat]
+julia = "1.1"
