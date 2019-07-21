@@ -10,8 +10,7 @@ using ..MetaModelica
 
 #= O(1) =#
 function arrayGetNoBoundsChecking(arr::Array{A}, index::ModelicaInteger)::A where {A <: Any}
-  local value::A  
-  @inbounds value[index]
+  @inbounds arr[index]
 end
 
 #= O(1) =#
@@ -28,9 +27,8 @@ lucky, and pretty much anything else if you're not. Do not use unless you will
 immediately fill the whole array with data. The dummy variable is used to fix
 the type of the array. =#
 function arrayCreateNoInit(size::ModelicaInteger, dummy::A)::Array{A} where {A <: Any}
-  local arr::Array{A}
-  
-  arr
+  local arr::Array{A}  
+  arr = fill(arr, 0)
 end
 
 #= O(1) =#
