@@ -32,7 +32,7 @@
 
 module ListUtil
 
-using MetaModelica
+using ..MetaModelica
 using ExportAll
 CompFunc = Function
 Predicate = Function
@@ -74,8 +74,8 @@ FilterFunc = Function
 FindMapFunc = Function
 Comp = Function
 MapFunc = Function
-import ArrayUtil
-import MetaModelica.Dangerous
+import ..ArrayUtil
+import .MetaModelica.Dangerous
 using MetaModelica.Dangerous: listReverseInPlace, arrayGetNoBoundsChecking, arrayUpdateNoBoundsChecking, arrayCreateNoInit
 
 #= Creates a list from an element. =#
