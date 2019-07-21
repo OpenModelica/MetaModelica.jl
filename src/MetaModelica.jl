@@ -29,6 +29,9 @@ include("exportmetaRuntime.jl")
 include("dangerous.jl")
 include("array.jl")
 #======Expose libraries=======#
-push!(LOAD_PATH, ".")
+push!(LOAD_PATH, @__DIR__)
+import ListUtil;
+import ArrayUtil
+export ListUtil, ArrayUtil
 #=========================#
 end
