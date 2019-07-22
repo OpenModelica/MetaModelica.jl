@@ -152,6 +152,9 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
     elseif string(T) == "nil"
       # Syntactic sugar for Nil
       T = :Nil
+    elseif string(T) == "NONE()"
+      # Syntactic sugar for Nothing
+      T = :Nothing
     end
     len = length(subpatterns)
     named_fields = [pat.args[1] for pat in subpatterns if (pat isa Expr) && pat.head == :(kw)]
