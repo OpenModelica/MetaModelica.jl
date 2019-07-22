@@ -67,4 +67,15 @@ let
   @test T == list(2,3)
 end
 
+#= Wildcard with structs =#
+struct foo end
+struct bar end
+struct barBar end
+a = barBar()
+@test 1 == @match a begin
+  foo() => 2
+  bar() => 3
+  _    => 1 
+end
+
 end
