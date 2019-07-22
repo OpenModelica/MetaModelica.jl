@@ -11,4 +11,13 @@ using Test
   _ => 3
 end
 
+#= Try nested matchcontinue =#
+@test 1 == @matchcontinue 2 begin
+  2 => @match 3 begin
+    3 =>  @match 3 begin
+      2 => 1
+    end
+  end
+  _ => 1
+end
 end

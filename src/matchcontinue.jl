@@ -26,7 +26,8 @@ macro splice(iterator, body)
 end
 
 struct MatchFailure
-    value
+  value
+  backtrace
 end
 
 """
@@ -144,25 +145,14 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
         if string(T) == "=>"
             # Syntactic sugar for head => tail
             T = :Cons
-        end
-        if string(T) == "<|"
+        elseif string(T) == "<|"
             # Syntactic sugar for head <| tail
             T = :Cons
+        elseif string(T) == "nil"
+          # Syntactic sugar for Nil
+          T = :Nil        
         end
-        if string(T) == "nil"
-          # Syntactic sugar for Nil
-          T = :Nil
-        end
-      if string(T) == "list()"
-          # Syntactic sugar for Nil
-        T = :Nil
-      #=We have elements=#
-      elseif string(T) == "list"
-          # Syntactic sugar for Nil
-          T = :Cons
-      end
         len = length(subpatterns)
-        # show([pat.head for pat in subpatterns if pat isa Expr])
         named_fields = [pat.args[1] for pat in subpatterns if (pat isa Expr) && pat.head == :(kw)]
         @assert length(named_fields)==length(unique(named_fields)) "Pattern $pattern has duplicate named arguments: $(named_fields)"
         nNamed = length(named_fields)
@@ -170,6 +160,12 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
         # struct
         if nNamed == 0
             push!(asserts, quote
+                if typeof($(esc(T))) <: Function
+                    throw(LoadError("Attempted to match on a function", @__LINE__, AssertionError("Incorrect match usage")))
+                end
+                if !(isstructtype(typeof($(esc(T)))) || issabstracttype(typeof($(esc(T)))))
+                    throw(LoadError("Attempted to match on a pattern that is not a struct", @__LINE__, AssertionError("Incorrect match usage")))
+                end
                 if evaluated_fieldcount($(esc(T))) != $(esc(len))
                     error("Pattern field count is $($(esc(len))) expected $(evaluated_fieldcount($(esc(T))))")
                 end
@@ -230,7 +226,8 @@ function handle_match_eq(expr)
             $(asserts...)
             value = $(esc(value))
             done = false
-            $body || throw(MatchFailure(value))
+            bt = backtrace();
+            $body || throw(MatchFailure(value, bt))
             $(@splice variable in bound quote
                 $(esc(variable)) = $(Symbol("variable_$variable"))
             end)
@@ -298,7 +295,8 @@ function handle_match_cases(value, match ; mathcontinue::Bool = false)
             local res
             $tail
             if !done
-                throw(MatchFailure(value))
+                bt = backtrace();
+                throw(MatchFailure(value, bt))
             end
             res
         end
@@ -313,7 +311,12 @@ end
 If `value` matches `pattern`, bind variables and return `value`. Otherwise, throw `MatchFailure`.
 """
 macro match(expr)
+  try
     handle_match_eq(expr)
+  catch ex
+    catch_backtrace()
+    rethrow(ex)
+  end
 end
 
 """
@@ -326,7 +329,12 @@ end
 Return `result` for the first matching `pattern`. If there are no matches, throw `MatchFailure`.
 """
 macro matchcontinue(value, cases)
+  try
     handle_match_cases(value, cases ; mathcontinue = true)
+  catch ex
+    catch_backtrace()
+    rethrow(ex)
+  end
 end
 
 """
@@ -339,7 +347,12 @@ end
 Return `result` for the first matching `pattern`. If there are no matches, throw `MatchFailure`.
 """
 macro match(value, cases)
+  try
     handle_match_cases(value, cases ; mathcontinue = false)
+  catch ex
+    catch_backtrace()
+    rethrow(ex)
+  end
 end
 
 """
