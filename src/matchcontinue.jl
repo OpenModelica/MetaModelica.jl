@@ -28,7 +28,6 @@ end
 
 struct MatchFailure
   value
-  backtrace
 end
 
 """
@@ -143,65 +142,59 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
         end
     end
   elseif @capture(pattern, T_(subpatterns__))
-    if string(T) == "=>"
-      # Syntactic sugar for head => tail
-      T = :Cons
-    elseif string(T) == "<|"
-      # Syntactic sugar for head <| tail
-      T = :Cons
-    elseif string(T) == "nil"
-      # Syntactic sugar for Nil
-      T = :Nil
-    elseif string(T) == "NONE()"
-      # Syntactic sugar for Nothing
-      T = :Nothing
-    end
-    len = length(subpatterns)
-    named_fields = [pat.args[1] for pat in subpatterns if (pat isa Expr) && pat.head == :(kw)]
-    local allWild = all(x -> x == first(named_fields), named_fields)
-    local nNamed = 0
-    if !allWild
+    #=All wild =#
+    if length(subpatterns) == 1 && subpatterns[1] == :(__)
+      #=
+        When using a wildcard field the actual values of the fields are not necessary
+      =#
+      quote
+        $value isa $(esc(T))
+      end
+    else
+      T = handleSugar(T)
+      len = length(subpatterns)
+      named_fields = [pat.args[1] for pat in subpatterns if (pat isa Expr) && pat.head == :(kw)]
       nNamed = length(named_fields)
       @assert length(named_fields)==length(unique(named_fields)) "Pattern $pattern has duplicate named arguments: $(named_fields)"
       @assert nNamed == 0 || len == nNamed "Pattern $pattern mixes named and positional arguments"
-    end
-    # struct
-    if !allWild && nNamed == 0
-      push!(asserts, quote
-        if typeof($(esc(T))) <: Function
-            func = $(esc(T))
-            throw(LoadError("Attempted to match on a function", @__LINE__, AssertionError("Incorrect match usage attempted to match on: $func")))
-            end
-        if !(isstructtype(typeof($(esc(T)))) || issabstracttype(typeof($(esc(T)))))
-            throw(LoadError("Attempted to match on a pattern that is not a struct", @__LINE__, AssertionError("Incorrect match usage. Attempted to match on a pattern that is not a stru ")))
+      # struct
+      if nNamed == 0
+        push!(asserts, quote
+              if typeof($(esc(T))) <: Function
+                func = $(esc(T))
+                throw(LoadError("Attempted to match on a function", @__LINE__, AssertionError("Incorrect match usage attempted to match on: $func")))
+              end
+              if !(isstructtype(typeof($(esc(T)))) || issabstracttype(typeof($(esc(T)))))
+              throw(LoadError("Attempted to match on a pattern that is not a struct", @__LINE__, AssertionError("Incorrect match usage. Attempted to match on a pattern that is not a stru ")))
+              end
+              pattern = $(esc(T))
+              if evaluated_fieldcount($(esc(T))) != $(esc(len))
+              error("Field count for pattern of type: $pattern is $($(esc(len))) expected $(evaluated_fieldcount($(esc(T))))")
+              end
+              end)
+      else
+        # Uses keyword arguments
+        struct_name = gensym("$(T)_match")
+        type_name = string(T)
+        assertcond = true
+        for field in named_fields
+          local tmp
+          tmp = quote $(Meta.quot(field)) in $struct_name end
+          assertcond = Expr(:&&, tmp, assertcond)
         end
-        pattern = $(esc(T))
-        if evaluated_fieldcount($(esc(T))) != $(esc(len))
-            error("Field count for pattern of type: $pattern is $($(esc(len))) expected $(evaluated_fieldcount($(esc(T))))")
-        end
-      end)
-    else
-      # Uses keyword arguments
-      struct_name = gensym("$(T)_match")
-      type_name = string(T)
-      assertcond = true
-      for field in named_fields
-        local tmp
-        tmp = quote $(Meta.quot(field)) in $struct_name end
-        assertcond = Expr(:&&, tmp, assertcond)
-      end
-      push!(asserts, quote
-            if !(let
-                 $struct_name = evaluated_fieldnames($(esc(T)))
-                 $assertcond
+        push!(asserts, quote
+                if !(let
+                   $struct_name = evaluated_fieldnames($(esc(T)))
+                   $assertcond
                  end)
-            error("Pattern contains named argument not in the type at: ")
-            end
-            end)
-    end
-    quote
-      $value isa $(esc(T)) &&
+                error("Pattern contains named argument not in the type at: ")
+                end
+              end)
+      end
+      quote
+        $value isa $(esc(T)) &&
         $(handle_destruct_fields(value, pattern, subpatterns, length(subpatterns), :getfield, bound, asserts; allow_splat=false))
+      end
     end
   elseif @capture(pattern, (subpatterns__,))
     # tuple
@@ -226,6 +219,26 @@ error("Unrecognized pattern syntax: $pattern")
 end
 end
 
+"""
+  Handle syntactic sugar for MetaModelica mode. 
+  Mostly lists but also for the optional type
+"""
+function handleSugar(T)
+  T =
+    if string(T) == "=>" || string(T) == "<|"
+      # Syntactic sugar cons. Two operators for now I suggest we remove =>
+      :Cons
+    elseif string(T) == "nil"
+      # Syntactic sugar for Nil
+      :Nil
+    elseif string(T) == "NONE()"
+      # Syntactic sugar for Nothing
+      :Nothing
+    else
+      T
+    end
+end
+
 function handle_match_eq(expr)
   if @capture(expr, pattern_ = value_)
     asserts = Expr[]
@@ -235,8 +248,7 @@ function handle_match_eq(expr)
       $(asserts...)
       value = $(esc(value))
       done = false
-      bt = backtrace();
-      $body || throw(MatchFailure(value, bt))
+      $body || throw(MatchFailure(value))
       $(@splice variable in bound quote
         $(esc(variable)) = $(Symbol("variable_$variable"))
         end)
@@ -290,7 +302,6 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
 end
 
 function handle_match_cases(value, match ; mathcontinue::Bool = false)
-  # assert(mathcontinue)
   tail = nothing
   if @capture(match, begin cases__ end)
     asserts = Expr[]
@@ -304,8 +315,7 @@ function handle_match_cases(value, match ; mathcontinue::Bool = false)
       local res
       $tail
       if !done
-        bt = backtrace();
-        throw(MatchFailure(value, bt))
+        throw(MatchFailure(value))
       end
       res
     end
@@ -320,12 +330,7 @@ end
   If `value` matches `pattern`, bind variables and return `value`. Otherwise, throw `MatchFailure`.
   """
 macro match(expr)
-  try
-    handle_match_eq(expr)
-  catch ex
-    catch_backtrace()
-    rethrow(ex)
-  end
+  handle_match_eq(expr)
 end
 
 """
@@ -338,12 +343,7 @@ end
   Return `result` for the first matching `pattern`. If there are no matches, throw `MatchFailure`.
   """
 macro matchcontinue(value, cases)
-  try
-    handle_match_cases(value, cases ; mathcontinue = true)
-  catch ex
-    catch_backtrace()
-    rethrow(ex)
-  end
+  handle_match_cases(value, cases ; mathcontinue = true)
 end
 
 """
@@ -356,12 +356,7 @@ end
   Return `result` for the first matching `pattern`. If there are no matches, throw `MatchFailure`.
   """
 macro match(value, cases)
-  try
-    handle_match_cases(value, cases ; mathcontinue = false)
-  catch ex
-    catch_backtrace()
-    rethrow(ex)
-  end
+  handle_match_cases(value, cases ; mathcontinue = false)
 end
 
 """

@@ -12,7 +12,7 @@ struct SOME{T}
 end
 
 Option{T} = Union{SOME{T}, Nothing}
-NONE() = Nothing
+NONE() = Nothing()
 
 #= Logically combine two Booleans with 'and' operator =#
 function boolAnd(b1::Bool, b2::Bool)::Bool

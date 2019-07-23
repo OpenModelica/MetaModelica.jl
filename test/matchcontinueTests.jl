@@ -22,40 +22,56 @@ end
 end
 
 #= Test support for all wildcard matching =#
-struct foo
-  a
-end
+@testset "Wildcard test" begin
+  begin
+    struct foo
+    end
+    struct bar
+    end
+    a = bar()
+    #=Empty fields. Wildcard match=#
+    @test 2 == @match a begin
+      foo(__) => 1
+      bar(__) => 2
+    end
+  end
 
-struct bar
-  a
-  b
-end
+  #= Test the new all wild syntax. Needed since I cannot figure out how to get that info from Susan =#
+  let
+    struct foo1
+      a
+    end
 
-struct baz
-  a
-  b
-  c
-end
+    struct bar2
+      a
+      b
+    end
+    
+    struct baz3
+      a
+      b
+      c
+    end
+    
+    a = baz3(1, 2, 3)
+    @test 4 == begin
+      @match a begin
+        bar2(__) => 2
+        foo1(a=1) => 3
+        foo1(__) => 3
+        _ => 4
+      end
+    end
 
-#= Test the new all wild syntax. Needed since I cannot figure out how to get that info from Susan =#
-a = baz(1, 2, 3)
-
-@test 4 == begin
-  @match a begin
-    bar(__) => 2
-    foo(a=1) => 3
-    foo(__) => 3
-    _ => 4
+    a = foo1(8)
+    @test 1 == @match a begin
+      bar2(__) => 2
+      foo1(a=7) => 3
+      bar2(__) => 5
+      bar2(a = 1, b = 2) => 6
+      foo1(__) => 1
+    end
+  
   end
 end
-
-a = foo(8)
-@test 1 == @match a begin
-  bar(__) => 2
-  foo(a=7) => 3
-  bar(__) => 5
-  bar(a = 1, b = 2) => 6
-  foo(__) => 1
-end
-
-end
+end #= End module =#
