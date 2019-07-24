@@ -165,6 +165,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
       # struct
       if nNamed == 0
         push!(asserts, quote
+              a = typeof($(esc(T)))
               #= NONE is a function. However, we treat it a bit special=#
               if $(esc(T)) != NONE && typeof($(esc(T))) <: Function
                 func = $(esc(T))
@@ -261,7 +262,7 @@ function handle_match_eq(expr)
       $(asserts...)
       value = $(esc(value))
       done = false
-      $body || throw(MatchFailure(value))
+      $body || throw(MatchFailure(value, @__LINE__, @__FILE__))
       $(@splice variable in bound quote
         $(esc(variable)) = $(Symbol("variable_$variable"))
         end)

@@ -31,6 +31,10 @@ end #= Function extension test =#
 @testset "Runtime tests" begin
   include("./runtimeTest.jl")
 end
+
+@testset "Cross module match" begin
+  include("crossModuleMatchTest.jl")
+end
   
 end #= End MetaModelica testset =#
 
