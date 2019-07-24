@@ -15,10 +15,6 @@ end
 Option{T} = Union{SOME{T}, Nothing}
 
 #= Allow upcasting =#
-Base.convert(::Type{Option}, Nothing) = let
-  Nothing
-end
-
 Base.convert(::Type{Option{S}}, x::SOME{T})  where {S, T <: S} = let
   SOME{S}(convert(S, x.data))
 end

@@ -97,9 +97,7 @@ Example: fill(2, 3) => {2, 2, 2} =#
 T = Any 
 function fill(inElement::T, inCount::ModelicaInteger)::IList
   local outList::IList = list()
-
   local i::ModelicaInteger = 0
-
   while i < inCount
     outList = inElement <| outList
     i = i + 1
