@@ -1,5 +1,5 @@
 """
-  Copyright 2018: Open Source Modelica Consortium (OSMC)
+  Copyright 2019: Open Source Modelica Consortium (OSMC)
   Copyright 2018: RelationalAI, Inc.
 
   Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -35,7 +35,11 @@ end
   fieldcount.
   """
 @generated function evaluated_fieldcount(t::Type{T}) where T
-  fieldcount(T)
+  if T != NONE
+    fieldcount(T)
+  else
+    0
+  end
 end
 
 """
@@ -145,7 +149,8 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
     #=All wild =#
     if length(subpatterns) == 1 && subpatterns[1] == :(__)
       #=
-        When using a wildcard field the actual values of the fields are not necessary
+        Fields not interesting when matching against a wildcard.
+        NONE() matched against a wildcard is also true
       =#
       quote
         $value isa $(esc(T))
@@ -160,7 +165,8 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
       # struct
       if nNamed == 0
         push!(asserts, quote
-              if typeof($(esc(T))) <: Function
+              #= NONE is a function. However, we treat it a bit special=#
+              if $(esc(T)) != NONE && typeof($(esc(T))) <: Function
                 func = $(esc(T))
                 throw(LoadError("Attempted to match on a function", @__LINE__, AssertionError("Incorrect match usage attempted to match on: $func")))
               end
@@ -168,8 +174,10 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
               throw(LoadError("Attempted to match on a pattern that is not a struct", @__LINE__, AssertionError("Incorrect match usage. Attempted to match on a pattern that is not a stru ")))
               end
               pattern = $(esc(T))
-              if evaluated_fieldcount($(esc(T))) != $(esc(len))
-              error("Field count for pattern of type: $pattern is $($(esc(len))) expected $(evaluated_fieldcount($(esc(T))))")
+              if $(esc(T)) != NONE
+                if evaluated_fieldcount($(esc(T))) != $(esc(len))
+                  error("Field count for pattern of type: $pattern is $($(esc(len))) expected $(evaluated_fieldcount($(esc(T))))")
+              end            
               end
               end)
       else
@@ -192,8 +200,12 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
               end)
       end
       quote
-        $value isa $(esc(T)) &&
-        $(handle_destruct_fields(value, pattern, subpatterns, length(subpatterns), :getfield, bound, asserts; allow_splat=false))
+        $value == nothing &&
+          $(esc(T)) == NONE ||
+          $value isa $(esc(T)) &&
+          $(handle_destruct_fields(value, pattern, subpatterns,
+                                   length(subpatterns), :getfield, bound,
+                                 asserts; allow_splat=false))
       end
     end
   elseif @capture(pattern, (subpatterns__,))
@@ -221,7 +233,8 @@ end
 
 """
   Handle syntactic sugar for MetaModelica mode. 
-  Mostly lists but also for the optional type
+  Mostly lists but also for the optional type. 
+  Parenthesis for these expressions are skipped
 """
 function handleSugar(T)
   T =
@@ -231,7 +244,7 @@ function handleSugar(T)
     elseif string(T) == "nil"
       # Syntactic sugar for Nil
       :Nil
-    elseif string(T) == "NONE()"
+    elseif string(T) == "NONE"
       # Syntactic sugar for Nothing
       :Nothing
     else
@@ -364,6 +377,7 @@ end
 
     * `_` matches anything
     * `foo` matches anything, binds value to `foo`
+    * `foo(__)` matches all subfields of foo, binds value to `foo`
     * `Foo(x,y,z)` matches structs of type `Foo` with fields matching `x,y,z`
     * `Foo(x=y)` matches structs of type `Foo` with a field named `x` matching `y`
     * `[x,y,z]` matches `AbstractArray`s with 3 entries matching `x,y,z`

@@ -11,7 +11,19 @@ struct SOME{T}
   data::T
 end
 
+#= Rules for the optional type =#
 Option{T} = Union{SOME{T}, Nothing}
+
+#= Allow upcasting =#
+Base.convert(::Type{Option}, Nothing) = let
+  Nothing
+end
+
+Base.convert(::Type{Option{S}}, x::SOME{T})  where {S, T <: S} = let
+  SOME{S}(convert(S, x.data))
+end
+
+#=NONE is always nothing=#
 NONE() = Nothing()
 
 #= Logically combine two Booleans with 'and' operator =#

@@ -70,8 +70,8 @@ end
       bar2(__) => 5
       bar2(a = 1, b = 2) => 6
       foo1(__) => 1
-    end
-  
+    end  
   end
+  
 end
 end #= End module =#

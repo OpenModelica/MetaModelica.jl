@@ -82,5 +82,98 @@ end
   @test tick() == 3
 end
 
+@testset "Testing the Optional type" begin
+  struct foo1
+    a
+  end
+  
+  struct bar2
+    a
+    b
+  end
+  
+  struct baz3
+    a
+    b
+    c
+  end
 
-end
+  a = NONE()
+  @test 0 == @match a begin
+    bar2(__) => 2
+    foo1(a=7) => 3
+    bar2(__) => 5
+    bar2(a = 1, b = 2) => 6
+    foo1(__) => 1
+    #= We should match the wildcard =#
+    _ => 0
+  end
+  
+  struct optionalFoo
+    a::Option{Integer}
+    b::Option{Integer}
+    c::Option{Integer}
+  end
+  
+  a = optionalFoo(NONE(), NONE(), NONE())
+  
+  @test 0 ==  begin
+    @match a begin
+      optionalFoo(NONE(), NONE(), NONE()) => 0
+      _ => 1
+    end
+  end
+  
+  aa = optionalFoo(SOME(1), NONE(), NONE())
+  cc = optionalFoo(NONE(), SOME(2), NONE())
+  dd = optionalFoo(NONE(), NONE(), SOME(3))
+  ee = optionalFoo(SOME(1),SOME(2), SOME(3))
+  
+  @test 1 == @match aa begin
+    optionalFoo(SOME(2), _, _) => 2
+    _ => 1
+  end
+  
+  @test 1 == @match aa begin
+    optionalFoo(SOME(1), _, _) => 1
+    _ => 1
+  end
+  
+  @test 1 == @match cc begin
+    optionalFoo(_, _, _) => 1
+    _ => 2
+  end
+
+  @test 2 == @match ee begin
+    optionalFoo(SOME(2), _, _) => 1
+    optionalFoo(__) => 2
+    _ => 3
+  end
+
+  struct optionalBar
+    a::Option{Integer}
+  end
+  
+  a = optionalBar(NONE())
+  b = optionalBar(SOME(1))
+  
+ @test 2 ==  @match a begin
+   optionalBar(SOME(1)) => 1
+   optionalBar(NONE()) => 2
+ end
+
+  @test 1 ==  @match b begin
+   optionalBar(NONE()) => 2
+   optionalBar(SOME(1)) => 1
+  end
+    
+  @test 4 == @match ee begin
+    optionalFoo(SOME(1), NONE(), NONE()) => 1
+    optionalFoo(NONE(), SOME(2), NONE()) => 2
+    optionalFoo(NONE(), NONE(), SOME(3)) => 3
+    optionalFoo(SOME(1),SOME(2), SOME(3)) => 4
+    _ => 4
+  end
+ 
+end #=End runtime tests=#
+end #=End module=#
