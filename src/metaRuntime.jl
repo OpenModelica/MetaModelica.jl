@@ -11,16 +11,26 @@ struct SOME{T}
   data::T
 end
 
-#= Rules for the optional type =#
+
 Option{T} = Union{SOME{T}, Nothing}
+
+#=NONE is always nothing=#
+NONE() = Nothing()
+
 
 #= Allow upcasting =#
 Base.convert(::Type{Option{S}}, x::SOME{T})  where {S, T <: S} = let
   SOME{S}(convert(S, x.data))
 end
 
-#=NONE is always nothing=#
-NONE() = Nothing()
+Base.convert(::Type{Option{T}}, nothing) where {T} = let
+  Nothing()
+end
+
+#= Identity case =#
+Base.convert(::Type{Union{Nothing, SOME{T}}}, x::Union{Nothing, SOME{T}}) where {T} = let
+  x
+end
 
 #= Logically combine two Booleans with 'and' operator =#
 function boolAnd(b1::Bool, b2::Bool)::Bool

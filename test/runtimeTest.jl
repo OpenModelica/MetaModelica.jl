@@ -83,6 +83,20 @@ end
 end
 
 @testset "Testing the Optional type" begin
+
+@test begin
+  try
+    let
+      anOpt::Option{Integer} = SOME(4)
+      bOpt::Option{Integer} = NONE()
+      cOpt::Option{Any} = SOME(4)
+    end
+    true
+  catch
+    false
+  end
+end
+  
   struct foo1
     a
   end
@@ -114,16 +128,19 @@ end
     b::Option{Integer}
     c::Option{Integer}
   end
-  
-  a = optionalFoo(NONE(), NONE(), NONE())
-  
+
+  try
   @test 0 ==  begin
+    a = optionalFoo(NONE(), NONE(), NONE())
     @match a begin
       optionalFoo(NONE(), NONE(), NONE()) => 0
       _ => 1
     end
   end
-  
+  catch
+    false
+  end
+
   aa = optionalFoo(SOME(1), NONE(), NONE())
   cc = optionalFoo(NONE(), SOME(2), NONE())
   dd = optionalFoo(NONE(), NONE(), SOME(3))
@@ -153,7 +170,8 @@ end
   struct optionalBar
     a::Option{Integer}
   end
-  
+
+
   a = optionalBar(NONE())
   b = optionalBar(SOME(1))
   

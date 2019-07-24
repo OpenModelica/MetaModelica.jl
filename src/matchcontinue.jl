@@ -200,8 +200,8 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
               end)
       end
       quote
-        $value == nothing &&
-          $(esc(T)) == NONE ||
+          $value == nothing &&
+          $(esc(T)) == Nothing ||
           $value isa $(esc(T)) &&
           $(handle_destruct_fields(value, pattern, subpatterns,
                                    length(subpatterns), :getfield, bound,
