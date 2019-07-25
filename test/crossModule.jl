@@ -1,4 +1,6 @@
 module CrossModule
+
+using ExportAll
 using MetaModelica
 
 abstract type S end;
@@ -8,7 +10,6 @@ end
 
 struct B <:S 
 end
-
 
 struct C <: S
 end
@@ -20,5 +21,15 @@ function isC(a::S)
     C(__ ) => true
   end
 end
+
+function isC2(a::S)
+  @match a begin
+    A(__) => A
+    B(__) => B
+    C(__ ) => C
+  end
+end
+
+@exportAll()
 
 end
