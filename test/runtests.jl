@@ -35,6 +35,10 @@ end
 @testset "Cross module match" begin
   include("crossModuleMatchTest.jl")
 end
+
+@testset "Should fail tests" begin
+  include("shouldFailTests.jl")
+end
   
 end #= End MetaModelica testset =#
 

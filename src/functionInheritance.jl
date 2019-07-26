@@ -96,8 +96,7 @@ function tupleToArgSym(tuple::Tuple)::Symbol
 end
 
 function getFuncFromSym(func::Symbol, __module__::Module)::Function
-  resFunc = getfield(__module__, func)
-  resFunc
+  getfield(__module__, func)
 end
 
 function makeFunctionHelper(functionToExtend::Expr, __module__::Module)::Tuple

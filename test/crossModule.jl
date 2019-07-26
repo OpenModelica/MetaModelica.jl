@@ -16,17 +16,17 @@ end
 
 function isC(a::S)
   @match a begin
-    A(__) => false
-    B(__) => false
-    C(__ ) => true
+    A() => false
+    B() => false
+    C() => true
   end
 end
 
 function isC2(a::S)
   @match a begin
-    A(__) => A
-    B(__) => B
-    C(__ ) => C
+    A() => A
+    B() => B
+    C() => C
   end
 end
 

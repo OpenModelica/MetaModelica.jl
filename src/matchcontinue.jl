@@ -49,7 +49,9 @@ end
 @generated function evaluated_fieldnames(t::Type{T}) where T
   fieldnames(T)
 end
-
+"""
+  Handles the deconstruction of fields
+"""
 function handle_destruct_fields(value::Symbol, pattern, subpatterns, len, get::Symbol, bound::Set{Symbol}, asserts::Vector{Expr}; allow_splat=true)
   # NOTE we assume `len` is cheap
   fields = []
@@ -80,7 +82,10 @@ function handle_destruct_fields(value::Symbol, pattern, subpatterns, len, get::S
        $(handle_destruct(Symbol("$(value)_$i"), subpattern, bound, asserts))
        end)
 end
-
+"""
+ Top level utility function. 
+ Handles deconstruction of patterns together with the value symbol.
+"""
 function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Vector{Expr})
   if pattern == :(_)
     # wildcard
@@ -253,6 +258,10 @@ function handleSugar(T)
     end
 end
 
+"""
+Handles match equations such as 
+@match x = 4
+"""
 function handle_match_eq(expr)
   if @capture(expr, pattern_ = value_)
     asserts = Expr[]
@@ -262,7 +271,7 @@ function handle_match_eq(expr)
       $(asserts...)
       value = $(esc(value))
       done = false
-      $body || throw(MatchFailure(value, @__LINE__, @__FILE__))
+      $body || throw(MatchFailure(value))
       $(@splice variable in bound quote
         $(esc(variable)) = $(Symbol("variable_$variable"))
         end)
@@ -272,7 +281,10 @@ function handle_match_eq(expr)
     error("Unrecognized match syntax: $expr")
   end
 end
-
+"""
+Handles match cases both for the matchcontinue and regular match case
+calls handle_destruct. See handle_destruct for more details.
+"""
 function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
   if @capture(case, pattern_ => result_)
     bound = Set{Symbol}()
@@ -315,6 +327,10 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
   end
 end
 
+"""
+Top level function for all match macros except 
+the match equation macro.
+"""
 function handle_match_cases(value, match ; mathcontinue::Bool = false)
   tail = nothing
   if @capture(match, begin cases__ end)
@@ -378,7 +394,7 @@ end
 
     * `_` matches anything
     * `foo` matches anything, binds value to `foo`
-    * `foo(__)` matches all subfields of foo, binds value to `foo`
+    * `foo(__)` wildcard match on all subfields of foo, binds value to `foo`
     * `Foo(x,y,z)` matches structs of type `Foo` with fields matching `x,y,z`
     * `Foo(x=y)` matches structs of type `Foo` with a field named `x` matching `y`
     * `[x,y,z]` matches `AbstractArray`s with 3 entries matching `x,y,z`
