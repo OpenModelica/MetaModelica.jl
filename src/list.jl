@@ -45,7 +45,7 @@ end
   If someone see a better alternative to this approach please fix me :). Basically I create a new list in O(N) * C time 
   with the type we cast to. Also, do not create new conversion strategies without measuring performance as they will call themselves 
   recursivly 
-=#
++=#
 
 Base.convert(::Type{List{T}}, x::Nil{Any}) where {T} = let
   Nil{T}()
@@ -53,6 +53,10 @@ end
 
 Base.convert(::Type{Nil{T}}, x::Nil) where {T} = let
   Nil{T}()
+end
+
+Base.convert(::Type{List{S}}, x::Nil{T}) where {S, T <: S}= let
+  Nil{S}()
 end
 
 Base.convert(::Type{List{S}}, x::Cons{T}) where {S, T <: S} = let
@@ -64,25 +68,17 @@ Base.convert(t::Type{Cons{S}}, x::Cons{T}) where {S, T <: S} = let
 end
 
 #= Identity cases =#
-Base.convert(::Type{List{T}}, x::Cons{T}) where {T} = let
-  x
-end
+Base.convert(::Type{List{T}}, x::Cons{T}) where {T} =  x
 
-Base.convert(::Type{Cons{T}}, x::Cons{T}) where {T} = let
-  x
-end
+Base.convert(::Type{Cons{T}}, x::Cons{T}) where {T} = x
 
-Base.convert(::Type{List{T}}, x::Nil{T}) where {T} = let
-  x
-end
+Base.convert(::Type{List{T}}, x::Nil{T}) where {T} = x
 
-Base.convert(::Type{List{Any}}, x::Nil{Any}) = let
-  x
-end
+Base.convert(::Type{List{Any}}, x::Nil{Any}) = x
 
-Base.convert(::Type{List{T}}, x::List{T}) where {T} = let
-  x
-end
+Base.convert(::Type{List{T}}, x::List{T}) where {T} = x
+
+Base.convert(::Type{List}, x::List) = x
 
 #= For "Efficient" casting... O(N) * C" =#
 List(T::Type #= Hack.. =#, args...) = let
@@ -95,25 +91,52 @@ end
 
 nil(T) = Nil{T}()
 nil() = Nil{Any}()
-
 list() = nil()
 
-function list(vs::T...)::List where {T}
-  local lst::List{T} = nil(T)
-  for i in length(vs):-1:1
-    lst = Cons{T}(vs[i], lst)
+#= Support for primitive constructs. Numbers. Integer bool e.t.c =#
+function list(els::T...)::List{T} where {T <: Number}
+  local lst::List{T} = nil()
+  for i in length(els):-1:1
+    lst = Cons{T}(els[i], lst)
   end
   lst
 end
 
-#=Support compound types =#
-function list(vs::Any...)::List
-  local lst::List = nil()
-  for i in length(vs):-1:1
-    lst = Cons{Any}(vs[i], lst)
+#=List can also be considered a primitive...=#
+function list(els::T...)::List{T} where {T <: AbstractString}
+  local lst::List{T} = nil()
+  for i in length(els):-1:1
+    lst = Cons{T}(els[i], lst)
   end
   lst
 end
+
+#= Support hieractical constructs. Concrete elements =#
+function list(els...)::List
+  local S::Type = supertype(typeof(first(els)))
+  local lst::List{S} = Nil{S}()
+  for i in length(els):-1:1
+    lst = Cons{S}(els[i], lst)
+  end
+  lst
+end
+
+#= Support generic list for the other cases =#
+function list(els::Tuple{Type}...)::List
+  local lst::List = nil()
+  for i in length(els):-1:1
+    lst = Cons(els[i], lst)
+  end
+  lst
+end
+#=Support compound types =#
+# function list(vs...)::List
+#   local lst::List = nil()
+#   for i in length(vs):-1:1
+#     lst = Cons{Any}(vs[i], lst)
+#   end
+#   lst
+# end
 
 cons(v::T, ::Nil{Any}) where {T} = Cons{T}(v, nil(T))
 cons(v, ::Nil{T}) where {T} = Cons{T}(v, nil(T))

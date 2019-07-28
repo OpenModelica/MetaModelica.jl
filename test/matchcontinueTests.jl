@@ -72,6 +72,24 @@ end
       foo1(__) => 1
     end  
   end
-  
+
+  @test begin
+    function testSideEffects(a)
+      local someVariableWeWantToMutate1 = false
+      local someVariableWeWantToMutate2 = false
+      begin
+        @match a begin
+          1 => begin
+            someVariableWeWantToMutate1 = true
+            someVariableWeWantToMutate2 = true
+            ()
+          end
+        end
+        println("1:$someVariableWeWantToMutate1 && 2:$someVariableWeWantToMutate2")
+        someVariableWeWantToMutate1 && someVariableWeWantToMutate2
+      end
+    end
+    testSideEffects(1)
+  end
 end
 end #= End module =#

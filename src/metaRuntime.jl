@@ -32,6 +32,10 @@ Base.convert(::Type{Union{Nothing, SOME{T}}}, x::Union{Nothing, SOME{T}}) where 
   x
 end
 
+Base.convert(::Type{Union{Nothing, SOME{S}}}, x::SOME{S}) where{S} = let
+  x
+end
+
 #= Logically combine two Booleans with 'and' operator =#
 function boolAnd(b1::Bool, b2::Bool)::Bool
   b = b1 && b2

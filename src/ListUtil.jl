@@ -140,7 +140,6 @@ end
 Example: listIntRange2(3,2,9) => {3,5,7,9} =#
 function intRange3(inStart::ModelicaInteger, inStep::ModelicaInteger, inStop::ModelicaInteger)::IList
   local outRange::IList
-
   if inStep == 0
     fail()
   end
@@ -154,7 +153,6 @@ one element. =#
 T = Any 
 function toOption(inList::IList)::Option
   local outOption::Option
-
   outOption = begin
     local e::T
     @match inList begin
@@ -175,14 +173,12 @@ SOME(element). =#
 T = Any 
 function fromOption(inElement::Option)::IList
   local outList::IList
-
   outList = begin
     local e::T
     @match inElement begin
       SOME(e)  => begin
         list(e)
       end
-      
       _  => begin
         list()
       end
@@ -298,9 +294,7 @@ swapped. =#
 T = Any 
 function consr(inList::IList, inElement::T)::IList
   local outList::IList
-
-  outList = inElement <| inList
-  outList
+  @match outList = inElement <| inList
 end
 
 #= Adds the element to the front of the list if the condition is true. =#
@@ -370,8 +364,6 @@ end
 n = 5, inElement=1, list={1,2} -> list={1,1,1,1,1,1,2} =#
 T = Any 
 function consN(size::ModelicaInteger, inElement::T, inList::IList)::IList
-
-
   for i in 1:size
     inList = inElement <| inList
   end
@@ -1019,9 +1011,7 @@ end
 and N. The complexity in this case is O(n) =#
 function sortIntN(inList::IList, inN::ModelicaInteger)::IList
   local outSorted::IList = list()
-
   local a1::MArray
-
   a1 = arrayCreate(inN, false)
   a1 = fold1r(inList, arrayUpdate, true, a1)
   for i in inN:(-1):1
@@ -1029,7 +1019,6 @@ function sortIntN(inList::IList, inN::ModelicaInteger)::IList
       outSorted = i <| outSorted
     end
   end
-  GC.free(a1)
   outSorted
 end
 
@@ -1052,9 +1041,7 @@ end
 each element in the new list is unique. O(listLength(inList)) =#
 function uniqueIntN(inList::IList, inN::ModelicaInteger)::IList
   local outList::IList = list()
-
   local arr::MArray
-
   arr = arrayCreate(inN, true)
   for i in inList
     if arrayGet(arr, i)
@@ -1062,7 +1049,6 @@ function uniqueIntN(inList::IList, inN::ModelicaInteger)::IList
     end
     arrayUpdate(arr, i, false)
   end
-  GC.free(arr)
   outList
 end
 
@@ -1245,7 +1231,6 @@ T = Any
 function splitOnFirstMatch(inList::IList, inFunc::CompFunc)::Tuple{IList, IList}
   local outList2::IList = inList
   local outList1::IList = list()
-
   local e::T
 
   #=  Shuffle elements from outList2 to outList1 until we find a match.
@@ -1268,7 +1253,6 @@ T = Any
 function splitFirst(inList::IList)::Tuple{IList, T}
   local outRest::IList
   local outFirst::T
-
   outFirst, outRest = listHead(inList), listRest(inList)
   (outRest, outFirst)
 end
@@ -1279,7 +1263,6 @@ T = Any
 function splitFirstOption(inList::IList)::Tuple{IList, Option}
   local outRest::IList
   local outFirst::Option
-
   (outFirst, outRest) = begin
     local el::T
     local rest::IList
@@ -1315,9 +1298,7 @@ Example: splitEqualParts({1, 2, 3, 4, 5, 6, 7, 8}, 4) =>
 T = Any 
 function splitEqualParts(inList::IList, inParts::ModelicaInteger)::IList
   local outParts::IList
-
   local length::ModelicaInteger
-
   if inParts == 0
     outParts = list()
   else
@@ -1333,12 +1314,10 @@ T = Any
 function splitOnBoolList(inList::IList, inBools::IList)::Tuple{IList, IList}
   local outFalseList::IList = list()
   local outTrueList::IList = list()
-
   local e::T
   local rest_e::IList = inList
   local b::Bool
   local rest_b::IList = inBools
-
   while ! listEmpty(rest_e)
     e, rest_e = listHead(rest_e), listRest(rest_e)
     b, rest_b = listHead(rest_b), listRest(rest_b)
@@ -1358,11 +1337,9 @@ Example: partition({1, 2, 3, 4, 5}, 2) => {{1, 2}, {3, 4}, {5}} =#
 T = Any 
 function partition(inList::IList, inPartitionLength::ModelicaInteger)::IList
   local outPartitions::IList = list()
-
   local lst::IList = inList
   local part::IList
   local length::ModelicaInteger
-
   @assert true == (inPartitionLength > 0)
   length = listLength(inList)
   if length == 0
@@ -1394,10 +1371,8 @@ as balanced in length as possible.
 T = Any 
 function balancedPartition(lst::IList, maxLength::ModelicaInteger)::IList
   local outPartitions::IList
-
   local length::ModelicaInteger
   local n::ModelicaInteger
-
   @assert true == (maxLength > 0)
   if listEmpty(lst)
     outPartitions = list()
@@ -1610,7 +1585,6 @@ function intersectionIntN(inList1::IList, inList2::IList, inN::ModelicaInteger):
     a = addPos(inList1, a, 1)
     a = addPos(inList2, a, 1)
     outResult = intersectionIntVec(a, inList1)
-    GC.free(a)
   else
     outResult = list()
   end
@@ -1648,7 +1622,6 @@ intersectionOnTrue({1, 4, 2}, {5, 2, 4, 6}, intEq) => {4, 2} =#
 T = Any 
 function intersectionOnTrue(inList1::IList, inList2::IList, inCompFunc::CompFunc)::IList
   local outIntersection::IList = list()
-
   for e in inList1
     if isMemberOnTrue(e, inList2, inCompFunc)
       outIntersection = e <| outIntersection
@@ -1668,9 +1641,7 @@ function intersection1OnTrue(inList1::IList, inList2::IList, inCompFunc::CompFun
   local outList2Rest::IList = inList2
   local outList1Rest::IList = list()
   local outIntersection::IList = list()
-
   local oe::Option
-
   if listEmpty(inList1)
     return (outList2Rest, outList1Rest, outIntersection)
   end
@@ -1703,9 +1674,7 @@ end
 between 1 and N. The complexity in this case is O(n) =#
 function setDifferenceIntN(inList1::IList, inList2::IList, inN::ModelicaInteger)::IList
   local outDifference::IList = list()
-
   local a::MArray
-
   if inN > 0
     a = arrayCreate(inN, 0)
     a = addPos(inList1, a, 1)
@@ -1715,7 +1684,6 @@ function setDifferenceIntN(inList1::IList, inList2::IList, inN::ModelicaInteger)
         outDifference = i <| outDifference
       end
     end
-    GC.free(a)
   end
   outDifference
 end
@@ -1746,7 +1714,6 @@ setDifference({1, 2, 3}, {1, 3}) => {2} =#
 T = Any 
 function setDifference(inList1::IList, inList2::IList)::IList
   local outDifference::IList = inList1
-
   if listEmpty(inList1)
     return outDifference
   end
@@ -1772,7 +1739,6 @@ function unionIntN(inList1::IList, inList2::IList, inN::ModelicaInteger)::IList
         outUnion = i <| outUnion
       end
     end
-    GC.free(a)
   end
   outUnion
 end
@@ -5695,7 +5661,6 @@ function combinationMap1_tail2(inHead::IList, inRest::IList, inMapFunc::MapFunc,
         accum = combinationMap1_tail(inRest, inMapFunc, inArg, head <| comb, accum)
         combinationMap1_tail2(rest, inRest, inMapFunc, inArg, comb, accum)
       end
-      
       _  => begin
         inAccumElems
       end
@@ -5708,7 +5673,6 @@ end
 T = Any 
 function allReferenceEq(inList1::IList, inList2::IList)::Bool
   local outEqual::Bool
-
   outEqual = begin
     local el1::T
     local el2::T
@@ -5743,10 +5707,8 @@ T2 = Any
 function removeEqualPrefix(inList1::IList, inList2::IList, inCompFunc::CompFunc)::Tuple{IList, IList}
   local outList2::IList = inList2
   local outList1::IList = inList1
-
   local e1::T1
   local e2::T2
-
   while ! (listEmpty(outList1) || listEmpty(outList2))
     e1 = listHead(outList1)
     e2 = listHead(outList2)
@@ -5771,9 +5733,7 @@ end
 T = Any 
 function toListWithPositions(inList::IList)::IList
   local outList::IList = list()
-
   local pos::ModelicaInteger = 1
-
   for e in inList
     outList = (e, pos) <| outList
     pos = pos + 1
@@ -5788,7 +5748,6 @@ make SOME(list) if the list is not empty =#
 T = Any 
 function mkOption(inList::IList)::Option
   local outOption::Option
-
   outOption = if listEmpty(inList)
     NONE()
   else
@@ -5802,7 +5761,6 @@ the given list. =#
 T = Any 
 function all(inList::IList, inFunc::PredFunc)::Bool
   local outResult::Bool
-
   for e in inList
     if ! inFunc(e)
       outResult = false
@@ -5819,7 +5777,6 @@ T = Any
 function separateOnTrue(inList::IList, inFilterFunc::FilterFunc)::Tuple{IList, IList}
   local outListFalse::IList = list()
   local outListTrue::IList = list()
-
   for e in inList
     if inFilterFunc(e)
       outListTrue = e <| outListTrue
@@ -5852,9 +5809,7 @@ TI = Any
 TO = Any 
 function mapFirst(inList::IList, inFunc::FindMapFunc)::TO
   local outElement::TO
-
   local found::Bool
-
   for e in inList
     (outElement, found) = inFunc(e)
     if found
@@ -5868,10 +5823,8 @@ end
 T = Any 
 function isSorted(inList::IList, inFunc::Comp)::Bool
   local b::Bool = true
-
   local found::Bool
   local prev::T
-
   if listEmpty(inList)
     return b
   end
@@ -5889,13 +5842,11 @@ end
 T = Any 
 function mapIndices(inList::IList, indices::IList, func::MapFunc)::IList
   local outList::IList
-
   local i::ModelicaInteger = 1
   local idx::ModelicaInteger
   local rest_idx::IList
   local e::T
   local rest_lst::IList
-
   if listEmpty(indices)
     outList = inList
     return outList
