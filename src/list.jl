@@ -47,6 +47,14 @@ end
   recursivly 
 +=#
 
+Base.convert(::Type{List{S}}, x::Cons{T}) where {S, T <: S} = let
+  List(S, promote(x)...)
+end
+
+Base.convert(t::Type{Cons{S}}, x::Cons{T}) where {S, T <: S} = let
+  List(S, promote(x)...)
+end
+
 Base.convert(::Type{List{T}}, x::Nil{Any}) where {T} = let
   Nil{T}()
 end
@@ -55,16 +63,12 @@ Base.convert(::Type{Nil{T}}, x::Nil) where {T} = let
   Nil{T}()
 end
 
-Base.convert(::Type{List{S}}, x::Nil{T}) where {S, T <: S}= let
+Base.convert(::Type{List{S}}, x::Nil{T}) where {S, T <: S} = let
   Nil{S}()
 end
 
-Base.convert(::Type{List{S}}, x::Cons{T}) where {S, T <: S} = let
-  List(S, promote(x)...)
-end
-
-Base.convert(t::Type{Cons{S}}, x::Cons{T}) where {S, T <: S} = let
-  List(S, promote(x)...)
+Base.convert(::Type{T}, a::List) where {T <: List} = let
+  a isa T ? a : List(eltype(T), promote(a)...)
 end
 
 #= Identity cases =#
@@ -80,11 +84,28 @@ Base.convert(::Type{List{T}}, x::List{T}) where {T} = x
 
 Base.convert(::Type{List}, x::List) = x
 
+Base.promote_rule(a::Type{List{T}}, b::Type{List{S}}) where {T,S} = let
+  el_same(promote_type(T,S), a, b)
+end
+
+#= Some needed interfaces =#
+Base.eltype(::Type{List{T}}) where {T} = let
+  T
+end
+
+Base.eltype(::Type{Cons{T}}) where {T} = let
+  T
+end
+
+Base.eltype(::List{T}) where {T} = T
+
+Base.eltype(::Cons{T}) where {T} = T
+
 #= For "Efficient" casting... O(N) * C" =#
 List(T::Type #= Hack.. =#, args...) = let
   local lst::List{T} = nil(T)
   for e in first(args)
-    lst = Cons{T}(e::T, lst)
+    lst = Cons{T}(e, lst)
   end
   lst
 end
@@ -102,7 +123,7 @@ function list(els::T...)::List{T} where {T <: Number}
   lst
 end
 
-#=List can also be considered a primitive...=#
+#= Strings can also be considered a primitive...=#
 function list(els::T...)::List{T} where {T <: AbstractString}
   local lst::List{T} = nil()
   for i in length(els):-1:1
@@ -113,7 +134,7 @@ end
 
 #= Support hieractical constructs. Concrete elements =#
 function list(els...)::List
-  local S::Type = supertype(typeof(first(els)))
+  local S::Type = eltype(els)
   local lst::List{S} = Nil{S}()
   for i in length(els):-1:1
     lst = Cons{S}(els[i], lst)

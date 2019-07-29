@@ -17,7 +17,6 @@ Option{T} = Union{SOME{T}, Nothing}
 #=NONE is always nothing=#
 NONE() = Nothing()
 
-
 #= Allow upcasting =#
 Base.convert(::Type{Option{S}}, x::SOME{T})  where {S, T <: S} = let
   SOME{S}(convert(S, x.data))
