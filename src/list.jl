@@ -88,7 +88,7 @@ Base.promote_rule(a::Type{List{T}}, b::Type{List{S}}) where {T,S} = let
   el_same(promote_type(T,S), a, b)
 end
 
-#= Some needed interfaces =#
+#= Definition of eltype =#
 Base.eltype(::Type{List{T}}) where {T} = let
   T
 end
@@ -97,9 +97,13 @@ Base.eltype(::Type{Cons{T}}) where {T} = let
   T
 end
 
-Base.eltype(::List{T}) where {T} = T
+Base.eltype(::List{T}) where {T} = let
+  T
+end
 
-Base.eltype(::Cons{T}) where {T} = T
+Base.eltype(::Cons{T}) where {T} = let
+  T
+end
 
 #= For "Efficient" casting... O(N) * C" =#
 List(T::Type #= Hack.. =#, args...) = let
@@ -150,14 +154,6 @@ function list(els::Tuple{Type}...)::List
   end
   lst
 end
-#=Support compound types =#
-# function list(vs...)::List
-#   local lst::List = nil()
-#   for i in length(vs):-1:1
-#     lst = Cons{Any}(vs[i], lst)
-#   end
-#   lst
-# end
 
 cons(v::T, ::Nil{Any}) where {T} = Cons{T}(v, nil(T))
 cons(v, ::Nil{T}) where {T} = Cons{T}(v, nil(T))
