@@ -85,7 +85,6 @@ end
             ()
           end
         end
-        println("1:$someVariableWeWantToMutate1 && 2:$someVariableWeWantToMutate2")
         someVariableWeWantToMutate1 && someVariableWeWantToMutate2
       end
     end

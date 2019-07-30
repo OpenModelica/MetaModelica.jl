@@ -169,37 +169,38 @@ function Base.iterate(l::List, state::Cons = l)
     state.head, state.tail
 end
 
-#=
+"""
   For list comprehension. Unless we switch to mutable structs this is the way to go I think.
   Seems to be more efficient then what the omc currently does.
-=#
+"""
 list(F, C::Base.Generator) = let
   list(collect(Base.Generator(F, C))...)
 end
 
-#= Comprehension without a function(!) =#
+""" Comprehension without a function(!) """
 list(C::Base.Generator) = let
   #= Just apply the element to itself =#
   list(i->i, C)
 end
 
-#= Adds the ability for Julia to flatten MMlists =#
+""" Adds the ability for Julia to flatten MMlists """
 list(X::Base.Iterators.Flatten) = let
   list([X...]...)
 end
 
-#Reductions
+"""
+  List Reductions
+"""
 list(X::Base.Generator{Base.Iterators.ProductIterator{Y}, Z}) where {Y,Z} = let
   x = collect(X)
   list(list(i...) for i in view.([x], 1:size(x, 1), :))
 end
 
-#=
+"""
 Generates the transformation:
-
  @do_threaded_for expr with (iter_names) iterators =>
-  $expr for $iterator_names in list(zip($iters...)...)
-=#
+  \$expr for \$iterator_names in list(zip(\$iters...)...)
+"""
 function make_threaded_for(expr, iter_names, ranges)
   iterExpr::Expr = Expr(:tuple, iter_names.args...)
   rangeExpr::Expr = ranges = [ranges...][1]

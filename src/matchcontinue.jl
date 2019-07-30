@@ -33,7 +33,7 @@ end
 """
   Statically get the fieldcount of a type. Useful to avoid runtime calls to
   fieldcount.
-  """
+"""
 @generated function evaluated_fieldcount(t::Type{T}) where T
   if T != NONE
     fieldcount(T)
@@ -45,7 +45,7 @@ end
 """
   Statically get the fieldnames of a type. Useful to avoid runtime calls to
   fieldnames (which includes many allocations).
-  """
+"""
 @generated function evaluated_fieldnames(t::Type{T}) where T
   fieldnames(T)
 end

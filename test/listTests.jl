@@ -169,7 +169,25 @@ end
     end
   end
 end
-  
-# end
 
+@testset "Eltype and instantiation of composite with subtype tests" begin
+  @test Int64 == eltype(list(1,2,3))
+  @test Cons{Int64} == eltype(list(list(1)))
+
+  abstract type AS end
+  struct SUBTYPE <: AS
+    a
+  end
+  struct SS
+    a::List{AS}
+  end
+@test begin
+  try
+    SS(list(SUBTYPE(1), SUBTYPE(2), SUBTYPE(3)))
+    true
+  catch
+    false
+  end
 end
+end
+end #=End module=#
