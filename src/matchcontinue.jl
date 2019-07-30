@@ -181,7 +181,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
               end
               pattern = $(esc(T))
               if $(esc(T)) != NONE
-                if evaluated_fieldcount($(esc(T))) != $(esc(len))
+                if fieldcount($(esc(T))) != $(esc(len))
                   error("Field count for pattern of type: $pattern is $($(esc(len))) expected $(evaluated_fieldcount($(esc(T))))")
               end            
               end

@@ -206,7 +206,7 @@ end
 
 #= Converts Integer to Real =#
 function intReal(i::ModelicaInteger)::ModelicaReal
-  float(r)
+  float(i)
 end
 
 #= Converts Integer to String =#
