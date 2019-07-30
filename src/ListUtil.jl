@@ -357,7 +357,7 @@ function consOnBool(inValue::Bool, inElement::T, trueList::IList, falseList::ILi
   else
     falseList = inElement <| falseList
   end
-  (falseList, trueList)
+  (trueList, falseList)
 end
 
 #= concate n time inElement to the list:
@@ -902,7 +902,7 @@ function sortedUniqueAndDuplicates(inList::IList, inCompFunc::CompareFunc)::Tupl
   end
   outUniqueElements = listReverseInPlace(outUniqueElements)
   outDuplicateElements = listReverseInPlace(outDuplicateElements)
-  (outDuplicateElements, outUniqueElements)
+  (outUniqueElements, outDuplicateElements)
 end
 
 #= Returns a list with all duplicate elements removed, as well as a list of the
@@ -1140,7 +1140,7 @@ function split(inList::IList, inPosition::ModelicaInteger)::Tuple{IList, IList}
   end
   outList1 = listReverseInPlace(l1)
   outList2 = l2
-  (outList2, outList1)
+  (outList1, outList2)
 end
 
 #= Takes a list and a position, and splits the list at the position given. The first list is returned in reverse order.
@@ -1165,7 +1165,7 @@ function splitr(inList::IList, inPosition::ModelicaInteger)::Tuple{IList, IList}
   end
   outList1 = l1
   outList2 = l2
-  (outList2, outList1)
+  (outList1, outList2)
 end
 
 #= Splits a list into two sublists depending on predicate function. =#
@@ -1183,7 +1183,7 @@ function splitOnTrue(inList::IList, inFunc::PredicateFunc)::Tuple{IList, IList}
   end
   outTrueList = listReverseInPlace(outTrueList)
   outFalseList = listReverseInPlace(outFalseList)
-  (outFalseList, outTrueList)
+  (outTrueList, outFalseList)
 end
 
 #= Splits a list into two sublists depending on predicate function. =#
@@ -1202,7 +1202,7 @@ function split1OnTrue(inList::IList, inFunc::PredicateFunc, inArg1::ArgT1)::Tupl
   end
   outTrueList = listReverseInPlace(outTrueList)
   outFalseList = listReverseInPlace(outFalseList)
-  (outFalseList, outTrueList)
+  (outTrueList, outFalseList)
 end
 
 #= Splits a list into two sublists depending on predicate function. =#
@@ -1222,7 +1222,7 @@ function split2OnTrue(inList::IList, inFunc::PredicateFunc, inArg1::ArgT1, inArg
   end
   outTrueList = listReverseInPlace(outTrueList)
   outFalseList = listReverseInPlace(outFalseList)
-  (outFalseList, outTrueList)
+  (outTrueList, outFalseList)
 end
 
 #= Splits a list when the given function first finds a matching element.
@@ -1244,7 +1244,7 @@ function splitOnFirstMatch(inList::IList, inFunc::CompFunc)::Tuple{IList, IList}
     outList1 = e <| outList1
   end
   outList1 = listReverseInPlace(outList1)
-  (outList2, outList1)
+  (outList1, outList2)
 end
 
 #= Returns the first element of a list and the rest of the list. Fails if the
@@ -1254,7 +1254,7 @@ function splitFirst(inList::IList)::Tuple{IList, T}
   local outRest::IList
   local outFirst::T
   outFirst, outRest = listHead(inList), listRest(inList)
-  (outRest, outFirst)
+  (outFirst, outRest)
 end
 
 #= Returns the first element of a list as an option, and the rest of the list.
@@ -1276,7 +1276,7 @@ function splitFirstOption(inList::IList)::Tuple{IList, Option}
       end
     end
   end
-  (outRest, outFirst)
+  (outFirst, outRest)
 end
 
 #= Returns the last element of a list and a list of all previous elements. If
@@ -1289,7 +1289,7 @@ function splitLast(inList::IList)::Tuple{IList, T}
 
   outLast, outRest = listHead(listReverse(inList)), listRest(listReverse(inList))
   outRest = listReverseInPlace(outRest)
-  (outRest, outLast)
+  (outLast, outRest)
 end
 
 #= Splits a list into n equally sized parts.
@@ -1329,7 +1329,7 @@ function splitOnBoolList(inList::IList, inBools::IList)::Tuple{IList, IList}
   end
   outTrueList = listReverseInPlace(outTrueList)
   outFalseList = listReverseInPlace(outFalseList)
-  (outFalseList, outTrueList)
+  (outTrueList, outFalseList)
 end
 
 #= Partitions a list of elements into sublists of length n.
@@ -1667,7 +1667,7 @@ function intersection1OnTrue(inList1::IList, inList2::IList, inCompFunc::CompFun
   else
     list()
   end
-  (outList2Rest, outList1Rest, outIntersection)
+  (outIntersection, outList1Rest, outList2Rest)
 end
 
 #= Provides same functionality as setDifference, but for integer values
@@ -1904,7 +1904,7 @@ function map_2(inList::IList, inFunc::MapFunc)::Tuple{IList, IList}
   if isPresent(outList2)
     outList2 = listReverseInPlace(outList2)
   end
-  (outList2, outList1)
+  (outList1, outList2)
 end
 
 #= Takes a list and a function, and creates three new lists by applying the
@@ -1939,7 +1939,7 @@ function map_3(inList::IList, inFunc::MapFunc)::Tuple{IList, IList, IList}
   if isPresent(outList3)
     outList3 = listReverseInPlace(outList3)
   end
-  (outList3, outList2, outList1)
+  (outList1, outList2, outList3)
 end
 
 #= The same as map(map(inList, getOption), inMapFunc), but is more efficient and
@@ -2074,10 +2074,8 @@ ArgT1 = Any
 function map1_2(inList::IList, inFunc::MapFunc, inArg1::ArgT1)::Tuple{IList, IList}
   local outList2::IList = list()
   local outList1::IList = list()
-
   local e1::TO1
-  local e2::TO2
-
+  local e2::TO2  
   for e in inList
     (e1, e2) = inFunc(e, inArg1)
     outList1 = e1 <| outList1
@@ -2085,7 +2083,7 @@ function map1_2(inList::IList, inFunc::MapFunc, inArg1::ArgT1)::Tuple{IList, ILi
   end
   outList1 = listReverseInPlace(outList1)
   outList2 = listReverseInPlace(outList2)
-  (outList2, outList1)
+  (outList1, outList2)
 end
 
 #= Takes a list and a function, and creates three new lists by applying the
@@ -2113,7 +2111,7 @@ function map1_3(inList::IList, inFunc::MapFunc, inArg1::ArgT1)::Tuple{IList, ILi
   outList1 = listReverseInPlace(outList1)
   outList2 = listReverseInPlace(outList2)
   outList3 = listReverseInPlace(outList3)
-  (outList3, outList2, outList1)
+  (outList1, outList2, outList3)
 end
 
 #= Takes a list, a function and two extra arguments, and creates a new list
@@ -2232,7 +2230,7 @@ function map2_3(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::T
   outList1 = listReverseInPlace(outList1)
   outList2 = listReverseInPlace(outList2)
   outList3 = listReverseInPlace(outList3)
-  (outList3, outList2, outList1)
+  (outList1, outList2, outList3)
 end
 
 #= Takes a list, a function and three extra arguments, and creates a new list
@@ -2298,7 +2296,7 @@ function map3_2(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, in
   end
   outList1 = listReverseInPlace(outList1)
   outList2 = listReverseInPlace(outList2)
-  (outList2, outList1)
+  (outList1, outList2)
 end
 
 #= Takes a list, a function and four extra arguments, and creates a new list
@@ -2352,7 +2350,7 @@ function map4_2(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, in
   end
   outList1 = listReverseInPlace(outList1)
   outList2 = listReverseInPlace(outList2)
-  (outList2, outList1)
+  (outList1, outList2)
 end
 
 #= Takes a list, a function and five extra arguments, and creates a new list
@@ -3487,7 +3485,7 @@ function map3FoldList(inListList::IList, inFunc::FuncType, inConstArg1::ArgT1, i
     outListList = res <| outListList
   end
   outListList = listReverseInPlace(outListList)
-  (outArg, outListList)
+  (outListList, outArg)
 end
 
 #= Takes a list of lists, an extra argument and a function. The function will be
@@ -3508,7 +3506,7 @@ function mapFoldListTuple(inListList::IList, inFunc::FuncType, inFoldArg::TO)::T
     outListList = res <| outListList
   end
   outListList = listReverseInPlace(outListList)
-  (outFoldArg, outListList)
+  (outListList, outFoldArg)
 end
 
 #= Takes a value and a function operating on the value n times.
@@ -3645,7 +3643,7 @@ function unzip(inTuples::IList)::Tuple{IList, IList}
   end
   outList1 = listReverseInPlace(outList1)
   outList2 = listReverseInPlace(outList2)
-  (outList2, outList1)
+  (outList1, outList2)
 end
 
 #= Like unzip, but returns the lists in reverse order. =#
@@ -3663,7 +3661,7 @@ function unzipReverse(inTuples::IList)::Tuple{IList, IList}
     outList1 = e1 <| outList1
     outList2 = e2 <| outList2
   end
-  (outList2, outList1)
+  (outList1, outList2)
 end
 
 #= Takes a list of two-element tuples and creates a list from the first element
@@ -3788,7 +3786,7 @@ function threadMap_2(inList1::IList, inList2::IList, inMapFunc::MapFunc)::Tuple{
   end
   outList1 = listReverseInPlace(outList1)
   outList2 = listReverseInPlace(outList2)
-  (outList2, outList1)
+  (outList1, outList2)
 end
 
 #= Takes two lists of lists and a function and threads (interleaves) and maps
@@ -3826,7 +3824,7 @@ function threadMapList_2(inList1::IList, inList2::IList, inMapFunc::MapFunc)::Tu
   end
   outList1 = listReverseInPlace(outList1)
   outList2 = listReverseInPlace(outList2)
-  (outList2, outList1)
+  (outList1, outList2)
 end
 
 #= Takes two lists of lists as arguments and produces a list of lists of a two
@@ -4109,7 +4107,7 @@ function thread3Map_2(inList1::IList, inList2::IList, inList3::IList, inFunc::Ma
   @assert true == (listEmpty(rest_e3))
   outList1 = listReverseInPlace(outList1)
   outList2 = listReverseInPlace(outList2)
-  (outList2, outList1)
+  (outList1, outList2)
 end
 
 #= Takes three lists and a function, and threads (interleaves) and maps the
@@ -5718,7 +5716,7 @@ function removeEqualPrefix(inList1::IList, inList2::IList, inCompFunc::CompFunc)
     outList1 = listRest(outList1)
     outList2 = listRest(outList2)
   end
-  (outList2, outList1)
+  (outList1, outList2)
 end
 
 #= Returns true if inList1 is longer than inList2, otherwise false. =#
@@ -5784,7 +5782,7 @@ function separateOnTrue(inList::IList, inFilterFunc::FilterFunc)::Tuple{IList, I
       outListFalse = e <| outListFalse
     end
   end
-  (outListFalse, outListTrue)
+  (outListTrue, outListFalse)
 end
 
 #= Takes a list of values and a filter function over the values and returns 2
@@ -5802,7 +5800,7 @@ function separate1OnTrue(inList::IList, inFilterFunc::FilterFunc, inArg1::ArgT1)
       outListFalse = e <| outListFalse
     end
   end
-  (outListFalse, outListTrue)
+  (outListTrue, outListFalse)
 end
 
 TI = Any 

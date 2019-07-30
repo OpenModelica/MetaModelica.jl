@@ -149,11 +149,20 @@ end
 cons(v::T, ::Nil{Any}) where {T} = Cons{T}(v, nil(T))
 cons(v, ::Nil{T}) where {T} = Cons{T}(v, nil(T))
 cons(v, l::Cons{T}) where {T} = Cons{T}(v, l)
-
+#= Mixed conses with one common superclass =#
+cons(v::T, l::Cons{S}) where {S, T <: S} = let
+  Cons{S}(v, l)
+end
+cons(v::A, l::Cons{B}) where {A, B} = let
+  #= Where there's a whip there's a way.. =#
+  @assert supertype(A) == supertype(B)
+  Cons{supertype(A)}(v, l)
+end
 # Right-associative operator ; conflicts with => in match expressions...
 Base.Pair(v, l::List{T}) where {T} = cons(v, l)
 # Suggestion for new operator <| also right assoc <| :), See I got a hat
-<|(v, lst::List{T}) where{T}= cons(v, lst)
+<|(v, lst::List{T}) where{T} = cons(v, lst)
+<|(v::S, lst::List{T}) where{T, S <: T} = cons(v, lst)
 
 Base.length(::Nil) = 0
 function Base.length(l::List)::Integer

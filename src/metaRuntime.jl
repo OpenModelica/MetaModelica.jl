@@ -719,13 +719,12 @@ end
 
 #= Returns true if the input is NONE() =#
 function isNone(opt::Option{A})::Bool where {A <: Any}
-  local none::Bool
-  isa(NONE, opt)
+  isa(opt, NONE)
 end
 
 #= Returns true if the input is SOME() =#
 function isSome(opt::Option{A})::Bool where{A <: Any}
-  isa(SOME, opt)
+  isa(opt, SOME)
 end
 
 function listStringCharString(strs::List{String})::String
