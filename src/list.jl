@@ -146,15 +146,6 @@ function list(els...)::List
   lst
 end
 
-#= Support generic list for the other cases =#
-function list(els::Tuple{Type}...)::List
-  local lst::List = nil()
-  for i in length(els):-1:1
-    lst = Cons(els[i], lst)
-  end
-  lst
-end
-
 cons(v::T, ::Nil{Any}) where {T} = Cons{T}(v, nil(T))
 cons(v, ::Nil{T}) where {T} = Cons{T}(v, nil(T))
 cons(v, l::Cons{T}) where {T} = Cons{T}(v, l)
