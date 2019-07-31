@@ -61,6 +61,8 @@ Base.convert(::Type{T}, a::List) where {T <: List} = let
 end
 
 #= Identity cases =#
+Base.convert(::Type{Nothing}, x::Cons{T}) where {S, T<:S}=  x
+
 Base.convert(::Type{List{T}}, x::Cons{T}) where {T} =  x
 
 Base.convert(::Type{Cons{T}}, x::Cons{T}) where {T} = x
@@ -70,6 +72,10 @@ Base.convert(::Type{List{T}}, x::List{T}) where {T} = x
 Base.convert(::Type{List}, x::List) = x
 
 Base.convert(::Type{List{T}}, x::Nothing) where {T} = x
+
+Base.convert(::Type{List{T}}, x::List{Nothing}) where {T} = x
+
+Base.convert(::Type{Nothing}, x::Union{Nothing, AbstractList{Nothing}}) = nothing
 
 Base.convert(::Type{Cons{T}}, x::Nothing) where {T} = x
 
@@ -104,6 +110,7 @@ List(T::Type #= Hack.. =#, args) = let
   lst
 end
 
+#= Yes...  (: =#
 nil(T) = nothing
 nil() = nothing
 list() = nil()
@@ -116,7 +123,6 @@ function list(els::T...)::List{T} where {T <: Number}
   end
   lst
 end
-
 
 #= Support hieractical constructs. Concrete elements =#
 function list(els...)::List
@@ -205,7 +211,7 @@ end
 
 #= Julia standard sort is pretty good =#
 Base.sort(lst::List) = let
-  list(sort(collect(lst...))...)
+  list(sort(collect(lst))...)
 end
 
 export List, list, Cons, cons, <|, nil
