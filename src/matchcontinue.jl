@@ -177,11 +177,11 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
                 throw(LoadError("Attempted to match on a function", @__LINE__, AssertionError("Incorrect match usage attempted to match on: $func")))
               end
               if !(isstructtype(typeof($(esc(T)))) || issabstracttype(typeof($(esc(T)))))
-              throw(LoadError("Attempted to match on a pattern that is not a struct", @__LINE__, AssertionError("Incorrect match usage. Attempted to match on a pattern that is not a stru ")))
+                throw(LoadError("Attempted to match on a pattern that is not a struct", @__LINE__, AssertionError("Incorrect match usage. Attempted to match on a pattern that is not a stru ")))
               end
               pattern = $(esc(T))
               if $(esc(T)) != NONE
-                if fieldcount($(esc(T))) != $(esc(len))
+                if evaluated_fieldcount($(esc(T))) != $(esc(len))
                   error("Field count for pattern of type: $pattern is $($(esc(len))) expected $(evaluated_fieldcount($(esc(T))))")
               end            
               end
@@ -249,7 +249,7 @@ function handleSugar(T)
       :Cons
     elseif string(T) == "nil"
       # Syntactic sugar for Nil
-      :Nil
+      :Nothing
     elseif string(T) == "NONE"
       # Syntactic sugar for Nothing
       :Nothing

@@ -80,23 +80,23 @@ using MetaModelica.Dangerous: listReverseInPlace, arrayGetNoBoundsChecking, arra
 
 #= Creates a list from an element. =#
 T = Any 
-function create(inElement::T)::IList
-  local outList::IList = list(inElement)
+function create(inElement::T)::List
+  local outList::List = list(inElement)
   outList
 end
 
 #= Creates a list from two elements. =#
 T = Any 
-function create2(inElement1::T, inElement2::T)::IList
-  local outList::IList = list(inElement1, inElement2)
+function create2(inElement1::T, inElement2::T)::List
+  local outList::List = list(inElement1, inElement2)
   outList
 end
 
 #= Returns a list of n element.
 Example: fill(2, 3) => {2, 2, 2} =#
 T = Any 
-function fill(inElement::T, inCount::ModelicaInteger)::IList
-  local outList::IList = list()
+function fill(inElement::T, inCount::ModelicaInteger)::List
+  local outList::List = list()
   local i::ModelicaInteger = 0
   while i < inCount
     outList = inElement <| outList
@@ -107,8 +107,8 @@ end
 
 #= Returns a list of n integers from 1 to inStop.
 Example: listIntRange(3) => {1,2,3} =#
-function intRange(inStop::ModelicaInteger)::IList
-  local outRange::IList = list()
+function intRange(inStop::ModelicaInteger)::List
+  local outRange::List = list()
   local i::ModelicaInteger = inStop
   while i > 0
     outRange = i <| outRange
@@ -119,8 +119,8 @@ end
 
 #= Returns a list of integers from inStart to inStop.
 Example listIntRange2(3,5) => {3,4,5} =#
-function intRange2(inStart::ModelicaInteger, inStop::ModelicaInteger)::IList
-  local outRange::IList = list()
+function intRange2(inStart::ModelicaInteger, inStop::ModelicaInteger)::List
+  local outRange::List = list()
   local i::ModelicaInteger = inStop
   if inStart < inStop
     while i >= inStart
@@ -138,8 +138,8 @@ end
 
 #= Returns a list of integers from inStart to inStop with step inStep.
 Example: listIntRange2(3,2,9) => {3,5,7,9} =#
-function intRange3(inStart::ModelicaInteger, inStep::ModelicaInteger, inStop::ModelicaInteger)::IList
-  local outRange::IList
+function intRange3(inStart::ModelicaInteger, inStep::ModelicaInteger, inStop::ModelicaInteger)::List
+  local outRange::List
   if inStep == 0
     fail()
   end
@@ -151,7 +151,7 @@ end
 element, NONE() if the list is empty and fails if the list contains more than
 one element. =#
 T = Any 
-function toOption(inList::IList)::Option
+function toOption(inList::List)::Option
   local outOption::Option
   outOption = begin
     local e::T
@@ -171,8 +171,8 @@ end
 #= Returns an empty list for NONE() and a list containing the element for
 SOME(element). =#
 T = Any 
-function fromOption(inElement::Option)::IList
-  local outList::IList
+function fromOption(inElement::Option)::List
+  local outList::List
   outList = begin
     local e::T
     @match inElement begin
@@ -189,7 +189,7 @@ end
 
 #= Fails if the given list is not empty. =#
 T = Any 
-function assertIsEmpty(inList::IList)
+function assertIsEmpty(inList::List)
   @assert list() == (inList)
 end
 
@@ -197,14 +197,14 @@ end
 to be of equal length, and if it is false they can be of different lengths (in
 which case only the overlapping parts of the lists are checked). =#
 T = Any 
-function isEqual(inList1::IList, inList2::IList, inEqualLength::Bool)::Bool
+function isEqual(inList1::List, inList2::List, inEqualLength::Bool)::Bool
   local outIsEqual::Bool
 
   outIsEqual = begin
     local e1::T
     local e2::T
-    local rest1::IList
-    local rest2::IList
+    local rest1::List
+    local rest2::List
     @match (inList1, inList2, inEqualLength) begin
       (e1 <| rest1, e2 <| rest2, _) where (valueEq(e1, e2))  => begin
         isEqual(rest1, rest2, inEqualLength)
@@ -234,14 +234,14 @@ end
 equal or not. =#
 T1 = Any 
 T2 = Any 
-function isEqualOnTrue(inList1::IList, inList2::IList, inCompFunc::CompFunc)::Bool
+function isEqualOnTrue(inList1::List, inList2::List, inCompFunc::CompFunc)::Bool
   local outIsEqual::Bool
 
   outIsEqual = begin
     local e1::T1
     local e2::T2
-    local rest1::IList
-    local rest2::IList
+    local rest1::List
+    local rest2::List
     @match (inList1, inList2) begin
       (e1 <| rest1, e2 <| rest2) where (inCompFunc(e1, e2))  => begin
         isEqualOnTrue(rest1, rest2, inCompFunc)
@@ -264,14 +264,14 @@ elements in the first list is equal to the corresponding elements in the
 second list. =#
 T1 = Any 
 T2 = Any 
-function isPrefixOnTrue(inList1::IList, inList2::IList, inCompFunc::CompFunc)::Bool
+function isPrefixOnTrue(inList1::List, inList2::List, inCompFunc::CompFunc)::Bool
   local outIsPrefix::Bool
 
   outIsPrefix = begin
     local e1::T1
-    local rest1::IList
+    local rest1::List
     local e2::T2
-    local rest2::IList
+    local rest2::List
     @match (inList1, inList2) begin
       (e1 <| rest1, e2 <| rest2) where (inCompFunc(e1, e2))  => begin
         isPrefixOnTrue(rest1, rest2, inCompFunc)
@@ -292,15 +292,15 @@ end
 #= The same as the builtin cons operator, but with the order of the arguments
 swapped. =#
 T = Any 
-function consr(inList::IList, inElement::T)::IList
-  local outList::IList
+function consr(inList::List, inElement::T)::List
+  local outList::List
   @match outList = inElement <| inList
 end
 
 #= Adds the element to the front of the list if the condition is true. =#
 T = Any 
-function consOnTrue(inCondition::Bool, inElement::T, inList::IList)::IList
-  local outList::IList
+function consOnTrue(inCondition::Bool, inElement::T, inList::List)::List
+  local outList::List
 
   outList = if inCondition
     inElement <| inList
@@ -313,8 +313,8 @@ end
 #= Adds the element to the front of the list if the predicate succeeds.
 Prefer using consOnTrue instead of this function, it's more efficient. =#
 T = Any 
-function consOnSuccess(inElement::T, inList::IList, inPredicate::Predicate)::IList
-  local outList::IList
+function consOnSuccess(inElement::T, inList::List, inPredicate::Predicate)::List
+  local outList::List
 
   try
     inPredicate(inElement)
@@ -328,8 +328,8 @@ end
 #= Adds an optional element to the front of the list, or returns the list if the
 element is none. =#
 T = Any 
-function consOption(inElement::Option, inList::IList)::IList
-  local outList::IList
+function consOption(inElement::Option, inList::List)::List
+  local outList::List
 
   outList = begin
     local e::T
@@ -348,7 +348,7 @@ end
 
 #= Adds an element to one of two lists, depending on the given boolean value. =#
 T = Any 
-function consOnBool(inValue::Bool, inElement::T, trueList::IList, falseList::IList)::Tuple{IList, IList}
+function consOnBool(inValue::Bool, inElement::T, trueList::List, falseList::List)::Tuple{List, List}
 
 
 
@@ -363,7 +363,7 @@ end
 #= concate n time inElement to the list:
 n = 5, inElement=1, list={1,2} -> list={1,1,1,1,1,1,2} =#
 T = Any 
-function consN(size::ModelicaInteger, inElement::T, inList::IList)::IList
+function consN(size::ModelicaInteger, inElement::T, inList::List)::List
   for i in 1:size
     inList = inElement <| inList
   end
@@ -372,8 +372,8 @@ end
 
 #= Appends the elements from list1 in reverse order to list2. =#
 T = Any 
-function append_reverse(inList1::IList, inList2::IList)::IList
-  local outList::IList = inList2
+function append_reverse(inList1::List, inList2::List)::List
+  local outList::List = inList2
 
   #=  Do not optimize the case listEmpty(inList2) and listLength(inList1)==1
   =#
@@ -389,8 +389,8 @@ end
 
 #= Appends the elements from list2 in reverse order to list1. =#
 T = Any 
-function append_reverser(inList1::IList, inList2::IList)::IList
-  local outList::IList = inList1
+function append_reverser(inList1::List, inList2::List)::List
+  local outList::List = inList1
 
   #=  Do not optimize the case listEmpty(inList2) and listLength(inList1)==1
   =#
@@ -406,8 +406,8 @@ end
 
 #= Appends two lists in reverse order compared to listAppend. =#
 T = Any 
-function appendr(inList1::IList, inList2::IList)::IList
-  local outList::IList
+function appendr(inList1::List, inList2::List)::List
+  local outList::List
 
   outList = listAppend(inList2, inList1)
   outList
@@ -416,8 +416,8 @@ end
 #= Appends an element to the end of the list. Note that this is very
 inefficient, so try to avoid using this function. =#
 T = Any 
-function appendElt(inElement::T, inList::IList)::IList
-  local outList::IList
+function appendElt(inElement::T, inList::List)::List
+  local outList::List
 
   outList = listAppend(inList, list(inElement))
   outList
@@ -425,13 +425,13 @@ end
 
 #= Appends a list to the last list in a list of lists. =#
 T = Any 
-function appendLastList(inListList::IList, inList::IList)::IList
-  local outListList::IList
+function appendLastList(inListList::List, inList::List)::List
+  local outListList::List
 
   outListList = begin
-    local l::IList
-    local ll::IList
-    local ol::IList = list()
+    local l::List
+    local ll::List
+    local ol::List = list()
     @match (inListList, inList) begin
       ( nil(), _)  => begin
         list(inList)
@@ -458,11 +458,11 @@ end
 #= Inserts an element at a position
 example: insert({2,1,4,2},2,3) => {2,3,1,4,2}  =#
 T = Any 
-function insert(inList::IList, inN::ModelicaInteger, inElement::T)::IList
-  local outList::IList
+function insert(inList::List, inN::ModelicaInteger, inElement::T)::List
+  local outList::List
 
-  local lst1::IList
-  local lst2::IList
+  local lst1::List
+  local lst2::List
 
   @assert true == (inN > 0)
   (lst1, lst2) = splitr(inList, inN - 1)
@@ -473,8 +473,8 @@ end
 #= Inserts an sorted list into another sorted list. O(n)
 example: insertListSorted({1,2,4,5},{3,4,8},intGt) => {1,2,3,4,4,5,8} =#
 T = Any 
-function insertListSorted(inList::IList, inList2::IList, inCompFunc::CompareFunc)::IList
-  local outList::IList
+function insertListSorted(inList::List, inList2::List, inCompFunc::CompareFunc)::List
+  local outList::List
 
   outList = listReverseInPlace(insertListSorted1(inList, inList2, inCompFunc, list()))
   outList
@@ -483,12 +483,12 @@ end
 #= Iterate over the first given list and add it to the result list if the comparison function with the head of the second list returns true.
 The result is a sorted list in reverse order. =#
 T = Any 
-function insertListSorted1(inList::IList, inList2::IList, inCompFunc::CompareFunc, inResultList::IList)::IList
-  local outResultList::IList
+function insertListSorted1(inList::List, inList2::List, inCompFunc::CompareFunc, inResultList::List)::List
+  local outResultList::List
 
-  local listRest::IList
-  local listRest2::IList
-  local tmpResultList::IList
+  local listRest::List
+  local listRest2::List
+  local tmpResultList::List
   local listHead::T
   local listHead2::T
   local elem::T
@@ -525,11 +525,11 @@ end
 #= set an element at a position
 example: set({2,1,4,2},2,3) => {2,3,4,2}  =#
 T = Any 
-function set(inList::IList, inN::ModelicaInteger, inElement::T)::IList
-  local outList::IList
+function set(inList::List, inN::ModelicaInteger, inElement::T)::List
+  local outList::List
 
-  local lst1::IList
-  local lst2::IList
+  local lst1::List
+  local lst2::List
 
   @assert true == (inN > 0)
   (lst1, lst2) = splitr(inList, inN - 1)
@@ -540,7 +540,7 @@ end
 
 #= Returns the first element of a list. Fails if the list is empty. =#
 T = Any 
-function first(inList::IList)::T
+function first(inList::List)::T
   local out::T
 
   out = begin
@@ -557,8 +557,8 @@ end
 #= Returns the first element of a list as a list, or an empty list if the given
 list is empty. =#
 T = Any 
-function firstOrEmpty(inList::IList)::IList
-  local outList::IList
+function firstOrEmpty(inList::List)::List
+  local outList::List
 
   outList = begin
     local e::T
@@ -577,7 +577,7 @@ end
 
 #= Returns the second element of a list. Fails if the list is empty. =#
 T = Any 
-function second(inList::IList)::T
+function second(inList::List)::T
   local outSecond::T
 
   outSecond = listGet(inList, 2)
@@ -586,10 +586,10 @@ end
 
 #= Returns the last element of a list. Fails if the list is empty. =#
 T = Any 
-function last(inList::IList)::T
+function last(inList::List)::T
   local outLast::T
 
-  local rest::IList
+  local rest::List
 
   outLast, rest = listHead(inList), listRest(inList)
   for e in rest
@@ -600,11 +600,11 @@ end
 
 #= Returns the last cons-cell of a list. Fails if the list is empty. Also returns the list length. =#
 T = Any 
-function lastElement(inList::IList)::Tuple{ModelicaInteger, IList}
+function lastElement(inList::List)::Tuple{ModelicaInteger, List}
   local listLength::ModelicaInteger = 0
-  local lst::IList
+  local lst::List
 
-  local rest::IList = inList
+  local rest::List = inList
 
   @assert false == (listEmpty(rest))
   while ! listEmpty(rest)
@@ -617,8 +617,8 @@ end
 #= Returns the last element(list) of a list of lists. Returns empty list
 if the outer list is empty. =#
 T = Any 
-function lastListOrEmpty(inListList::IList)::IList
-  local outLastList::IList = list()
+function lastListOrEmpty(inListList::List)::List
+  local outLastList::List = list()
 
   for e in inListList
     outLastList = e
@@ -629,7 +629,7 @@ end
 #= Returns the second last element of a list, or fails if such an element does
 not exist. =#
 T = Any 
-function secondLast(inList::IList)::T
+function secondLast(inList::List)::T
   local outSecondLast::T
 
   _, outSecondLast, _ = listHead(listReverse(inList)), listRest(listReverse(inList))
@@ -638,8 +638,8 @@ end
 
 #= Returns the last N elements of a list. =#
 T = Any 
-function lastN(inList::IList, inN::ModelicaInteger)::IList
-  local outList::IList
+function lastN(inList::List, inN::ModelicaInteger)::List
+  local outList::List
 
   local len::ModelicaInteger
 
@@ -651,8 +651,8 @@ end
 
 #= Returns all elements except for the first in a list. =#
 T = Any 
-function rest(inList::IList)::IList
-  local outList::IList
+function rest(inList::List)::List
+  local outList::List
 
   _, outList = listHead(inList), listRest(inList)
   outList
@@ -660,8 +660,8 @@ end
 
 #= Returns all elements except for the first in a list. =#
 T = Any 
-function restCond(cond::Bool, inList::IList)::IList
-  local outList::IList
+function restCond(cond::Bool, inList::List)::List
+  local outList::List
 
   outList = if cond
     listRest(inList)
@@ -674,8 +674,8 @@ end
 #= Returns all elements except for the first in a list, or the empty list of the
 list is empty. =#
 T = Any 
-function restOrEmpty(inList::IList)::IList
-  local outList::IList
+function restOrEmpty(inList::List)::List
+  local outList::List
 
   outList = if listEmpty(inList)
     inList
@@ -686,7 +686,7 @@ function restOrEmpty(inList::IList)::IList
 end
 
 T = Any 
-function getIndexFirst(index::ModelicaInteger, inList::IList)::T
+function getIndexFirst(index::ModelicaInteger, inList::List)::T
   local element::T
 
   element = listGet(inList, index)
@@ -696,11 +696,11 @@ end
 #= Returns the first N elements of a list, or fails if there are not enough
 elements in the list. =#
 T = Any 
-function firstN(inList::IList, inN::ModelicaInteger)::IList
-  local outList::IList = list()
+function firstN(inList::List, inN::ModelicaInteger)::List
+  local outList::List = list()
 
   local e::T
-  local rest::IList
+  local rest::List
 
   @assert true == (inN >= 0)
   rest = inList
@@ -715,8 +715,8 @@ end
 #= Removes the first element of a list, but returns the empty list if the given
 list is empty. =#
 T = Any 
-function stripFirst(inList::IList)::IList
-  local outList::IList
+function stripFirst(inList::List)::List
+  local outList::List
 
   if listEmpty(inList)
     outList = list()
@@ -729,8 +729,8 @@ end
 #= Removes the last element of a list. If the list is the empty list, the
 function returns the empty list. =#
 T = Any 
-function stripLast(inList::IList)::IList
-  local outList::IList
+function stripLast(inList::List)::List
+  local outList::List
 
   if listEmpty(inList)
     outList = list()
@@ -744,8 +744,8 @@ end
 #= Strips the N first elements from a list. Fails if the list contains less than
 N elements, or if N is negative. =#
 T = Any 
-function stripN(inList::IList, inN::ModelicaInteger)::IList
-  local outList::IList = inList
+function stripN(inList::List, inN::ModelicaInteger)::List
+  local outList::List = inList
 
   @assert true == (inN >= 0)
   for i in 1:inN
@@ -754,7 +754,7 @@ function stripN(inList::IList, inN::ModelicaInteger)::IList
   outList
 end
 
-function heapSortIntList(lst::IList)::IList
+function heapSortIntList(lst::List)::List
 
 
   lst = begin
@@ -780,14 +780,14 @@ Example:
 sort({2, 1, 3}, intGt) => {1, 2, 3}
 sort({2, 1, 3}, intLt) => {3, 2, 1} =#
 T = Any 
-function sort(inList::IList, inCompFunc::CompareFunc)::IList
-  local outList::IList = list()
+function sort(inList::List, inCompFunc::CompareFunc)::List
+  local outList::List = list()
 
-  local rest::IList = inList
+  local rest::List = inList
   local e1::T
   local e2::T
-  local left::IList
-  local right::IList
+  local left::List
+  local right::List
   local middle::ModelicaInteger
 
   if ! listEmpty(rest)
@@ -817,11 +817,11 @@ end
 #= Returns a list of all duplicates in a sorted list, using the given comparison
 function to check for equality. =#
 T = Any 
-function sortedDuplicates(inList::IList, inCompFunc::CompareFunc #= Equality comparator =#)::IList
-  local outDuplicates::IList = list()
+function sortedDuplicates(inList::List, inCompFunc::CompareFunc #= Equality comparator =#)::List
+  local outDuplicates::List = list()
 
   local e::T
-  local rest::IList = inList
+  local rest::List = inList
 
   while ! listEmpty(rest)
     e, rest = listHead(rest), listRest(rest)
@@ -835,11 +835,11 @@ end
 
 #= The input is a sorted list. The functions checks if all elements are unique. =#
 T = Any 
-function sortedListAllUnique(lst::IList, compare::CompareFunc)::Bool
+function sortedListAllUnique(lst::List, compare::CompareFunc)::Bool
   local allUnique::Bool = false
 
   local e::T
-  local rest::IList = lst
+  local rest::List = lst
 
   while ! listEmpty(rest)
     rest = begin
@@ -866,11 +866,11 @@ end
 #= Returns a list of unique elements in a sorted list, using the given
 comparison function to check for equality. =#
 T = Any 
-function sortedUnique(inList::IList, inCompFunc::CompareFunc)::IList
-  local outUniqueElements::IList = list()
+function sortedUnique(inList::List, inCompFunc::CompareFunc)::List
+  local outUniqueElements::List = list()
 
   local e::T
-  local rest::IList = inList
+  local rest::List = inList
 
   while ! listEmpty(rest)
     e, rest = listHead(rest), listRest(rest)
@@ -885,12 +885,12 @@ end
 #= Returns a list with all duplicate elements removed, as well as a list of the
 removed elements, using the given comparison function to check for equality. =#
 T = Any 
-function sortedUniqueAndDuplicates(inList::IList, inCompFunc::CompareFunc)::Tuple{IList, IList}
-  local outDuplicateElements::IList = list()
-  local outUniqueElements::IList = list()
+function sortedUniqueAndDuplicates(inList::List, inCompFunc::CompareFunc)::Tuple{List, List}
+  local outDuplicateElements::List = list()
+  local outUniqueElements::List = list()
 
   local e::T
-  local rest::IList = inList
+  local rest::List = inList
 
   while ! listEmpty(rest)
     e, rest = listHead(rest), listRest(rest)
@@ -908,11 +908,11 @@ end
 #= Returns a list with all duplicate elements removed, as well as a list of the
 removed elements, using the given comparison function to check for equality. =#
 T = Any 
-function sortedUniqueOnlyDuplicates(inList::IList, inCompFunc::CompareFunc)::IList
-  local outDuplicateElements::IList = list()
+function sortedUniqueOnlyDuplicates(inList::List, inCompFunc::CompareFunc)::List
+  local outDuplicateElements::List = list()
 
   local e::T
-  local rest::IList = inList
+  local rest::List = inList
 
   while ! listEmpty(rest)
     e, rest = listHead(rest), listRest(rest)
@@ -926,17 +926,17 @@ end
 
 #= Helper function to sort, merges two sorted lists. =#
 T = Any 
-function merge(inLeft::IList, inRight::IList, inCompFunc::CompareFunc, acc::IList)::IList
-  local outList::IList
+function merge(inLeft::List, inRight::List, inCompFunc::CompareFunc, acc::List)::List
+  local outList::List
 
   outList = begin
     local b::Bool
     local l::T
     local r::T
     local el::T
-    local l_rest::IList
-    local r_rest::IList
-    local res::IList
+    local l_rest::List
+    local r_rest::List
+    local res::List
     #= /* Tail recursive version */ =#
     @match (inLeft, inRight) begin
       (l <| l_rest, r <| r_rest)  => begin
@@ -971,11 +971,11 @@ comparison function that defines a strict weak ordering of the elements, i.e.
 that returns true if the first element should be placed before the second
 element in the sorted list. =#
 T = Any 
-function mergeSorted(inList1::IList, inList2::IList, inCompFunc::CompFunc)::IList
-  local outList::IList = list()
+function mergeSorted(inList1::List, inList2::List, inCompFunc::CompFunc)::List
+  local outList::List = list()
 
-  local l1::IList
-  local l2::IList
+  local l1::List
+  local l2::List
   local e1::T
   local e2::T
 
@@ -1009,8 +1009,8 @@ end
 
 #= Provides same functionality as sort, but for integer values between 1
 and N. The complexity in this case is O(n) =#
-function sortIntN(inList::IList, inN::ModelicaInteger)::IList
-  local outSorted::IList = list()
+function sortIntN(inList::List, inN::ModelicaInteger)::List
+  local outSorted::List = list()
   local a1::MArray
   a1 = arrayCreate(inN, false)
   a1 = fold1r(inList, arrayUpdate, true, a1)
@@ -1025,8 +1025,8 @@ end
 #= Takes a list of elements and returns a list with duplicates removed, so that
 each element in the new list is unique. =#
 T = Any 
-function unique(inList::IList)::IList
-  local outList::IList = list()
+function unique(inList::List)::List
+  local outList::List = list()
 
   for e in inList
     if ! listMember(e, outList)
@@ -1039,8 +1039,8 @@ end
 
 #= Takes a list of integes and returns a list with duplicates removed, so that
 each element in the new list is unique. O(listLength(inList)) =#
-function uniqueIntN(inList::IList, inN::ModelicaInteger)::IList
-  local outList::IList = list()
+function uniqueIntN(inList::List, inN::ModelicaInteger)::List
+  local outList::List = list()
   local arr::MArray
   arr = arrayCreate(inN, true)
   for i in inList
@@ -1057,8 +1057,8 @@ each element in the new list is unique. O(listLength(inList)). The function
 also takes an array of Integer of size N+1 to mark the already selected entries <= N.
 The last entrie of the array is used for the mark index. It will be updated after
 each call =#
-function uniqueIntNArr(inList::IList, inMarkArray::MArray, inAccum::IList)::IList
-  local outAccum::IList
+function uniqueIntNArr(inList::List, inMarkArray::MArray, inAccum::List)::List
+  local outAccum::List
 
   local len::ModelicaInteger
   local mark::ModelicaInteger
@@ -1075,8 +1075,8 @@ function uniqueIntNArr(inList::IList, inMarkArray::MArray, inAccum::IList)::ILis
 end
 
 #= Helper for uniqueIntNArr1. =#
-function uniqueIntNArr1(inList::IList, inLength::ModelicaInteger, inMark::ModelicaInteger, inMarkArray::MArray, inAccum::IList)::IList
-  local outAccum::IList = inAccum
+function uniqueIntNArr1(inList::List, inLength::ModelicaInteger, inMark::ModelicaInteger, inMarkArray::MArray, inAccum::List)::List
+  local outAccum::List = inAccum
 
   for i in inList
     if i >= inLength
@@ -1094,8 +1094,8 @@ end
 list and returns a list with duplicates removed, so that each element in the
 new list is unique. =#
 T = Any 
-function uniqueOnTrue(inList::IList, inCompFunc::CompFunc)::IList
-  local outList::IList = list()
+function uniqueOnTrue(inList::List, inCompFunc::CompFunc)::List
+  local outList::List = list()
 
   for e in inList
     if ! isMemberOnTrue(e, outList, inCompFunc)
@@ -1111,8 +1111,8 @@ itself and each sublist.
 Example:
 reverseList({{1, 2}, {3, 4, 5}, {6}}) => {{6}, {5, 4, 3}, {2, 1}} =#
 T = Any 
-function reverseList(inList::IList)::IList
-  local outList::IList
+function reverseList(inList::List)::List
+  local outList::List
 
   outList = listReverse(listReverse(e) for e in inList)
   outList
@@ -1121,13 +1121,13 @@ end
 #= Takes a list and a position, and splits the list at the position given.
 Example: split({1, 2, 5, 7}, 2) => ({1, 2}, {5, 7}) =#
 T = Any 
-function split(inList::IList, inPosition::ModelicaInteger)::Tuple{IList, IList}
-  local outList2::IList
-  local outList1::IList
+function split(inList::List, inPosition::ModelicaInteger)::Tuple{List, List}
+  local outList2::List
+  local outList1::List
 
   local pos::ModelicaInteger
-  local l1::IList = list()
-  local l2::IList = inList
+  local l1::List = list()
+  local l2::List = inList
   local e::T
 
   @assert true == (inPosition >= 0)
@@ -1146,13 +1146,13 @@ end
 #= Takes a list and a position, and splits the list at the position given. The first list is returned in reverse order.
 Example: split({1, 2, 5, 7}, 2) => ({2, 1}, {5, 7}) =#
 T = Any 
-function splitr(inList::IList, inPosition::ModelicaInteger)::Tuple{IList, IList}
-  local outList2::IList
-  local outList1::IList
+function splitr(inList::List, inPosition::ModelicaInteger)::Tuple{List, List}
+  local outList2::List
+  local outList1::List
 
   local pos::ModelicaInteger
-  local l1::IList = list()
-  local l2::IList = inList
+  local l1::List = list()
+  local l2::List = inList
   local e::T
 
   @assert true == (inPosition >= 0)
@@ -1170,9 +1170,9 @@ end
 
 #= Splits a list into two sublists depending on predicate function. =#
 T = Any 
-function splitOnTrue(inList::IList, inFunc::PredicateFunc)::Tuple{IList, IList}
-  local outFalseList::IList = list()
-  local outTrueList::IList = list()
+function splitOnTrue(inList::List, inFunc::PredicateFunc)::Tuple{List, List}
+  local outFalseList::List = list()
+  local outTrueList::List = list()
 
   for e in inList
     if inFunc(e)
@@ -1189,9 +1189,9 @@ end
 #= Splits a list into two sublists depending on predicate function. =#
 T = Any 
 ArgT1 = Any 
-function split1OnTrue(inList::IList, inFunc::PredicateFunc, inArg1::ArgT1)::Tuple{IList, IList}
-  local outFalseList::IList = list()
-  local outTrueList::IList = list()
+function split1OnTrue(inList::List, inFunc::PredicateFunc, inArg1::ArgT1)::Tuple{List, List}
+  local outFalseList::List = list()
+  local outTrueList::List = list()
 
   for e in inList
     if inFunc(e, inArg1)
@@ -1209,9 +1209,9 @@ end
 T = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function split2OnTrue(inList::IList, inFunc::PredicateFunc, inArg1::ArgT1, inArg2::ArgT2)::Tuple{IList, IList}
-  local outFalseList::IList = list()
-  local outTrueList::IList = list()
+function split2OnTrue(inList::List, inFunc::PredicateFunc, inArg1::ArgT1, inArg2::ArgT2)::Tuple{List, List}
+  local outFalseList::List = list()
+  local outTrueList::List = list()
 
   for e in inList
     if inFunc(e, inArg1, inArg2)
@@ -1228,9 +1228,9 @@ end
 #= Splits a list when the given function first finds a matching element.
 Example: splitOnFirstMatch({1, 2, 3, 4, 5}, isThree) => ({1, 2}, {3, 4, 5}) =#
 T = Any 
-function splitOnFirstMatch(inList::IList, inFunc::CompFunc)::Tuple{IList, IList}
-  local outList2::IList = inList
-  local outList1::IList = list()
+function splitOnFirstMatch(inList::List, inFunc::CompFunc)::Tuple{List, List}
+  local outList2::List = inList
+  local outList1::List = list()
   local e::T
 
   #=  Shuffle elements from outList2 to outList1 until we find a match.
@@ -1250,8 +1250,8 @@ end
 #= Returns the first element of a list and the rest of the list. Fails if the
 list is empty. =#
 T = Any 
-function splitFirst(inList::IList)::Tuple{IList, T}
-  local outRest::IList
+function splitFirst(inList::List)::Tuple{List, T}
+  local outRest::List
   local outFirst::T
   outFirst, outRest = listHead(inList), listRest(inList)
   (outFirst, outRest)
@@ -1260,12 +1260,12 @@ end
 #= Returns the first element of a list as an option, and the rest of the list.
 Returns NONE and {} if the list is empty. =#
 T = Any 
-function splitFirstOption(inList::IList)::Tuple{IList, Option}
-  local outRest::IList
+function splitFirstOption(inList::List)::Tuple{List, Option}
+  local outRest::List
   local outFirst::Option
   (outFirst, outRest) = begin
     local el::T
-    local rest::IList
+    local rest::List
     @match inList begin
       el <| rest  => begin
         (SOME(el), rest)
@@ -1283,8 +1283,8 @@ end
 the list is the empty list, the function fails.
 Example: splitLast({3, 5, 7, 11, 13}) => (13, {3, 5, 7, 11}) =#
 T = Any 
-function splitLast(inList::IList)::Tuple{IList, T}
-  local outRest::IList
+function splitLast(inList::List)::Tuple{List, T}
+  local outRest::List
   local outLast::T
 
   outLast, outRest = listHead(listReverse(inList)), listRest(listReverse(inList))
@@ -1296,8 +1296,8 @@ end
 Example: splitEqualParts({1, 2, 3, 4, 5, 6, 7, 8}, 4) =>
 {{1, 2}, {3, 4}, {5, 6}, {7, 8}} =#
 T = Any 
-function splitEqualParts(inList::IList, inParts::ModelicaInteger)::IList
-  local outParts::IList
+function splitEqualParts(inList::List, inParts::ModelicaInteger)::List
+  local outParts::List
   local length::ModelicaInteger
   if inParts == 0
     outParts = list()
@@ -1311,13 +1311,13 @@ end
 
 #= Splits a list into two sublists depending on a second list of bools. =#
 T = Any 
-function splitOnBoolList(inList::IList, inBools::IList)::Tuple{IList, IList}
-  local outFalseList::IList = list()
-  local outTrueList::IList = list()
+function splitOnBoolList(inList::List, inBools::List)::Tuple{List, List}
+  local outFalseList::List = list()
+  local outTrueList::List = list()
   local e::T
-  local rest_e::IList = inList
+  local rest_e::List = inList
   local b::Bool
-  local rest_b::IList = inBools
+  local rest_b::List = inBools
   while ! listEmpty(rest_e)
     e, rest_e = listHead(rest_e), listRest(rest_e)
     b, rest_b = listHead(rest_b), listRest(rest_b)
@@ -1335,10 +1335,10 @@ end
 #= Partitions a list of elements into sublists of length n.
 Example: partition({1, 2, 3, 4, 5}, 2) => {{1, 2}, {3, 4}, {5}} =#
 T = Any 
-function partition(inList::IList, inPartitionLength::ModelicaInteger)::IList
-  local outPartitions::IList = list()
-  local lst::IList = inList
-  local part::IList
+function partition(inList::List, inPartitionLength::ModelicaInteger)::List
+  local outPartitions::List = list()
+  local lst::List = inList
+  local part::List
   local length::ModelicaInteger
   @assert true == (inPartitionLength > 0)
   length = listLength(inList)
@@ -1369,8 +1369,8 @@ The number of partitions is the same as partition(), but chosen to be
 as balanced in length as possible.
 =#
 T = Any 
-function balancedPartition(lst::IList, maxLength::ModelicaInteger)::IList
-  local outPartitions::IList
+function balancedPartition(lst::List, maxLength::ModelicaInteger)::List
+  local outPartitions::List
   local length::ModelicaInteger
   local n::ModelicaInteger
   @assert true == (maxLength > 0)
@@ -1387,12 +1387,12 @@ end
 #= Returns a sublist determined by an offset and length.
 Example: sublist({1,2,3,4,5}, 2, 3) => {2,3,4} =#
 T = Any 
-function sublist(inList::IList, inOffset::ModelicaInteger, inLength::ModelicaInteger)::IList
-  local outList::IList = list()
+function sublist(inList::List, inOffset::ModelicaInteger, inLength::ModelicaInteger)::List
+  local outList::List = list()
 
   local e::T
-  local rest::IList = inList
-  local res::IList
+  local rest::List = inList
+  local res::List
 
   @assert true == (inOffset > 0)
   @assert true == (inLength >= 0)
@@ -1417,8 +1417,8 @@ Example: productMap({1, 2}, {3, 4}, intMul) = {1*3, 1*4, 2*3, 2*4} =#
 T1 = Any 
 T2 = Any 
 TO = Any 
-function productMap(inList1::IList, inList2::IList, inMapFunc::MapFunc)::IList
-  local outResult::IList = list()
+function productMap(inList1::List, inList2::List, inMapFunc::MapFunc)::List
+  local outResult::List = list()
 
   for e1 in listReverse(inList1), e2 in listReverse(inList2)
     outResult = inMapFunc(e1, e2) <| outResult
@@ -1431,8 +1431,8 @@ Example:
 list1 = {{1}, {2}}, list2 = {{1}, {3}, {4}}
 result = {{1, 1}, {1, 3}, {1, 4}, {2, 1}, {2, 3}, {2, 4}} =#
 T = Any 
-function product(inList1::IList, inList2::IList)::IList
-  local outProduct::IList = list()
+function product(inList1::List, inList2::List)::List
+  local outProduct::List = list()
 
   for e1 in inList1, e2 in inList2
     outProduct = listAppend(e1, e2) <| outProduct
@@ -1443,12 +1443,12 @@ end
 #= Transposes a list of lists. Example:
 transposeList({{1, 2, 3}, {4, 5, 6}}) => {{1, 4}, {2, 5}, {3, 6}} =#
 T = Any 
-function transposeList(inList::IList)::IList
-  local outList::IList = list()
+function transposeList(inList::List)::List
+  local outList::List = list()
 
   local arr::MArray
   local arr_row::MArray
-  local new_row::IList
+  local new_row::List
   local c_len::ModelicaInteger
   local r_len::ModelicaInteger
 
@@ -1479,7 +1479,7 @@ function transposeList(inList::IList)::IList
 end
 
 T = Any 
-function listArrayReverse(inLst::IList)::MArray
+function listArrayReverse(inLst::List)::MArray
   local outArr::MArray
 
   local len::ModelicaInteger
@@ -1502,10 +1502,10 @@ end
 #= Takes two lists and a comparison function over two elements of the lists.
 It returns true if the two sets are equal, false otherwise. =#
 T = Any 
-function setEqualOnTrue(inList1::IList, inList2::IList, inCompFunc::CompFunc)::Bool
+function setEqualOnTrue(inList1::List, inList2::List, inCompFunc::CompFunc)::Bool
   local outIsEqual::Bool
 
-  local lst::IList
+  local lst::List
   local lst_size::ModelicaInteger
 
   lst = intersectionOnTrue(inList1, inList2, inCompFunc)
@@ -1516,15 +1516,15 @@ end
 
 #= Provides same functionality as listIntersection, but for integer values
 in sorted lists. The complexity in this case is O(n). =#
-function intersectionIntSorted(inList1::IList, inList2::IList)::IList
-  local outResult::IList = list()
+function intersectionIntSorted(inList1::List, inList2::List)::List
+  local outResult::List = list()
 
   local i1::ModelicaInteger
   local i2::ModelicaInteger
   local o1::ModelicaInteger
   local o2::ModelicaInteger
-  local l1::IList = inList1
-  local l2::IList = inList2
+  local l1::List = inList1
+  local l2::List = inList2
 
   if listEmpty(inList1) || listEmpty(inList2)
     return outResult
@@ -1575,8 +1575,8 @@ end
 
 #= Provides same functionality as listIntersection, but for integer values
 between 1 and N. The complexity in this case is O(n). =#
-function intersectionIntN(inList1::IList, inList2::IList, inN::ModelicaInteger)::IList
-  local outResult::IList
+function intersectionIntN(inList1::List, inList2::List, inN::ModelicaInteger)::List
+  local outResult::List
 
   local a::MArray
 
@@ -1592,8 +1592,8 @@ function intersectionIntN(inList1::IList, inList2::IList, inN::ModelicaInteger):
 end
 
 #= Helper function to intersectionIntN. =#
-function intersectionIntVec(inArray::MArray, inList1::IList)::IList
-  local outResult::IList = list()
+function intersectionIntVec(inArray::MArray, inList1::List)::List
+  local outResult::List = list()
 
   for i in inList1
     if arrayGet(inArray, i) == 2
@@ -1604,7 +1604,7 @@ function intersectionIntVec(inArray::MArray, inList1::IList)::IList
 end
 
 #= Helper function to intersectionIntN. =#
-function addPos(inList::IList, inArray::MArray, inIndex::ModelicaInteger)::MArray
+function addPos(inList::List, inArray::MArray, inIndex::ModelicaInteger)::MArray
   local outArray::MArray
 
   for i in inList
@@ -1620,8 +1620,8 @@ passed as argument to determine identity between two elements.
 Example:
 intersectionOnTrue({1, 4, 2}, {5, 2, 4, 6}, intEq) => {4, 2} =#
 T = Any 
-function intersectionOnTrue(inList1::IList, inList2::IList, inCompFunc::CompFunc)::IList
-  local outIntersection::IList = list()
+function intersectionOnTrue(inList1::List, inList2::List, inCompFunc::CompFunc)::List
+  local outIntersection::List = list()
   for e in inList1
     if isMemberOnTrue(e, inList2, inCompFunc)
       outIntersection = e <| outIntersection
@@ -1637,10 +1637,10 @@ passed as argument to determine identity between two elements. This function
 also returns a list of the elements from list 1 which is not in list 2 and a
 list of the elements from list 2 which is not in list 1. =#
 T = Any 
-function intersection1OnTrue(inList1::IList, inList2::IList, inCompFunc::CompFunc)::Tuple{IList, IList, IList}
-  local outList2Rest::IList = inList2
-  local outList1Rest::IList = list()
-  local outIntersection::IList = list()
+function intersection1OnTrue(inList1::List, inList2::List, inCompFunc::CompFunc)::Tuple{List, List, List}
+  local outList2Rest::List = inList2
+  local outList1Rest::List = list()
+  local outIntersection::List = list()
   local oe::Option
   if listEmpty(inList1)
     return (outList2Rest, outList1Rest, outIntersection)
@@ -1672,8 +1672,8 @@ end
 
 #= Provides same functionality as setDifference, but for integer values
 between 1 and N. The complexity in this case is O(n) =#
-function setDifferenceIntN(inList1::IList, inList2::IList, inN::ModelicaInteger)::IList
-  local outDifference::IList = list()
+function setDifferenceIntN(inList1::List, inList2::List, inN::ModelicaInteger)::List
+  local outDifference::List = list()
   local a::MArray
   if inN > 0
     a = arrayCreate(inN, 0)
@@ -1694,8 +1694,8 @@ function passed as argument to determine identity between two elements.
 Example:
 setDifferenceOnTrue({1, 2, 3}, {1, 3}, intEq) => {2} =#
 T = Any 
-function setDifferenceOnTrue(inList1::IList, inList2::IList, inCompFunc::CompFunc)::IList
-  local outDifference::IList = inList1
+function setDifferenceOnTrue(inList1::List, inList2::List, inCompFunc::CompFunc)::List
+  local outDifference::List = inList1
 
   #=  Empty - B = Empty
   =#
@@ -1712,8 +1712,8 @@ end
 Example:
 setDifference({1, 2, 3}, {1, 3}) => {2} =#
 T = Any 
-function setDifference(inList1::IList, inList2::IList)::IList
-  local outDifference::IList = inList1
+function setDifference(inList1::List, inList2::List)::List
+  local outDifference::List = inList1
   if listEmpty(inList1)
     return outDifference
   end
@@ -1725,8 +1725,8 @@ end
 
 #= Provides same functionality as listUnion, but for integer values between 1
 and N. The complexity in this case is O(n) =#
-function unionIntN(inList1::IList, inList2::IList, inN::ModelicaInteger)::IList
-  local outUnion::IList = list()
+function unionIntN(inList1::List, inList2::List, inN::ModelicaInteger)::List
+  local outUnion::List = list()
 
   local a::MArray
 
@@ -1749,8 +1749,8 @@ Example:
 unionElt(1, {2, 3}) => {1, 2, 3}
 unionElt(0, {0, 1, 2}) => {0, 1, 2} =#
 T = Any 
-function unionElt(inElement::T, inList::IList)::IList
-  local outList::IList
+function unionElt(inElement::T, inList::List)::List
+  local outList::List
 
   outList = consOnTrue(! listMember(inElement, inList), inElement, inList)
   outList
@@ -1758,8 +1758,8 @@ end
 
 #= Works as unionElt, but with a compare function. =#
 T = Any 
-function unionEltOnTrue(inElement::T, inList::IList, inCompFunc::CompFunc)::IList
-  local outList::IList
+function unionEltOnTrue(inElement::T, inList::List, inCompFunc::CompFunc)::List
+  local outList::List
 
   outList = consOnTrue(! isMemberOnTrue(inElement, inList, inCompFunc), inElement, inList)
   outList
@@ -1769,8 +1769,8 @@ end
 elements combined without duplicates. Example:
 union({0, 1}, {2, 1}) => {0, 1, 2} =#
 T = Any 
-function union(inList1::IList, inList2::IList)::IList
-  local outUnion::IList = list()
+function union(inList1::List, inList2::List)::List
+  local outUnion::List = list()
 
   for e in inList1
     outUnion = unionElt(e, outUnion)
@@ -1787,8 +1787,8 @@ i.e. a list of all elements combined without duplicates.
 Example:
 union({0, 1}, {2, 1}) => {0, 1, 2} =#
 T = Any 
-function unionAppendonUnion(inList1::IList, inList2::IList)::IList
-  local outUnion::IList
+function unionAppendonUnion(inList1::List, inList2::List)::List
+  local outUnion::List
 
   outUnion = listReverse(inList1)
   for e in inList2
@@ -1803,8 +1803,8 @@ returns the union of the two lists, using the comparison function passed as
 argument to determine identity between two elements. Example:
 unionOnTrue({1, 2}, {2, 3}, intEq) => {1, 2, 3} =#
 T = Any 
-function unionOnTrue(inList1::IList, inList2::IList, inCompFunc::CompFunc)::IList
-  local outUnion::IList = list()
+function unionOnTrue(inList1::List, inList2::List, inCompFunc::CompFunc)::List
+  local outUnion::List = list()
 
   for e in inList1
     outUnion = unionEltOnTrue(e, outUnion, inCompFunc)
@@ -1817,14 +1817,14 @@ function unionOnTrue(inList1::IList, inList2::IList, inCompFunc::CompFunc)::ILis
 end
 
 T = Any 
-function unionAppendListOnTrue(inList::IList, inUnion::IList, inCompFunc::CompFunc)::IList          
+function unionAppendListOnTrue(inList::List, inUnion::List, inCompFunc::CompFunc)::List          
 end
 
 #= Takes a list of lists and returns the union of the sublists.
 Example: unionList({1}, {1, 2}, {3, 4}, {5}}) => {1, 2, 3, 4, 5} =#
 T = Any 
-function unionList(inList::IList)::IList
-  local outUnion::IList
+function unionList(inList::List)::List
+  local outUnion::List
 
   outUnion = if listEmpty(inList)
     list()
@@ -1840,8 +1840,8 @@ for identity.
 Example:
 unionOnTrueList({{1}, {1, 2}, {3, 4}}, intEq) => {1, 2, 3, 4} =#
 T = Any 
-function unionOnTrueList(inList::IList, inCompFunc::CompFunc)::IList
-  local outUnion::IList
+function unionOnTrueList(inList::List, inCompFunc::CompFunc)::List
+  local outUnion::List
 
   outUnion = if listEmpty(inList)
     list()
@@ -1855,8 +1855,8 @@ end
 to each element of the list. =#
 TI = Any 
 TO = Any 
-function map(inList::IList, inFunc::MapFunc)::IList
-  local outList::IList
+function map(inList::List, inFunc::MapFunc)::List
+  local outList::List
 
   outList = list(inFunc(e) for e in inList)
   outList
@@ -1865,7 +1865,7 @@ end
 #= Takes a list and a function, and creates a new list by applying the function
 to each element of the list. =#
 TI = Any 
-function mapCheckReferenceEq(inList::IList, inFunc::MapFunc)::IList
+function mapCheckReferenceEq(inList::List, inFunc::MapFunc)::List
 
 end
 
@@ -1874,8 +1874,8 @@ to each element of the list. The created list will be reversed compared to
 the given list. =#
 TI = Any 
 TO = Any 
-function mapReverse(inList::IList, inFunc::MapFunc)::IList
-  local outList::IList
+function mapReverse(inList::List, inFunc::MapFunc)::List
+  local outList::List
 
   outList = listReverse(inFunc(e) for e in inList)
   outList
@@ -1886,9 +1886,9 @@ function to each element of the list. =#
 TI = Any 
 TO1 = Any 
 TO2 = Any 
-function map_2(inList::IList, inFunc::MapFunc)::Tuple{IList, IList}
-  local outList2::IList = list()
-  local outList1::IList = list()
+function map_2(inList::List, inFunc::MapFunc)::Tuple{List, List}
+  local outList2::List = list()
+  local outList1::List = list()
 
   local e1::TO1
   local e2::TO2
@@ -1913,10 +1913,10 @@ TI = Any
 TO1 = Any 
 TO2 = Any 
 TO3 = Any 
-function map_3(inList::IList, inFunc::MapFunc)::Tuple{IList, IList, IList}
-  local outList3::IList = list()
-  local outList2::IList = list()
-  local outList1::IList = list()
+function map_3(inList::List, inFunc::MapFunc)::Tuple{List, List, List}
+  local outList3::List = list()
+  local outList2::List = list()
+  local outList1::List = list()
 
   local e1::TO1
   local e2::TO2
@@ -1946,8 +1946,8 @@ end
 it strips out NONE() instead of failing on them. =#
 TI = Any 
 TO = Any 
-function mapOption(inList::IList, inFunc::MapFunc)::IList
-  local outList::IList = list()
+function mapOption(inList::List, inFunc::MapFunc)::List
+  local outList::List = list()
 
   local ei::TI
   local eo::TO
@@ -1968,8 +1968,8 @@ it strips out NONE() instead of failing on them. =#
 TI = Any 
 TO = Any 
 ArgT = Any 
-function map1Option(inList::IList, inFunc::MapFunc, inArg1::ArgT)::IList
-  local outList::IList = list()
+function map1Option(inList::List, inFunc::MapFunc, inArg1::ArgT)::List
+  local outList::List = list()
 
   local ei::TI
   local eo::TO
@@ -1991,8 +1991,8 @@ TI = Any
 TO = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function map2Option(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::IList
-  local outList::IList = list()
+function map2Option(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::List
+  local outList::List = list()
 
   local ei::TI
   local eo::TO
@@ -2011,7 +2011,7 @@ end
 #= Takes a list and a function which does not return a value. The function is
 probably a function with side effects, like print. =#
 T = Any 
-function map_0(inList::IList, inFunc::MapFunc)
+function map_0(inList::List, inFunc::MapFunc)
   for e in inList
     inFunc(e)
   end
@@ -2022,8 +2022,8 @@ by applying the function to each element of the list. =#
 TI = Any 
 TO = Any 
 ArgT1 = Any 
-function map1(inList::IList, inMapFunc::MapFunc, inArg1::ArgT1)::IList
-  local outList::IList
+function map1(inList::List, inMapFunc::MapFunc, inArg1::ArgT1)::List
+  local outList::List
 
   outList = list(inMapFunc(e, inArg1) for e in inList)
   outList
@@ -2035,8 +2035,8 @@ be reversed compared to the given list. =#
 TI = Any 
 TO = Any 
 ArgT1 = Any 
-function map1Reverse(inList::IList, inMapFunc::MapFunc, inArg1::ArgT1)::IList
-  local outList::IList
+function map1Reverse(inList::List, inMapFunc::MapFunc, inArg1::ArgT1)::List
+  local outList::List
 
   outList = listReverse(inMapFunc(e, inArg1) for e in inList)
   outList
@@ -2048,8 +2048,8 @@ function has it's arguments reversed compared to map1. =#
 TI = Any 
 TO = Any 
 ArgT1 = Any 
-function map1r(inList::IList, inFunc::MapFunc, inArg1::ArgT1)::IList
-  local outList::IList
+function map1r(inList::List, inFunc::MapFunc, inArg1::ArgT1)::List
+  local outList::List
 
   outList = list(inFunc(inArg1, e) for e in inList)
   outList
@@ -2059,7 +2059,7 @@ end
 each element of the list. =#
 TI = Any 
 ArgT1 = Any 
-function map1_0(inList::IList, inFunc::MapFunc, inArg1::ArgT1)
+function map1_0(inList::List, inFunc::MapFunc, inArg1::ArgT1)
   for e in inList
     inFunc(e, inArg1)
   end
@@ -2071,9 +2071,9 @@ TI = Any
 TO1 = Any 
 TO2 = Any 
 ArgT1 = Any 
-function map1_2(inList::IList, inFunc::MapFunc, inArg1::ArgT1)::Tuple{IList, IList}
-  local outList2::IList = list()
-  local outList1::IList = list()
+function map1_2(inList::List, inFunc::MapFunc, inArg1::ArgT1)::Tuple{List, List}
+  local outList2::List = list()
+  local outList1::List = list()
   local e1::TO1
   local e2::TO2  
   for e in inList
@@ -2093,10 +2093,10 @@ TO1 = Any
 TO2 = Any 
 TO3 = Any 
 ArgT1 = Any 
-function map1_3(inList::IList, inFunc::MapFunc, inArg1::ArgT1)::Tuple{IList, IList, IList}
-  local outList3::IList = list()
-  local outList2::IList = list()
-  local outList1::IList = list()
+function map1_3(inList::List, inFunc::MapFunc, inArg1::ArgT1)::Tuple{List, List, List}
+  local outList3::List = list()
+  local outList2::List = list()
+  local outList1::List = list()
 
   local e1::TO1
   local e2::TO2
@@ -2120,8 +2120,8 @@ TI = Any
 TO = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function map2(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::IList
-  local outList::IList
+function map2(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::List
+  local outList::List
 
   outList = list(inFunc(e, inArg1, inArg2) for e in inList)
   outList
@@ -2134,8 +2134,8 @@ TI = Any
 TO = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function map2Reverse(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::IList
-  local outList::IList
+function map2Reverse(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::List
+  local outList::List
 
   outList = listReverse(inFunc(e, inArg1, inArg2) for e in inList)
   outList
@@ -2148,8 +2148,8 @@ TI = Any
 TO = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function map2rm(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::IList
-  local outList::IList
+function map2rm(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::List
+  local outList::List
 
   outList = list(inFunc(inArg1, e, inArg2) for e in inList)
   outList
@@ -2162,8 +2162,8 @@ TI = Any
 TO = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function map2r(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::IList
-  local outList::IList
+function map2r(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::List
+  local outList::List
 
   outList = list(inFunc(inArg1, inArg2, e) for e in inList)
   outList
@@ -2174,7 +2174,7 @@ each element of the list. =#
 TI = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function map2_0(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)
+function map2_0(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)
   for e in inList
     inFunc(e, inArg1, inArg2)
   end
@@ -2187,9 +2187,9 @@ TO1 = Any
 TO2 = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function map2_2(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::Tuple{IList, IList}
-  local outList2::IList = list()
-  local outList1::IList = list()
+function map2_2(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::Tuple{List, List}
+  local outList2::List = list()
+  local outList1::List = list()
 
   local e1::TO1
   local e2::TO2
@@ -2212,10 +2212,10 @@ TO2 = Any
 TO3 = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function map2_3(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::Tuple{IList, IList, IList}
-  local outList3::IList = list()
-  local outList2::IList = list()
-  local outList1::IList = list()
+function map2_3(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::Tuple{List, List, List}
+  local outList3::List = list()
+  local outList2::List = list()
+  local outList1::List = list()
 
   local e1::TO1
   local e2::TO2
@@ -2240,8 +2240,8 @@ TO = Any
 ArgT1 = Any 
 ArgT2 = Any 
 ArgT3 = Any 
-function map3(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3)::IList
-  local outList::IList
+function map3(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3)::List
+  local outList::List
 
   outList = list(inFunc(e, inArg1, inArg2, inArg3) for e in inList)
   outList
@@ -2255,8 +2255,8 @@ TO = Any
 ArgT1 = Any 
 ArgT2 = Any 
 ArgT3 = Any 
-function map3r(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3)::IList
-  local outList::IList
+function map3r(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3)::List
+  local outList::List
 
   outList = list(inFunc(inArg1, inArg2, inArg3, e) for e in inList)
   outList
@@ -2268,7 +2268,7 @@ TI = Any
 ArgT1 = Any 
 ArgT2 = Any 
 ArgT3 = Any 
-function map3_0(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3)
+function map3_0(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3)
   for e in inList
     inFunc(e, inArg1, inArg2, inArg3)
   end
@@ -2282,9 +2282,9 @@ TO2 = Any
 ArgT1 = Any 
 ArgT2 = Any 
 ArgT3 = Any 
-function map3_2(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3)::Tuple{IList, IList}
-  local outList2::IList = list()
-  local outList1::IList = list()
+function map3_2(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3)::Tuple{List, List}
+  local outList2::List = list()
+  local outList1::List = list()
 
   local e1::TO1
   local e2::TO2
@@ -2307,8 +2307,8 @@ ArgT1 = Any
 ArgT2 = Any 
 ArgT3 = Any 
 ArgT4 = Any 
-function map4(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4)::IList
-  local outList::IList
+function map4(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4)::List
+  local outList::List
 
   outList = list(inFunc(e, inArg1, inArg2, inArg3, inArg4) for e in inList)
   outList
@@ -2321,7 +2321,7 @@ ArgT1 = Any
 ArgT2 = Any 
 ArgT3 = Any 
 ArgT4 = Any 
-function map4_0(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4)
+function map4_0(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4)
   for e in inList
     inFunc(e, inArg1, inArg2, inArg3, inArg4)
   end
@@ -2336,9 +2336,9 @@ ArgT1 = Any
 ArgT2 = Any 
 ArgT3 = Any 
 ArgT4 = Any 
-function map4_2(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4)::Tuple{IList, IList}
-  local outList2::IList = list()
-  local outList1::IList = list()
+function map4_2(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4)::Tuple{List, List}
+  local outList2::List = list()
+  local outList1::List = list()
 
   local e1::TO1
   local e2::TO2
@@ -2362,8 +2362,8 @@ ArgT2 = Any
 ArgT3 = Any 
 ArgT4 = Any 
 ArgT5 = Any 
-function map5(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4, inArg5::ArgT5)::IList
-  local outList::IList
+function map5(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4, inArg5::ArgT5)::List
+  local outList::List
 
   outList = list(inFunc(e, inArg1, inArg2, inArg3, inArg4, inArg5) for e in inList)
   outList
@@ -2379,8 +2379,8 @@ ArgT3 = Any
 ArgT4 = Any 
 ArgT5 = Any 
 ArgT6 = Any 
-function map6(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4, inArg5::ArgT5, inArg6::ArgT6)::IList
-  local outList::IList
+function map6(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4, inArg5::ArgT5, inArg6::ArgT6)::List
+  local outList::List
 
   outList = list(inFunc(e, inArg1, inArg2, inArg3, inArg4, inArg5, inArg6) for e in inList)
   outList
@@ -2397,8 +2397,8 @@ ArgT4 = Any
 ArgT5 = Any 
 ArgT6 = Any 
 ArgT7 = Any 
-function map7(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4, inArg5::ArgT5, inArg6::ArgT6, inArg7::ArgT7)::IList
-  local outList::IList
+function map7(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4, inArg5::ArgT5, inArg6::ArgT6, inArg7::ArgT7)::List
+  local outList::List
 
   outList = list(inFunc(e, inArg1, inArg2, inArg3, inArg4, inArg5, inArg6, inArg7) for e in inList)
   outList
@@ -2416,8 +2416,8 @@ ArgT5 = Any
 ArgT6 = Any 
 ArgT7 = Any 
 ArgT8 = Any 
-function map8(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4, inArg5::ArgT5, inArg6::ArgT6, inArg7::ArgT7, inArg8::ArgT8)::IList
-  local outList::IList
+function map8(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4, inArg5::ArgT5, inArg6::ArgT6, inArg7::ArgT7, inArg8::ArgT8)::List
+  local outList::List
 
   outList = list(inFunc(e, inArg1, inArg2, inArg3, inArg4, inArg5, inArg6, inArg7, inArg8) for e in inList)
   outList
@@ -2436,8 +2436,8 @@ ArgT6 = Any
 ArgT7 = Any 
 ArgT8 = Any 
 ArgT9 = Any 
-function map9(inList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4, inArg5::ArgT5, inArg6::ArgT6, inArg7::ArgT7, inArg8::ArgT8, inArg9::ArgT9)::IList
-  local outList::IList
+function map9(inList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4, inArg5::ArgT5, inArg6::ArgT6, inArg7::ArgT7, inArg8::ArgT8, inArg9::ArgT9)::List
+  local outList::List
 
   outList = list(inFunc(e, inArg1, inArg2, inArg3, inArg4, inArg5, inArg6, inArg7, inArg8, inArg9) for e in inList)
   outList
@@ -2448,8 +2448,8 @@ into one list. Example (fill2(n) = {n, n}):
 mapFlat({1, 2, 3}, fill2) => {1, 1, 2, 2, 3, 3} =#
 TI = Any 
 TO = Any 
-function mapFlat(inList::IList, inMapFunc::MapFunc)::IList
-  local outList::IList
+function mapFlat(inList::List, inMapFunc::MapFunc)::List
+  local outList::List
 
   outList = listReverse(mapFlatReverse(inList, inMapFunc))
   outList
@@ -2461,8 +2461,8 @@ Example (fill2(n) = {n, n}):
 mapFlat({1, 2, 3}, fill2) => {3, 3, 2, 2, 1, 1} =#
 TI = Any 
 TO = Any 
-function mapFlatReverse(inList::IList, inMapFunc::MapFunc)::IList
-  local outList::IList = list()
+function mapFlatReverse(inList::List, inMapFunc::MapFunc)::List
+  local outList::List = list()
 
   for e in inList
     outList = listAppend(inMapFunc(e), outList)
@@ -2476,8 +2476,8 @@ the mapping function. =#
 TI = Any 
 TO = Any 
 ArgT1 = Any 
-function map1Flat(inList::IList, inMapFunc::MapFunc, inArg1::ArgT1)::IList
-  local outList::IList = list()
+function map1Flat(inList::List, inMapFunc::MapFunc, inArg1::ArgT1)::List
+  local outList::List = list()
 
   for e in inList
     outList = listAppend(inMapFunc(e, inArg1), outList)
@@ -2493,8 +2493,8 @@ TI = Any
 TO = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function map2Flat(inList::IList, inMapFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::IList
-  local outList::IList = list()
+function map2Flat(inList::List, inMapFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::List
+  local outList::List = list()
 
   for e in inList
     outList = listAppend(inMapFunc(e, inArg1, inArg2), outList)
@@ -2507,8 +2507,8 @@ end
 TI = Any 
 TO1 = Any 
 TO2 = Any 
-function mapMap(inList::IList, inMapFunc1::MapFunc1, inMapFunc2::MapFunc2)::IList
-  local outList::IList
+function mapMap(inList::List, inMapFunc1::MapFunc1, inMapFunc2::MapFunc2)::List
+  local outList::List
 
   outList = list(inMapFunc2(inMapFunc1(e)) for e in inList)
   outList
@@ -2517,7 +2517,7 @@ end
 #= More efficient than map_0(map(inList, inMapFunc1), inMapFunc2), =#
 TI = Any 
 TO = Any 
-function mapMap_0(inList::IList, inMapFunc1::MapFunc1, inMapFunc2::MapFunc2)
+function mapMap_0(inList::List, inMapFunc1::MapFunc1, inMapFunc2::MapFunc2)
   for e in inList
     inMapFunc2(inMapFunc1(e))
   end
@@ -2528,7 +2528,7 @@ elements are equal to the given value. =#
 TI = Any 
 TO = Any 
 VT = Any 
-function mapAllValue(inList::IList, inMapFunc::MapFunc, inValue::VT)
+function mapAllValue(inList::List, inMapFunc::MapFunc, inValue::VT)
   local eo::TO
 
   for e in inList
@@ -2542,7 +2542,7 @@ failing. =#
 TI = Any 
 TO = Any 
 VT = Any 
-function mapAllValueBool(inList::IList, inMapFunc::MapFunc, inValue::VT)::Bool
+function mapAllValueBool(inList::List, inMapFunc::MapFunc, inValue::VT)::Bool
   local outAllValue::Bool
 
   try
@@ -2559,7 +2559,7 @@ TI = Any
 TO = Any 
 VT = Any 
 ArgT1 = Any 
-function map1AllValueBool(inList::IList, inMapFunc::MapFunc, inValue::VT, inArg1::ArgT1)::Bool
+function map1AllValueBool(inList::List, inMapFunc::MapFunc, inValue::VT, inArg1::ArgT1)::Bool
   local outAllValue::Bool
 
   try
@@ -2578,7 +2578,7 @@ TI = Any
 TO = Any 
 VT = Any 
 ArgT1 = Any 
-function map1AllValue(inList::IList, inMapFunc::MapFunc, inValue::VT, inArg1::ArgT1)
+function map1AllValue(inList::List, inMapFunc::MapFunc, inValue::VT, inArg1::ArgT1)
   local eo::TO
 
   for e in inList
@@ -2594,7 +2594,7 @@ TI = Any
 TO = Any 
 VT = Any 
 ArgT1 = Any 
-function map1rAllValue(inList::IList, inMapFunc::MapFunc, inValue::VT, inArg1::ArgT1)
+function map1rAllValue(inList::List, inMapFunc::MapFunc, inValue::VT, inArg1::ArgT1)
   local eo::TO
 
   for e in inList
@@ -2611,7 +2611,7 @@ TO = Any
 VT = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function map2AllValue(inList::IList, inMapFunc::MapFunc, inValue::VT, inArg1::ArgT1, inArg2::ArgT2)
+function map2AllValue(inList::List, inMapFunc::MapFunc, inValue::VT, inArg1::ArgT1, inArg2::ArgT2)
   local eo::TO
 
   for e in inList
@@ -2625,7 +2625,7 @@ failing. =#
 TI = Any 
 TO = Any 
 VT = Any 
-function mapListAllValueBool(inList::IList, inMapFunc::MapFunc, inValue::VT)::Bool
+function mapListAllValueBool(inList::List, inMapFunc::MapFunc, inValue::VT)::Bool
   local outAllValue::Bool = true
 
   for lst in inList
@@ -2642,7 +2642,7 @@ TI = Any
 TO = Any 
 VT = Any 
 ArgT1 = Any 
-function map1ListAllValueBool(inList::IList, inMapFunc::MapFunc, inValue::VT, inArg1::ArgT1)::Bool
+function map1ListAllValueBool(inList::List, inMapFunc::MapFunc, inValue::VT, inArg1::ArgT1)::Bool
   local outAllValue::Bool = true
 
   for lst in inList
@@ -2660,7 +2660,7 @@ argument that are passed to the mapping function and updated =#
 TI = Any 
 TO = Any 
 ArgT1 = Any 
-function foldAllValue(inList::IList, inMapFunc::MapFunc, inValue::TO, inArg1::ArgT1)
+function foldAllValue(inList::List, inMapFunc::MapFunc, inValue::TO, inArg1::ArgT1)
   local arg::ArgT1 = inArg1
   local eo::TO
 
@@ -2675,7 +2675,7 @@ memory-efficient. =#
 TI = Any 
 TO = Any 
 FT = Any 
-function applyAndFold(inList::IList, inFoldFunc::FoldFunc, inApplyFunc::ApplyFunc, inFoldArg::FT)::FT
+function applyAndFold(inList::List, inFoldFunc::FoldFunc, inApplyFunc::ApplyFunc, inFoldArg::FT)::FT
   local outResult::FT = inFoldArg
 
   for e in inList
@@ -2690,7 +2690,7 @@ TI = Any
 TO = Any 
 FT = Any 
 ArgT1 = Any 
-function applyAndFold1(inList::IList, inFoldFunc::FoldFunc, inApplyFunc::ApplyFunc, inExtraArg::ArgT1, inFoldArg::FT)::FT
+function applyAndFold1(inList::List, inFoldFunc::FoldFunc, inApplyFunc::ApplyFunc, inExtraArg::ArgT1, inFoldArg::FT)::FT
   local outResult::FT = inFoldArg
 
   for e in inList
@@ -2702,7 +2702,7 @@ end
 #= Maps each element of a inList to Boolean type with inFunc. Stops mapping at first occurrence of true return value. =#
 TI = Any 
 ArgT1 = Any 
-function mapBoolOr(inList::IList, inFunc::MapFunc)::Bool
+function mapBoolOr(inList::List, inFunc::MapFunc)::Bool
   local res::Bool = false
 
   for e in inList
@@ -2716,7 +2716,7 @@ end
 
 #= Maps each element of a inList to Boolean type with inFunc. Stops mapping at first occurrence of true return value. =#
 TI = Any 
-function mapBoolAnd(inList::IList, inFunc::MapFunc)::Bool
+function mapBoolAnd(inList::List, inFunc::MapFunc)::Bool
   local res::Bool = false
 
   for e in inList
@@ -2731,7 +2731,7 @@ end
 #= Maps each element of a inList to Boolean type with inFunc. Stops mapping at first occurrence of true return value. =#
 TI = Any 
 TI2 = Any 
-function mapMapBoolAnd(inList::IList, inFunc::MapFunc, inBFunc::MapBFunc)::Bool
+function mapMapBoolAnd(inList::List, inFunc::MapFunc, inBFunc::MapBFunc)::Bool
   local res::Bool = false
 
   for e in inList
@@ -2747,7 +2747,7 @@ end
 inFunc takes one additional argument. =#
 TI = Any 
 ArgT1 = Any 
-function map1BoolOr(inList::IList, inFunc::MapFunc, inArg1::ArgT1)::Bool
+function map1BoolOr(inList::List, inFunc::MapFunc, inArg1::ArgT1)::Bool
   local res::Bool = false
 
   for e in inList
@@ -2763,7 +2763,7 @@ end
 inFunc takes one additional argument. =#
 TI = Any 
 ArgT1 = Any 
-function map1BoolAnd(inList::IList, inFunc::MapFunc, inArg1::ArgT1)::Bool
+function map1BoolAnd(inList::List, inFunc::MapFunc, inArg1::ArgT1)::Bool
   local res::Bool = false
 
   for e in inList
@@ -2779,7 +2779,7 @@ end
 inFunc takes one additional argument. =#
 TI = Any 
 ArgT1 = Any 
-function map1ListBoolOr(inListList::IList, inFunc::MapFunc, inArg1::ArgT1)::Bool
+function map1ListBoolOr(inListList::List, inFunc::MapFunc, inArg1::ArgT1)::Bool
   local res::Bool = false
 
   for el in inListList
@@ -2799,8 +2799,8 @@ Example: mapList({{1, 2},{3},{4}}, intString) =>
 {{\\\"1\\\", \\\"2\\\"}, {\\\"3\\\"}, {\\\"4\\\"}} =#
 TI = Any 
 TO = Any 
-function mapList(inListList::IList, inFunc::MapFunc)::IList
-  local outListList::IList
+function mapList(inListList::List, inFunc::MapFunc)::List
+  local outListList::List
 
   outListList = list(list(inFunc(e) for e in lst) for lst in inListList)
   outListList
@@ -2810,7 +2810,7 @@ end
 the function to all elements in  the list of lists.
 Example: mapList0({{1, 2},{3},{4}}, print) =#
 TI = Any 
-function mapList0(inListList::IList, inFunc::MapFunc)
+function mapList0(inListList::List, inFunc::MapFunc)
   map1_0(inListList, map_0, inFunc)
 end
 
@@ -2819,7 +2819,7 @@ the function to all elements in  the list of lists.
 Example: mapList1_0({{1, 2},{3},{4}}, costomPrint, inArg1) =#
 TI = Any 
 ArgT1 = Any 
-function mapList1_0(inListList::IList, inFunc::MapFunc, inArg1::ArgT1)
+function mapList1_0(inListList::List, inFunc::MapFunc, inArg1::ArgT1)
   map2_0(inListList, map1_0, inFunc, inArg1)
 end
 
@@ -2829,7 +2829,7 @@ Example: mapList1_0({{1, 2},{3},{4}}, costomPrint, inArg1, inArg2) =#
 TI = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function mapList2_0(inListList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)
+function mapList2_0(inListList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)
   map3_0(inListList, map2_0, inFunc, inArg1, inArg2)
 end
 
@@ -2839,8 +2839,8 @@ Example: mapList1_0({{1, 2},{3},{4}}, customPrint, inArg1) =#
 TI = Any 
 TO = Any 
 ArgT1 = Any 
-function mapList1_1(inListList::IList, inFunc::MapFunc, inArg1::ArgT1)::IList
-  local outListList::IList
+function mapList1_1(inListList::List, inFunc::MapFunc, inArg1::ArgT1)::List
+  local outListList::List
 
   outListList = list(list(inFunc(e, inArg1) for e in lst) for lst in inListList)
   outListList
@@ -2853,8 +2853,8 @@ Example: mapListReverse({{1, 2}, {3}, {4}}, intString) =>
 {{\\\"4\\\"}, {\\\"3\\\"}, {\\\"2\\\", \\\"1\\\"}} =#
 TI = Any 
 TO = Any 
-function mapListReverse(inListList::IList, inFunc::MapFunc)::IList
-  local outListList::IList
+function mapListReverse(inListList::List, inFunc::MapFunc)::List
+  local outListList::List
 
   outListList = list(listReverse(inFunc(e) for e in lst) for lst in inListList)
   outListList
@@ -2864,8 +2864,8 @@ end
 TI = Any 
 TO = Any 
 ArgT1 = Any 
-function map1List(inListList::IList, inFunc::MapFunc, inArg1::ArgT1)::IList
-  local outListList::IList
+function map1List(inListList::List, inFunc::MapFunc, inArg1::ArgT1)::List
+  local outListList::List
 
   outListList = list(list(inFunc(e, inArg1) for e in lst) for lst in inListList)
   outListList
@@ -2876,8 +2876,8 @@ TI = Any
 TO = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function map2List(inListList::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::IList
-  local outListList::IList
+function map2List(inListList::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::List
+  local outListList::List
 
   outListList = list(list(inFunc(e, inArg1, inArg2) for e in lst) for lst in inListList)
   outListList
@@ -2890,7 +2890,7 @@ Example: fold({1, 2, 3}, intAdd, 2) => 8
 intAdd(1, 2) => 3, intAdd(2, 3) => 5, intAdd(3, 5) => 8 =#
 T = Any 
 FT = Any 
-function fold(inList::IList, inFoldFunc::FoldFunc, inStartValue::FT)::FT
+function fold(inList::List, inFoldFunc::FoldFunc, inStartValue::FT)::FT
   local outResult::FT = inStartValue
 
   for e in inList
@@ -2902,7 +2902,7 @@ end
 #= Same as fold, but with reversed order on the fold function arguments. =#
 T = Any 
 FT = Any 
-function foldr(inList::IList, inFoldFunc::FoldFunc, inStartValue::FT)::FT
+function foldr(inList::List, inFoldFunc::FoldFunc, inStartValue::FT)::FT
   local outResult::FT = inStartValue
 
   for e in inList
@@ -2918,7 +2918,7 @@ a sequence, updating the start value. =#
 T = Any 
 FT = Any 
 ArgT1 = Any 
-function fold1(inList::IList, inFoldFunc::FoldFunc, inExtraArg::ArgT1, inStartValue::FT)::FT
+function fold1(inList::List, inFoldFunc::FoldFunc, inExtraArg::ArgT1, inStartValue::FT)::FT
   local outResult::FT = inStartValue
 
   for e in inList
@@ -2931,7 +2931,7 @@ end
 T = Any 
 FT = Any 
 ArgT1 = Any 
-function fold1r(inList::IList, inFoldFunc::FoldFunc, inExtraArg::ArgT1, inStartValue::FT)::FT
+function fold1r(inList::List, inFoldFunc::FoldFunc, inExtraArg::ArgT1, inStartValue::FT)::FT
   local outResult::FT = inStartValue
 
   for e in inList
@@ -2948,7 +2948,7 @@ T = Any
 FT = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function fold2(inList::IList, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inStartValue::FT)::FT
+function fold2(inList::List, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inStartValue::FT)::FT
   local outResult::FT = inStartValue
 
   for e in inList
@@ -2966,7 +2966,7 @@ FT1 = Any
 FT2 = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function fold22(inList::IList, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inStartValue1::FT1, inStartValue2::FT2)::Tuple{FT2, FT1}
+function fold22(inList::List, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inStartValue1::FT1, inStartValue2::FT2)::Tuple{FT2, FT1}
   local outResult2::FT2 = inStartValue2
   local outResult1::FT1 = inStartValue1
 
@@ -2978,7 +2978,7 @@ end
 
 T = Any 
 FT = Any 
-function foldList(inList::IList, inFoldFunc::FoldFunc, inStartValue::FT)::FT
+function foldList(inList::List, inFoldFunc::FoldFunc, inStartValue::FT)::FT
   local outResult::FT = inStartValue
 
   for lst in inList
@@ -2992,7 +2992,7 @@ end
 T = Any 
 FT = Any 
 ArgT1 = Any 
-function foldList1(inList::IList, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inStartValue::FT)::FT
+function foldList1(inList::List, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inStartValue::FT)::FT
   local outResult::FT = inStartValue
 
   for lst in inList
@@ -3011,7 +3011,7 @@ T = Any
 FT = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function foldList2(inList::IList, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inStartValue::FT)::FT
+function foldList2(inList::List, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inStartValue::FT)::FT
   local outResult::FT = inStartValue
 
   for lst in inList
@@ -3027,7 +3027,7 @@ T = Any
 FT = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function fold2r(inList::IList, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inStartValue::FT)::FT
+function fold2r(inList::List, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inStartValue::FT)::FT
   local outResult::FT = inStartValue
 
   for e in inList
@@ -3045,7 +3045,7 @@ FT = Any
 ArgT1 = Any 
 ArgT2 = Any 
 ArgT3 = Any 
-function fold3(inList::IList, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inExtraArg3::ArgT3, inStartValue::FT)::FT
+function fold3(inList::List, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inExtraArg3::ArgT3, inStartValue::FT)::FT
   local outResult::FT = inStartValue
 
   for e in inList
@@ -3060,7 +3060,7 @@ FT = Any
 ArgT1 = Any 
 ArgT2 = Any 
 ArgT3 = Any 
-function fold3r(inList::IList, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inExtraArg3::ArgT3, inStartValue::FT)::FT
+function fold3r(inList::List, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inExtraArg3::ArgT3, inStartValue::FT)::FT
   local outResult::FT = inStartValue
 
   for e in inList
@@ -3079,7 +3079,7 @@ ArgT1 = Any
 ArgT2 = Any 
 ArgT3 = Any 
 ArgT4 = Any 
-function fold4(inList::IList, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inExtraArg3::ArgT3, inExtraArg4::ArgT4, inStartValue::FT)::FT
+function fold4(inList::List, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inExtraArg3::ArgT3, inExtraArg4::ArgT4, inStartValue::FT)::FT
   local outResult::FT = inStartValue
 
   for e in inList
@@ -3100,7 +3100,7 @@ ArgT1 = Any
 ArgT2 = Any 
 ArgT3 = Any 
 ArgT4 = Any 
-function fold43(inList::IList, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inExtraArg3::ArgT3, inExtraArg4::ArgT4, inStartValue1::FT1, inStartValue2::FT2, inStartValue3::FT3)::Tuple{FT3, FT2, FT1}
+function fold43(inList::List, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inExtraArg3::ArgT3, inExtraArg4::ArgT4, inStartValue1::FT1, inStartValue2::FT2, inStartValue3::FT3)::Tuple{FT3, FT2, FT1}
   local outResult3::FT3 = inStartValue3
   local outResult2::FT2 = inStartValue2
   local outResult1::FT1 = inStartValue1
@@ -3117,7 +3117,7 @@ the function for each element in a sequence, updating the start value. =#
 T = Any 
 FT1 = Any 
 FT2 = Any 
-function fold20(inList::IList, inFoldFunc::FoldFunc, inStartValue1::FT1, inStartValue2::FT2)::Tuple{FT2, FT1}
+function fold20(inList::List, inFoldFunc::FoldFunc, inStartValue1::FT1, inStartValue2::FT2)::Tuple{FT2, FT1}
   local outResult2::FT2 = inStartValue2
   local outResult1::FT1 = inStartValue1
 
@@ -3134,7 +3134,7 @@ T = Any
 FT1 = Any 
 FT2 = Any 
 FT3 = Any 
-function fold30(inList::IList, inFoldFunc::FoldFunc, inStartValue1::FT1, inStartValue2::FT2, inStartValue3::FT3)::Tuple{FT3, FT2, FT1}
+function fold30(inList::List, inFoldFunc::FoldFunc, inStartValue1::FT1, inStartValue2::FT2, inStartValue3::FT3)::Tuple{FT3, FT2, FT1}
   local outResult3::FT3 = inStartValue3
   local outResult2::FT2 = inStartValue2
   local outResult1::FT1 = inStartValue1
@@ -3153,7 +3153,7 @@ T = Any
 FT1 = Any 
 FT2 = Any 
 ArgT1 = Any 
-function fold21(inList::IList, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inStartValue1::FT1, inStartValue2::FT2)::Tuple{FT2, FT1}
+function fold21(inList::List, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inStartValue1::FT1, inStartValue2::FT2)::Tuple{FT2, FT1}
   local outResult2::FT2 = inStartValue2
   local outResult1::FT1 = inStartValue1
 
@@ -3172,7 +3172,7 @@ FT1 = Any
 FT2 = Any 
 FT3 = Any 
 ArgT1 = Any 
-function fold31(inList::IList, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inStartValue1::FT1, inStartValue2::FT2, inStartValue3::FT3)::Tuple{FT3, FT2, FT1}
+function fold31(inList::List, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inStartValue1::FT1, inStartValue2::FT2, inStartValue3::FT3)::Tuple{FT3, FT2, FT1}
   local outResult3::FT3 = inStartValue3
   local outResult2::FT2 = inStartValue2
   local outResult1::FT1 = inStartValue1
@@ -3194,7 +3194,7 @@ ArgT2 = Any
 ArgT3 = Any 
 ArgT4 = Any 
 ArgT5 = Any 
-function fold5(inList::IList, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inExtraArg3::ArgT3, inExtraArg4::ArgT4, inExtraArg5::ArgT5, inStartValue::FT)::FT
+function fold5(inList::List, inFoldFunc::FoldFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2, inExtraArg3::ArgT3, inExtraArg4::ArgT4, inExtraArg5::ArgT5, inStartValue::FT)::FT
   local outResult::FT = inStartValue
 
   for e in inList
@@ -3209,9 +3209,9 @@ function and updated. =#
 TI = Any 
 TO = Any 
 FT = Any 
-function mapFold(inList::IList, inFunc::FuncType, inArg::FT)::Tuple{FT, IList}
+function mapFold(inList::List, inFunc::FuncType, inArg::FT)::Tuple{FT, List}
   local outArg::FT = inArg
-  local outList::IList = list()
+  local outList::List = list()
 
   local res::TO
 
@@ -3230,10 +3230,10 @@ TI = Any
 TO = Any 
 FT1 = Any 
 FT2 = Any 
-function mapFold2(inList::IList, inFunc::FuncType, inArg1::FT1, inArg2::FT2)::Tuple{FT2, FT1, IList}
+function mapFold2(inList::List, inFunc::FuncType, inArg1::FT1, inArg2::FT2)::Tuple{FT2, FT1, List}
   local outArg2::FT2 = inArg2
   local outArg1::FT1 = inArg1
-  local outList::IList = list()
+  local outList::List = list()
 
   local res::TO
 
@@ -3253,11 +3253,11 @@ TO = Any
 FT1 = Any 
 FT2 = Any 
 FT3 = Any 
-function mapFold3(inList::IList, inFunc::FuncType, inArg1::FT1, inArg2::FT2, inArg3::FT3)::Tuple{FT3, FT2, FT1, IList}
+function mapFold3(inList::List, inFunc::FuncType, inArg1::FT1, inArg2::FT2, inArg3::FT3)::Tuple{FT3, FT2, FT1, List}
 
 
 
-  local outList::IList = list()
+  local outList::List = list()
 
   local res::TO
 
@@ -3278,12 +3278,12 @@ FT1 = Any
 FT2 = Any 
 FT3 = Any 
 FT4 = Any 
-function mapFold4(inList::IList, inFunc::FuncType, inArg1::FT1, inArg2::FT2, inArg3::FT3, inArg4::FT4)::Tuple{FT4, FT3, FT2, FT1, IList}
+function mapFold4(inList::List, inFunc::FuncType, inArg1::FT1, inArg2::FT2, inArg3::FT3, inArg4::FT4)::Tuple{FT4, FT3, FT2, FT1, List}
 
 
 
 
-  local outList::IList = list()
+  local outList::List = list()
 
   local res::TO
 
@@ -3305,13 +3305,13 @@ FT2 = Any
 FT3 = Any 
 FT4 = Any 
 FT5 = Any 
-function mapFold5(inList::IList, inFunc::FuncType, inArg1::FT1, inArg2::FT2, inArg3::FT3, inArg4::FT4, inArg5::FT5)::Tuple{FT5, FT4, FT3, FT2, FT1, IList}
+function mapFold5(inList::List, inFunc::FuncType, inArg1::FT1, inArg2::FT2, inArg3::FT3, inArg4::FT4, inArg5::FT5)::Tuple{FT5, FT4, FT3, FT2, FT1, List}
 
 
 
 
 
-  local outList::IList = list()
+  local outList::List = list()
 
   local res::TO
 
@@ -3330,9 +3330,9 @@ TI = Any
 TO = Any 
 FT = Any 
 ArgT1 = Any 
-function map1Fold(inList::IList, inFunc::FuncType, inConstArg::ArgT1, inArg::FT)::Tuple{FT, IList}
+function map1Fold(inList::List, inFunc::FuncType, inConstArg::ArgT1, inArg::FT)::Tuple{FT, List}
   local outArg::FT = inArg
-  local outList::IList = list()
+  local outList::List = list()
 
   local res::TO
 
@@ -3352,9 +3352,9 @@ TO = Any
 FT = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function map2Fold(inList::IList, inFunc::FuncType, inConstArg::ArgT1, inConstArg2::ArgT2, inArg::FT, inAccum::IList = list())::Tuple{FT, IList}
+function map2Fold(inList::List, inFunc::FuncType, inConstArg::ArgT1, inConstArg2::ArgT2, inArg::FT, inAccum::List = list())::Tuple{FT, List}
   local outArg::FT = inArg
-  local outList::IList = inAccum
+  local outList::List = inAccum
 
   local res::TO
 
@@ -3373,7 +3373,7 @@ TIO = Any
 FT = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function map2FoldCheckReferenceEq(inList::IList, inFunc::FuncType, inConstArg::ArgT1, inConstArg2::ArgT2, inArg::FT)::Tuple{FT, IList}
+function map2FoldCheckReferenceEq(inList::List, inFunc::FuncType, inConstArg::ArgT1, inConstArg2::ArgT2, inArg::FT)::Tuple{FT, List}
 
 end
 
@@ -3386,9 +3386,9 @@ FT = Any
 ArgT1 = Any 
 ArgT2 = Any 
 ArgT3 = Any 
-function map3Fold(inList::IList, inFunc::FuncType, inConstArg::ArgT1, inConstArg2::ArgT2, inConstArg3::ArgT3, inArg::FT)::Tuple{FT, IList}
+function map3Fold(inList::List, inFunc::FuncType, inConstArg::ArgT1, inConstArg2::ArgT2, inConstArg3::ArgT3, inArg::FT)::Tuple{FT, List}
   local outArg::FT = inArg
-  local outList::IList = list()
+  local outList::List = list()
 
   local res::TO
 
@@ -3410,9 +3410,9 @@ ArgT1 = Any
 ArgT2 = Any 
 ArgT3 = Any 
 ArgT4 = Any 
-function map4Fold(inList::IList, inFunc::FuncType, inConstArg::ArgT1, inConstArg2::ArgT2, inConstArg3::ArgT3, inConstArg4::ArgT4, inArg::FT)::Tuple{FT, IList}
+function map4Fold(inList::List, inFunc::FuncType, inConstArg::ArgT1, inConstArg2::ArgT2, inConstArg3::ArgT3, inConstArg4::ArgT4, inArg::FT)::Tuple{FT, List}
   local outArg::FT = inArg
-  local outList::IList = list()
+  local outList::List = list()
 
   local res::TO
 
@@ -3431,9 +3431,9 @@ tuples. =#
 TI = Any 
 TO = Any 
 FT = Any 
-function mapFoldTuple(inList::IList, inFunc::FuncType, inArg::FT)::Tuple{FT, IList}
+function mapFoldTuple(inList::List, inFunc::FuncType, inArg::FT)::Tuple{FT, List}
   local outArg::FT = inArg
-  local outList::IList = list()
+  local outList::List = list()
 
   local res::TO
 
@@ -3451,11 +3451,11 @@ to the function and updated for each element. =#
 TI = Any 
 TO = Any 
 FT = Any 
-function mapFoldList(inListList::IList, inFunc::FuncType, inArg::FT)::Tuple{FT, IList}
+function mapFoldList(inListList::List, inFunc::FuncType, inArg::FT)::Tuple{FT, List}
   local outArg::FT = inArg
-  local outListList::IList = list()
+  local outListList::List = list()
 
-  local res::IList
+  local res::List
 
   for lst in inListList
     (res, outArg) = mapFold(lst, inFunc, outArg)
@@ -3474,11 +3474,11 @@ FT = Any
 ArgT1 = Any 
 ArgT2 = Any 
 ArgT3 = Any 
-function map3FoldList(inListList::IList, inFunc::FuncType, inConstArg1::ArgT1, inConstArg2::ArgT2, inConstArg3::ArgT3, inArg::FT)::Tuple{FT, IList}
+function map3FoldList(inListList::List, inFunc::FuncType, inConstArg1::ArgT1, inConstArg2::ArgT2, inConstArg3::ArgT3, inArg::FT)::Tuple{FT, List}
   local outArg::FT = inArg
-  local outListList::IList = list()
+  local outListList::List = list()
 
-  local res::IList
+  local res::List
 
   for lst in inListList
     (res, outArg) = map3Fold(lst, inFunc, inConstArg1, inConstArg2, inConstArg3, inArg)
@@ -3495,11 +3495,11 @@ tuples. =#
 TI = Any 
 TO = Any 
 FT = Any 
-function mapFoldListTuple(inListList::IList, inFunc::FuncType, inFoldArg::TO)::Tuple{TO, IList}
+function mapFoldListTuple(inListList::List, inFunc::FuncType, inFoldArg::TO)::Tuple{TO, List}
   local outFoldArg::TO = inFoldArg
-  local outListList::IList = list()
+  local outListList::List = list()
 
-  local res::IList
+  local res::List
 
   for lst in inListList
     (res, outFoldArg) = mapFoldTuple(lst, inFunc, outFoldArg)
@@ -3526,10 +3526,10 @@ The function performs a reduction of the list to a single value using the
 function. Example:
 reduce({1, 2, 3}, intAdd) => 6 =#
 T = Any 
-function reduce(inList::IList, inReduceFunc::ReduceFunc)::T
+function reduce(inList::List, inReduceFunc::ReduceFunc)::T
   local outResult::T
 
-  local rest::IList
+  local rest::List
 
   outResult, rest = listHead(inList), listRest(inList)
   for e in rest
@@ -3544,10 +3544,10 @@ function. This function also takes an extra argument that is sent to the
 reduction function. =#
 T = Any 
 ArgT1 = Any 
-function reduce1(inList::IList, inReduceFunc::ReduceFunc, inExtraArg1::ArgT1)::T
+function reduce1(inList::List, inReduceFunc::ReduceFunc, inExtraArg1::ArgT1)::T
   local outResult::T
 
-  local rest::IList
+  local rest::List
 
   outResult, rest = listHead(inList), listRest(inList)
   for e in rest
@@ -3560,25 +3560,25 @@ end
 of the sublists. O(len(outList))
 Example: flatten({{1, 2}, {3, 4, 5}, {6}, {}}) => {1, 2, 3, 4, 5, 6} =#
 T = Any 
-function flatten(inList::IList)::IList
-  local outList::IList = listAppend(lst for lst in listReverse(inList))
+function flatten(inList::List)::List
+  local outList::List = listAppend(lst for lst in listReverse(inList))
   outList
 end
 
 T = Any 
-function flattenReverse(inList::IList)::IList
-  local outList::IList = listAppend(lst for lst in inList)
+function flattenReverse(inList::List)::List
+  local outList::List = listAppend(lst for lst in inList)
   outList
 end
 
 #= Takes two lists of the same type and threads (interleaves) them together.
 Example: thread({1, 2, 3}, {4, 5, 6}) => {4, 1, 5, 2, 6, 3} =#
 T = Any 
-function thread(inList1::IList, inList2::IList, inAccum::IList = list())::IList
-  local outList::IList = list()
+function thread(inList1::List, inList2::List, inAccum::List = list())::List
+  local outList::List = list()
 
   local e2::T
-  local rest_e2::IList = inList2
+  local rest_e2::List = inList2
 
   for e1 in inList1
     e2, rest_e2 = listHead(rest_e2), listRest(rest_e2)
@@ -3593,13 +3593,13 @@ end
 Example: thread({1, 2, 3}, {4, 5, 6}, {7, 8, 9}) =>
 {7, 4, 1, 8, 5, 2, 9, 6, 3} =#
 T = Any 
-function thread3(inList1::IList, inList2::IList, inList3::IList)::IList
-  local outList::IList = list()
+function thread3(inList1::List, inList2::List, inList3::List)::List
+  local outList::List = list()
 
   local e2::T
   local e3::T
-  local rest_e2::IList = inList2
-  local rest_e3::IList = inList3
+  local rest_e2::List = inList2
+  local rest_e3::List = inList3
 
   for e1 in inList1
     e2, rest_e2 = listHead(rest_e2), listRest(rest_e2)
@@ -3618,8 +3618,8 @@ Example: threadTuple({1, 2, 3}, {true, false, true}) =>
 {(1, true), (2, false), (3, true)} =#
 T1 = Any 
 T2 = Any 
-function threadTuple(inList1::IList, inList2::IList)::IList
-  local outTuples::IList
+function threadTuple(inList1::List, inList2::List)::List
+  local outTuples::List
 
   outTuples = list(@do_threaded_for (e1, e2) (e1, e2) (inList1, inList2))
   outTuples
@@ -3629,9 +3629,9 @@ end
 lists. Example: unzip({(1, 2), (3, 4)}) => ({1, 3}, {2, 4}) =#
 T1 = Any 
 T2 = Any 
-function unzip(inTuples::IList)::Tuple{IList, IList}
-  local outList2::IList = list()
-  local outList1::IList = list()
+function unzip(inTuples::List)::Tuple{List, List}
+  local outList2::List = list()
+  local outList1::List = list()
 
   local e1::T1
   local e2::T2
@@ -3649,9 +3649,9 @@ end
 #= Like unzip, but returns the lists in reverse order. =#
 T1 = Any 
 T2 = Any 
-function unzipReverse(inTuples::IList)::Tuple{IList, IList}
-  local outList2::IList = list()
-  local outList1::IList = list()
+function unzipReverse(inTuples::List)::Tuple{List, List}
+  local outList2::List = list()
+  local outList1::List = list()
 
   local e1::T1
   local e2::T2
@@ -3668,8 +3668,8 @@ end
 of each tuple. Example: unzipFirst({(1, 2), (3, 4)}) => {1, 3} =#
 T1 = Any 
 T2 = Any 
-function unzipFirst(inTuples::IList)::IList
-  local outList::IList = list()
+function unzipFirst(inTuples::List)::List
+  local outList::List = list()
 
   local e::T1
 
@@ -3685,8 +3685,8 @@ end
 of each tuple. Example: unzipFirst({(1, 2), (3, 4)}) => {2, 4} =#
 T1 = Any 
 T2 = Any 
-function unzipSecond(inTuples::IList)::IList
-  local outList::IList = list()
+function unzipSecond(inTuples::List)::List
+  local outList::List = list()
 
   local e::T2
 
@@ -3703,8 +3703,8 @@ consisting of the three element types. =#
 T1 = Any 
 T2 = Any 
 T3 = Any 
-function thread3Tuple(inList1::IList, inList2::IList, inList3::IList)::IList
-  local outTuples::IList
+function thread3Tuple(inList1::List, inList2::List, inList3::List)::List
+  local outTuples::List
 
   outTuples = list(@do_threaded_for (e1, e2, e3) (e1, e2, e3) (inList1, inList2, inList3))
   outTuples
@@ -3716,8 +3716,8 @@ T1 = Any
 T2 = Any 
 T3 = Any 
 T4 = Any 
-function thread4Tuple(inList1::IList, inList2::IList, inList3::IList, inList4::IList)::IList
-  local outTuples::IList
+function thread4Tuple(inList1::List, inList2::List, inList3::List, inList4::List)::List
+  local outTuples::List
 
   outTuples = list(@do_threaded_for (e1, e2, e3, e4) (e1, e2, e3, e4) (inList1, inList2, inList3, inList4))
   outTuples
@@ -3730,8 +3730,8 @@ T2 = Any
 T3 = Any 
 T4 = Any 
 T5 = Any 
-function thread5Tuple(inList1::IList, inList2::IList, inList3::IList, inList4::IList, inList5::IList)::IList
-  local outTuples::IList
+function thread5Tuple(inList1::List, inList2::List, inList3::List, inList4::List, inList5::List)::List
+  local outTuples::List
 
   outTuples = list(@do_threaded_for (e1, e2, e3, e4, e5) (e1, e2, e3, e4, e5) (inList1, inList2, inList3, inList4, inList5))
   outTuples
@@ -3743,8 +3743,8 @@ Example: threadMap({1, 2}, {3, 4}, intAdd) => {1+3, 2+4} =#
 T1 = Any 
 T2 = Any 
 TO = Any 
-function threadMap(inList1::IList, inList2::IList, inMapFunc::MapFunc)::IList
-  local outList::IList
+function threadMap(inList1::List, inList2::List, inMapFunc::MapFunc)::List
+  local outList::List
 
   outList = list(@do_threaded_for inMapFunc(e1, e2) (e1, e2) (inList1, inList2))
   outList
@@ -3757,8 +3757,8 @@ Example: threadMap({1, 2}, {3, 4}, intAdd) => {2+4, 1+3} =#
 T1 = Any 
 T2 = Any 
 TO = Any 
-function threadMapReverse(inList1::IList, inList2::IList, inMapFunc::MapFunc)::IList
-  local outList::IList
+function threadMapReverse(inList1::List, inList2::List, inMapFunc::MapFunc)::List
+  local outList::List
 
   outList = listReverse(@do_threaded_for inMapFunc(e1, e2) (e1, e2) (inList1, inList2))
   outList
@@ -3769,12 +3769,12 @@ T1 = Any
 T2 = Any 
 TO1 = Any 
 TO2 = Any 
-function threadMap_2(inList1::IList, inList2::IList, inMapFunc::MapFunc)::Tuple{IList, IList}
-  local outList2::IList = list()
-  local outList1::IList = list()
+function threadMap_2(inList1::List, inList2::List, inMapFunc::MapFunc)::Tuple{List, List}
+  local outList2::List = list()
+  local outList1::List = list()
 
   local e2::T2
-  local rest_e2::IList = inList2
+  local rest_e2::List = inList2
   local ret1::TO1
   local ret2::TO2
 
@@ -3795,8 +3795,8 @@ Example: threadMapList({{1, 2}}, {{3, 4}}, intAdd) => {{1 + 3, 2 + 4}} =#
 T1 = Any 
 T2 = Any 
 TO = Any 
-function threadMapList(inList1::IList, inList2::IList, inMapFunc::MapFunc)::IList
-  local outList::IList
+function threadMapList(inList1::List, inList2::List, inMapFunc::MapFunc)::List
+  local outList::List
 
   outList = list(@do_threaded_for threadMap(lst1, lst2, inMapFunc) (lst1, lst2) (inList1, inList2))
   outList
@@ -3807,14 +3807,14 @@ T1 = Any
 T2 = Any 
 TO1 = Any 
 TO2 = Any 
-function threadMapList_2(inList1::IList, inList2::IList, inMapFunc::MapFunc)::Tuple{IList, IList}
-  local outList2::IList = list()
-  local outList1::IList = list()
+function threadMapList_2(inList1::List, inList2::List, inMapFunc::MapFunc)::Tuple{List, List}
+  local outList2::List = list()
+  local outList1::List = list()
 
-  local l2::IList
-  local rest_l2::IList = inList2
-  local ret1::IList
-  local ret2::IList
+  local l2::List
+  local rest_l2::List = inList2
+  local ret1::List
+  local ret2::List
 
   for l1 in inList1
     l2, rest_l2 = listHead(rest_l2), listRest(rest_l2)
@@ -3833,8 +3833,8 @@ Example: threadTupleList({{1}, {2, 3}}, {{'a'}, {'b', 'c'}}) =>
 {{(1, 'a')}, {(2, 'b'), (3, 'c')}} =#
 T1 = Any 
 T2 = Any 
-function threadTupleList(inList1::IList, inList2::IList)::IList
-  local outList::IList
+function threadTupleList(inList1::List, inList2::List)::List
+  local outList::List
 
   outList = list(@do_threaded_for threadTuple(lst1, lst2) (lst1, lst2) (inList1, inList2))
   outList
@@ -3849,12 +3849,12 @@ T1 = Any
 T2 = Any 
 TO = Any 
 VT = Any 
-function threadMapAllValue(inList1::IList, inList2::IList, inMapFunc::MapFunc, inValue::VT)
+function threadMapAllValue(inList1::List, inList2::List, inMapFunc::MapFunc, inValue::VT)
   _ = begin
     local e1::T1
-    local rest1::IList
+    local rest1::List
     local e2::T2
-    local rest2::IList
+    local rest2::List
     local res::TO
     @match (inList1, inList2) begin
       (e1 <| rest1, e2 <| rest2)  => begin
@@ -3878,8 +3878,8 @@ T1 = Any
 T2 = Any 
 TO = Any 
 ArgT1 = Any 
-function threadMap1(inList1::IList, inList2::IList, inMapFunc::MapFunc, inArg1::ArgT1)::IList
-  local outList::IList
+function threadMap1(inList1::List, inList2::List, inMapFunc::MapFunc, inArg1::ArgT1)::List
+  local outList::List
 
   outList = list(@do_threaded_for inMapFunc(e1, e2, inArg1) (e1, e2) (inList1, inList2))
   outList
@@ -3893,8 +3893,8 @@ T1 = Any
 T2 = Any 
 TO = Any 
 ArgT1 = Any 
-function threadMap1Reverse(inList1::IList, inList2::IList, inMapFunc::MapFunc, inArg1::ArgT1)::IList
-  local outList::IList
+function threadMap1Reverse(inList1::List, inList2::List, inMapFunc::MapFunc, inArg1::ArgT1)::List
+  local outList::List
 
   outList = listReverse(@do_threaded_for inMapFunc(e1, e2, inArg1) (e1, e2) (inList1, inList2))
   outList
@@ -3906,12 +3906,12 @@ which is passed to the mapping function, but returns no result. =#
 T1 = Any 
 T2 = Any 
 ArgT1 = Any 
-function threadMap1_0(inList1::IList, inList2::IList, inMapFunc::MapFunc, inArg1::ArgT1)
+function threadMap1_0(inList1::List, inList2::List, inMapFunc::MapFunc, inArg1::ArgT1)
   _ = begin
     local e1::T1
-    local rest1::IList
+    local rest1::List
     local e2::T2
-    local rest2::IList
+    local rest2::List
     @match (inList1, inList2, inMapFunc, inArg1) begin
       ( nil(),  nil(), _, _)  => begin
         ()
@@ -3934,8 +3934,8 @@ T2 = Any
 TO = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function threadMap2(inList1::IList, inList2::IList, inMapFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::IList
-  local outList::IList
+function threadMap2(inList1::List, inList2::List, inMapFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::List
+  local outList::List
 
   outList = list(@do_threaded_for inMapFunc(e1, e2, inArg1, inArg2) (e1, e2) (inList1, inList2))
   outList
@@ -3950,8 +3950,8 @@ T2 = Any
 TO = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function threadMap2Reverse(inList1::IList, inList2::IList, inMapFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::IList
-  local outList::IList
+function threadMap2Reverse(inList1::List, inList2::List, inMapFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2)::List
+  local outList::List
 
   outList = listReverse(@do_threaded_for inMapFunc(e1, e2, inArg1, inArg2) (e1, e2) (inList1, inList2))
   outList
@@ -3967,15 +3967,15 @@ TO = Any
 FT = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function threadMap2ReverseFold(inList1::IList, inList2::IList, inMapFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inFoldArg::FT, inAccum::IList = list())::Tuple{FT, IList}
+function threadMap2ReverseFold(inList1::List, inList2::List, inMapFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inFoldArg::FT, inAccum::List = list())::Tuple{FT, List}
   local outFoldArg::FT
-  local outList::IList
+  local outList::List
 
   (outList, outFoldArg) = begin
     local e1::T1
-    local rest1::IList
+    local rest1::List
     local e2::T2
-    local rest2::IList
+    local rest2::List
     local res::TO
     local foldArg::FT
     @match (inList1, inList2) begin
@@ -4002,8 +4002,8 @@ TO = Any
 ArgT1 = Any 
 ArgT2 = Any 
 ArgT3 = Any 
-function threadMap3(inList1::IList, inList2::IList, inMapFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3)::IList
-  local outList::IList
+function threadMap3(inList1::List, inList2::List, inMapFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3)::List
+  local outList::List
 
   outList = list(@do_threaded_for inMapFunc(e1, e2, inArg1, inArg2, inArg3) (e1, e2) (inList1, inList2))
   outList
@@ -4018,8 +4018,8 @@ TO = Any
 ArgT1 = Any 
 ArgT2 = Any 
 ArgT3 = Any 
-function threadMap3Reverse(inList1::IList, inList2::IList, inMapFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3)::IList
-  local outList::IList
+function threadMap3Reverse(inList1::List, inList2::List, inMapFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3)::List
+  local outList::List
 
   outList = listReverse(@do_threaded_for inMapFunc(e1, e2, inArg1, inArg2, inArg3) (e1, e2) (inList1, inList2))
   outList
@@ -4032,8 +4032,8 @@ T1 = Any
 T2 = Any 
 T3 = Any 
 TO = Any 
-function thread3Map(inList1::IList, inList2::IList, inList3::IList, inFunc::MapFunc)::IList
-  local outList::IList
+function thread3Map(inList1::List, inList2::List, inList3::List, inFunc::MapFunc)::List
+  local outList::List
 
   outList = list(@do_threaded_for inFunc(e1, e2, e3) (e1, e2, e3) (inList1, inList2, inList3))
   outList
@@ -4050,15 +4050,15 @@ FT = Any
 ArgT1 = Any 
 ArgT2 = Any 
 ArgT3 = Any 
-function threadMap3ReverseFold(inList1::IList, inList2::IList, inMapFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inFoldArg::FT, inAccum::IList = list())::Tuple{FT, IList}
+function threadMap3ReverseFold(inList1::List, inList2::List, inMapFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inFoldArg::FT, inAccum::List = list())::Tuple{FT, List}
   local outFoldArg::FT
-  local outList::IList
+  local outList::List
 
   (outList, outFoldArg) = begin
     local e1::T1
-    local rest1::IList
+    local rest1::List
     local e2::T2
-    local rest2::IList
+    local rest2::List
     local res::TO
     local foldArg::FT
     @match (inList1, inList2) begin
@@ -4085,14 +4085,14 @@ T2 = Any
 T3 = Any 
 TO1 = Any 
 TO2 = Any 
-function thread3Map_2(inList1::IList, inList2::IList, inList3::IList, inFunc::MapFunc)::Tuple{IList, IList}
-  local outList2::IList = list()
-  local outList1::IList = list()
+function thread3Map_2(inList1::List, inList2::List, inList3::List, inFunc::MapFunc)::Tuple{List, List}
+  local outList2::List = list()
+  local outList1::List = list()
 
   local e2::T2
-  local rest_e2::IList = inList2
+  local rest_e2::List = inList2
   local e3::T3
-  local rest_e3::IList = inList3
+  local rest_e3::List = inList3
   local res1::TO1
   local res2::TO2
 
@@ -4118,14 +4118,14 @@ T2 = Any
 T3 = Any 
 TO = Any 
 ArgT1 = Any 
-function thread3MapFold(inList1::IList, inList2::IList, inList3::IList, inFunc::MapFunc, inArg::ArgT1)::Tuple{ArgT1, IList}
+function thread3MapFold(inList1::List, inList2::List, inList3::List, inFunc::MapFunc, inArg::ArgT1)::Tuple{ArgT1, List}
   local outArg::ArgT1 = inArg
-  local outList::IList = list()
+  local outList::List = list()
 
   local e2::T2
-  local rest_e2::IList = inList2
+  local rest_e2::List = inList2
   local e3::T3
-  local rest_e3::IList = inList3
+  local rest_e3::List = inList3
   local res::TO
 
   for e1 in inList1
@@ -4150,8 +4150,8 @@ TO = Any
 ArgT1 = Any 
 ArgT2 = Any 
 ArgT3 = Any 
-function thread3Map3(inList1::IList, inList2::IList, inList3::IList, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3)::IList
-  local outList::IList
+function thread3Map3(inList1::List, inList2::List, inList3::List, inFunc::MapFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3)::List
+  local outList::List
 
   outList = list(@do_threaded_for inFunc(e1, e2, e3, inArg1, inArg2, inArg3) (e1, e2, e3) (inList1, inList2, inList3))
   outList
@@ -4164,14 +4164,14 @@ T1 = Any
 T2 = Any 
 FT = Any 
 ArgT1 = Any 
-function threadFold1(inList1::IList, inList2::IList, inFoldFunc::FoldFunc, inArg1::ArgT1, inFoldArg::FT)::FT
+function threadFold1(inList1::List, inList2::List, inFoldFunc::FoldFunc, inArg1::ArgT1, inFoldArg::FT)::FT
   local outFoldArg::FT
 
   outFoldArg = begin
     local e1::T1
-    local rest1::IList
+    local rest1::List
     local e2::T2
-    local rest2::IList
+    local rest2::List
     local res::FT
     @match (inList1, inList2) begin
       (e1 <| rest1, e2 <| rest2)  => begin
@@ -4195,14 +4195,14 @@ T2 = Any
 FT = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function threadFold2(inList1::IList, inList2::IList, inFoldFunc::FoldFunc, inArg1::ArgT1, inArg2::ArgT2, inFoldArg::FT)::FT
+function threadFold2(inList1::List, inList2::List, inFoldFunc::FoldFunc, inArg1::ArgT1, inArg2::ArgT2, inFoldArg::FT)::FT
   local outFoldArg::FT
 
   outFoldArg = begin
     local e1::T1
-    local rest1::IList
+    local rest1::List
     local e2::T2
-    local rest2::IList
+    local rest2::List
     local res::FT
     @match (inList1, inList2) begin
       (e1 <| rest1, e2 <| rest2)  => begin
@@ -4227,14 +4227,14 @@ FT = Any
 ArgT1 = Any 
 ArgT2 = Any 
 ArgT3 = Any 
-function threadFold3(inList1::IList, inList2::IList, inFoldFunc::FoldFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inFoldArg::FT)::FT
+function threadFold3(inList1::List, inList2::List, inFoldFunc::FoldFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inFoldArg::FT)::FT
   local outFoldArg::FT
 
   outFoldArg = begin
     local e1::T1
-    local rest1::IList
+    local rest1::List
     local e2::T2
-    local rest2::IList
+    local rest2::List
     local res::FT
     @match (inList1, inList2) begin
       (e1 <| rest1, e2 <| rest2)  => begin
@@ -4260,14 +4260,14 @@ ArgT1 = Any
 ArgT2 = Any 
 ArgT3 = Any 
 ArgT4 = Any 
-function threadFold4(inList1::IList, inList2::IList, inFoldFunc::FoldFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4, inFoldArg::FT)::FT
+function threadFold4(inList1::List, inList2::List, inFoldFunc::FoldFunc, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3, inArg4::ArgT4, inFoldArg::FT)::FT
   local outFoldArg::FT
 
   outFoldArg = begin
     local e1::T1
-    local rest1::IList
+    local rest1::List
     local e2::T2
-    local rest2::IList
+    local rest2::List
     local res::FT
     @match (inList1, inList2) begin
       (e1 <| rest1, e2 <| rest2)  => begin
@@ -4288,14 +4288,14 @@ of two lists with an extra argument that is updated and passed on. =#
 T1 = Any 
 T2 = Any 
 FT = Any 
-function threadFold(inList1::IList, inList2::IList, inFoldFunc::FoldFunc, inFoldArg::FT)::FT
+function threadFold(inList1::List, inList2::List, inFoldFunc::FoldFunc, inFoldArg::FT)::FT
   local outFoldArg::FT
 
   outFoldArg = begin
     local e1::T1
-    local rest1::IList
+    local rest1::List
     local e2::T2
-    local rest2::IList
+    local rest2::List
     local res::FT
     @match (inList1, inList2) begin
       (e1 <| rest1, e2 <| rest2)  => begin
@@ -4318,12 +4318,12 @@ T1 = Any
 T2 = Any 
 TO = Any 
 FT = Any 
-function threadMapFold(inList1::IList, inList2::IList, inFunc::FuncType, inArg::FT)::Tuple{FT, IList}
+function threadMapFold(inList1::List, inList2::List, inFunc::FuncType, inArg::FT)::Tuple{FT, List}
   local outArg::FT = inArg
-  local outList::IList = list()
+  local outList::List = list()
 
   local e2::T2
-  local rest_e2::IList = inList2
+  local rest_e2::List = inList2
   local res::TO
 
   for e1 in inList1
@@ -4340,7 +4340,7 @@ end
 that whose value is equal to the given value.
 Example: position(2, {0, 1, 2, 3}) => 3 =#
 T = Any 
-function position(inElement::T, inList::IList)::ModelicaInteger
+function position(inElement::T, inList::List)::ModelicaInteger
   local outPosition::ModelicaInteger = 1 #= one-based index =#
 
   for e in inList
@@ -4356,7 +4356,7 @@ end
 #= Takes a list and a predicate function, and returns the index of the first
 element for which the function returns true, or -1 if no match is found. =#
 T = Any 
-function positionOnTrue(inList::IList, inPredFunc::PredFunc)::ModelicaInteger
+function positionOnTrue(inList::List, inPredFunc::PredFunc)::ModelicaInteger
   local outPosition::ModelicaInteger = 1
 
   for e in inList
@@ -4375,7 +4375,7 @@ match is found. The extra argument is passed to the predicate function for
 each call. =#
 T = Any 
 ArgT = Any 
-function position1OnTrue(inList::IList, inPredFunc::PredFunc, inArg::ArgT)::ModelicaInteger
+function position1OnTrue(inList::List, inPredFunc::PredFunc, inArg::ArgT)::ModelicaInteger
   local outPosition::ModelicaInteger = 1
 
   for e in inList
@@ -4393,7 +4393,7 @@ outListIndex is the index of the list the value was found in, and outPosition
 is the position in that list.
 Example: positionList(3, {{4, 2}, {6, 4, 3, 1}}) => (2, 3) =#
 T = Any 
-function positionList(inElement::T, inList::IList)::Tuple{ModelicaInteger, ModelicaInteger}
+function positionList(inElement::T, inList::List)::Tuple{ModelicaInteger, ModelicaInteger}
   local outPosition::ModelicaInteger #= one-based index =#
   local outListIndex::ModelicaInteger = 1 #= one-based index =#
 
@@ -4416,12 +4416,12 @@ If not present the function will fail.
 Example: listGetMember(0, {1, 2, 3}) => fail
 listGetMember(1, {1, 2, 3}) => 1 =#
 T = Any 
-function getMember(inElement::T, inList::IList)::T
+function getMember(inElement::T, inList::List)::T
   local outElement::T
 
   local e::T
   local res::T
-  local rest::IList
+  local rest::List
 
   for e in inList
     if valueEq(inElement, e)
@@ -4441,7 +4441,7 @@ function equalLength(string,string) returns true if the strings are of same leng
 getMemberOnTrue(\\\"a\\\",{\\\"bb\\\",\\\"b\\\",\\\"ccc\\\"},equalLength) => \\\"b\\\" =#
 T = Any 
 VT = Any 
-function getMemberOnTrue(inValue::VT, inList::IList, inCompFunc::CompFunc)::T
+function getMemberOnTrue(inValue::VT, inList::List, inCompFunc::CompFunc)::T
   local outElement::T
 
   for e in inList
@@ -4456,7 +4456,7 @@ end
 
 #= Returns true if a list does not contain the given element, otherwise false. =#
 T = Any 
-function notMember(inElement::T, inList::IList)::Bool
+function notMember(inElement::T, inList::List)::Bool
   local outIsNotMember::Bool
 
   outIsNotMember = ! listMember(inElement, inList)
@@ -4467,7 +4467,7 @@ end
 comparison function given. =#
 T = Any 
 VT = Any 
-function isMemberOnTrue(inValue::VT, inList::IList, inCompFunc::CompFunc)::Bool
+function isMemberOnTrue(inValue::VT, inList::List, inCompFunc::CompFunc)::Bool
   local outIsMember::Bool
 
   for e in inList
@@ -4486,7 +4486,7 @@ Example:
 exist({1,2}, isEven) => true
 exist({1,3,5,7}, isEven) => false =#
 T = Any 
-function exist(inList::IList, inFindFunc::FindFunc)::Bool
+function exist(inList::List, inFindFunc::FindFunc)::Bool
   local outExists::Bool
 
   for e in inList
@@ -4504,7 +4504,7 @@ the given predicate function. Also takes an extra argument that is passed to
 the predicate function. =#
 T = Any 
 ArgT1 = Any 
-function exist1(inList::IList, inFindFunc::FindFunc, inExtraArg::ArgT1)::Bool
+function exist1(inList::List, inFindFunc::FindFunc, inExtraArg::ArgT1)::Bool
   local outExists::Bool
 
   for e in inList
@@ -4523,7 +4523,7 @@ to the predicate function. =#
 T = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function exist2(inList::IList, inFindFunc::FindFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2)::Bool
+function exist2(inList::List, inFindFunc::FindFunc, inExtraArg1::ArgT1, inExtraArg2::ArgT2)::Bool
   local outExists::Bool
 
   for e in inList
@@ -4542,9 +4542,9 @@ other containing the remaining elements.
 Example:
 extractOnTrue({1, 2, 3, 4, 5}, isEven) => {2, 4}, {1, 3, 5} =#
 T = Any 
-function extractOnTrue(inList::IList, inFilterFunc::FilterFunc)::Tuple{IList, IList}
-  local outRemainingList::IList = list()
-  local outExtractedList::IList = list()
+function extractOnTrue(inList::List, inFilterFunc::FilterFunc)::Tuple{List, List}
+  local outRemainingList::List = list()
+  local outExtractedList::List = list()
 
   for e in inList
     if inFilterFunc(e)
@@ -4563,9 +4563,9 @@ argument and returns two lists. One of values for which the matching function
 returns true and the other containing the remaining elements. =#
 T = Any 
 ArgT1 = Any 
-function extract1OnTrue(inList::IList, inFilterFunc::FilterFunc, inArg::ArgT1)::Tuple{IList, IList}
-  local outRemainingList::IList = list()
-  local outExtractedList::IList = list()
+function extract1OnTrue(inList::List, inFilterFunc::FilterFunc, inArg::ArgT1)::Tuple{List, List}
+  local outRemainingList::List = list()
+  local outExtractedList::List = list()
 
   for e in inList
     if inFilterFunc(e, inArg)
@@ -4584,8 +4584,8 @@ sub list of values for which the matching function succeeds.
 Example:
 filter({1, 2, 3, 4, 5}, isEven) => {2, 4} =#
 T = Any 
-function filter(inList::IList, inFilterFunc::FilterFunc)::IList
-  local outList::IList = list()
+function filter(inList::List, inFilterFunc::FilterFunc)::List
+  local outList::List = list()
 
   for e in inList
     try
@@ -4602,8 +4602,8 @@ end
 all elements for which the function fails. =#
 TI = Any 
 TO = Any 
-function filterMap(inList::IList, inFilterMapFunc::FilterMapFunc)::IList
-  local outList::IList = list()
+function filterMap(inList::List, inFilterMapFunc::FilterMapFunc)::List
+  local outList::List = list()
 
   local oe::TO
 
@@ -4623,8 +4623,8 @@ all elements for which the function fails. =#
 TI = Any 
 TO = Any 
 ArgT1 = Any 
-function filterMap1(inList::IList, inFilterMapFunc::FilterMapFunc, inExtraArg::ArgT1)::IList
-  local outList::IList = list()
+function filterMap1(inList::List, inFilterMapFunc::FilterMapFunc, inExtraArg::ArgT1)::List
+  local outList::List = list()
 
   local oe::TO
 
@@ -4644,8 +4644,8 @@ sub list of values for which the matching function returns true.
 Example:
 filter({1, 2, 3, 4, 5}, isEven) => {2, 4} =#
 T = Any 
-function filterOnTrue(inList::IList, inFilterFunc::FilterFunc)::IList
-  local outList::IList
+function filterOnTrue(inList::List, inFilterFunc::FilterFunc)::List
+  local outList::List
 
   outList = list(e for e in inList if inFilterFunc(e))
   outList
@@ -4656,8 +4656,8 @@ sub list of values for which the matching function returns false.
 Example:
 filterOnFalse({1, 2, 3, 1, 5}, isEven) => {1, 3, 1, 5} =#
 T = Any 
-function filterOnFalse(inList::IList, inFilterFunc::FilterFunc)::IList
-  local outList::IList
+function filterOnFalse(inList::List, inFilterFunc::FilterFunc)::List
+  local outList::List
 
   outList = list(e for e in inList if boolNot(inFilterFunc(e)))
   outList
@@ -4671,12 +4671,12 @@ filter({1, 2, 3, 4, 5}, isEven) => {2, 4} =#
 T1 = Any 
 T2 = Any 
 ArgT1 = Any 
-function filter1OnTrueSync(inList::IList, inFilterFunc::FilterFunc, inArg1::ArgT1, inSyncList::IList)::Tuple{IList, IList}
-  local outList_b::IList = list()
-  local outList_a::IList = list()
+function filter1OnTrueSync(inList::List, inFilterFunc::FilterFunc, inArg1::ArgT1, inSyncList::List)::Tuple{List, List}
+  local outList_b::List = list()
+  local outList_a::List = list()
 
   local e2::T2
-  local rest2::IList = inSyncList
+  local rest2::List = inSyncList
 
   for e1 in inList
     e2, rest2 = listHead(rest2), listRest(rest2)
@@ -4696,12 +4696,12 @@ list and returns a sub list of values for both lists for which the matching
 function returns true for the first list. =#
 T1 = Any 
 T2 = Any 
-function filterOnTrueSync(inList::IList, inFilterFunc::FilterFunc, inSyncList::IList)::Tuple{IList, IList}
-  local outList_b::IList = list()
-  local outList_a::IList = list()
+function filterOnTrueSync(inList::List, inFilterFunc::FilterFunc, inSyncList::List)::Tuple{List, List}
+  local outList_b::List = list()
+  local outList_a::List = list()
 
   local e2::T2
-  local rest2::IList = inSyncList
+  local rest2::List = inSyncList
 
   @assert true == (listLength(inList) == listLength(inSyncList))
   for e1 in inList
@@ -4721,8 +4721,8 @@ sub list of values in reverse order for which the matching function returns true
 Example:
 filter({1, 2, 3, 4, 5}, isEven) => {4, 2} =#
 T = Any 
-function filterOnTrueReverse(inList::IList, inFilterFunc::FilterFunc)::IList
-  local outList::IList
+function filterOnTrueReverse(inList::List, inFilterFunc::FilterFunc)::List
+  local outList::List
 
   outList = listReverse(e for e in inList if inFilterFunc(e))
   outList
@@ -4735,8 +4735,8 @@ Example:
 filter({1, 2, 3, 4, 5}, isEven) => {2, 4} =#
 T = Any 
 ArgT1 = Any 
-function filter1(inList::IList, inFilterFunc::FilterFunc, inArg1::ArgT1)::IList
-  local outList::IList = list()
+function filter1(inList::List, inFilterFunc::FilterFunc, inArg1::ArgT1)::List
+  local outList::List = list()
 
   for e in inList
     try
@@ -4755,8 +4755,8 @@ Example:
 filter1OnTrue({1, 2, 3, 1, 5}, intEq, 1) => {1, 1} =#
 T = Any 
 ArgT1 = Any 
-function filter1OnTrue(inList::IList, inFilterFunc::FilterFunc, inArg1::ArgT1)::IList
-  local outList::IList
+function filter1OnTrue(inList::List, inFilterFunc::FilterFunc, inArg1::ArgT1)::List
+  local outList::List
   outList = list(e for e in inList if inFilterFunc(e, inArg1))
   outList
 end
@@ -4768,8 +4768,8 @@ Example:
 filter1OnTrue({1, 2, 3, 1, 5}, intEq, 1) => {1, 1} =#
 T = Any 
 ArgT1 = Any 
-function filter1OnTrueAndUpdate(inList::IList, inFilterFunc::FilterFunc, inUpdateFunc::UpdateFunc, inArg1::ArgT1)::IList
-  local outList::IList
+function filter1OnTrueAndUpdate(inList::List, inFilterFunc::FilterFunc, inUpdateFunc::UpdateFunc, inArg1::ArgT1)::List
+  local outList::List
 
   outList = list(inUpdateFunc(e, inArg1) for e in inList if inFilterFunc(e, inArg1))
   outList
@@ -4781,8 +4781,8 @@ Example:
 filter1rOnTrue({1, 2, 3, 1, 5}, intEq, 1) => {1, 1} =#
 T = Any 
 ArgT1 = Any 
-function filter1rOnTrue(inList::IList, inFilterFunc::FilterFunc, inArg1::ArgT1)::IList
-  local outList::IList
+function filter1rOnTrue(inList::List, inFilterFunc::FilterFunc, inArg1::ArgT1)::List
+  local outList::List
 
   outList = list(e for e in inList if inFilterFunc(inArg1, e))
   outList
@@ -4793,8 +4793,8 @@ sub list of values for which the matching function returns true. =#
 T = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function filter2OnTrue(inList::IList, inFilterFunc::FilterFunc, inArg1::ArgT1, inArg2::ArgT2)::IList
-  local outList::IList
+function filter2OnTrue(inList::List, inFilterFunc::FilterFunc, inArg1::ArgT1, inArg2::ArgT2)::List
+  local outList::List
 
   outList = list(e for e in inList if inFilterFunc(e, inArg1, inArg2))
   outList
@@ -4804,8 +4804,8 @@ end
 value, using the given comparison function. =#
 T = Any 
 VT = Any 
-function removeOnTrue(inValue::VT, inCompFunc::CompFunc, inList::IList)::IList
-  local outList::IList
+function removeOnTrue(inValue::VT, inCompFunc::CompFunc, inList::List)::List
+  local outList::List
 
   outList = list(e for e in inList if ! inCompFunc(inValue, e))
   outList
@@ -4822,7 +4822,7 @@ select2 = filter2OnTrue
 #= This function retrieves the first element of a list for which the passed
 function evaluates to true. =#
 T = Any 
-function find(inList::IList, inFunc::SelectFunc)::T
+function find(inList::List, inFunc::SelectFunc)::T
   local outElement::T
 
   for e in inList
@@ -4839,7 +4839,7 @@ end
 function evaluates to true. =#
 T = Any 
 ArgT1 = Any 
-function find1(inList::IList, inFunc::SelectFunc, arg1::ArgT1)::T
+function find1(inList::List, inFunc::SelectFunc, arg1::ArgT1)::T
   local outElement::T
 
   for e in inList
@@ -4855,25 +4855,25 @@ end
 #= This function retrieves the first element of a list for which the passed
 function evaluates to true. And returns the list with the element removed. =#
 T = Any 
-function findAndRemove(inList::IList, inFunc::SelectFunc)::Tuple{IList, T}
+function findAndRemove(inList::List, inFunc::SelectFunc)::Tuple{List, T}
 end
 
 #= This function retrieves the first element of a list for which the passed
 function evaluates to true. And returns the list with the element removed. =#
 T = Any 
 ArgT1 = Any 
-function findAndRemove1(inList::IList, inFunc::SelectFunc, arg1::ArgT1)::Tuple{IList, T}
+function findAndRemove1(inList::List, inFunc::SelectFunc, arg1::ArgT1)::Tuple{List, T}
 
 end
 
 #= This function returns the first value in the given list for which the
 corresponding element in the boolean list is true. =#
 T = Any 
-function findBoolList(inBooleans::IList, inList::IList, inFalseValue::T)::T
+function findBoolList(inBooleans::List, inList::List, inFalseValue::T)::T
   local outElement::T
 
   local e::T
-  local rest::IList = inList
+  local rest::List = inList
 
   for b in inBooleans
     e, rest = listHead(rest), listRest(rest)
@@ -4889,11 +4889,11 @@ end
 #= Takes a list and a value, and deletes the first occurence of the value in the
 list. Example: deleteMember({1, 2, 3, 2}, 2) => {1, 3, 2} =#
 T = Any 
-function deleteMember(inList::IList, inElement::T)::IList
-  local outList::IList = list()
+function deleteMember(inList::List, inElement::T)::List
+  local outList::List = list()
 
   local e::T
-  local rest::IList = inList
+  local rest::List = inList
 
   while ! listEmpty(rest)
     e, rest = listHead(rest), listRest(rest)
@@ -4909,8 +4909,8 @@ end
 
 #= Same as deleteMember, but fails if the element isn't present in the list. =#
 T = Any 
-function deleteMemberF(inList::IList, inElement::T)::IList
-  local outList::IList
+function deleteMemberF(inList::List, inElement::T)::List
+  local outList::List
 
   outList = deleteMember(inList, inElement)
   if referenceEq(outList, inList)
@@ -4926,13 +4926,13 @@ no element was removed.
 Example: deleteMemberOnTrue({1,2,3,2},2,intEq) => {1,3,2} =#
 T = Any 
 VT = Any 
-function deleteMemberOnTrue(inValue::VT, inList::IList, inCompareFunc::CompareFunc)::Tuple{Option, IList}
+function deleteMemberOnTrue(inValue::VT, inList::List, inCompareFunc::CompareFunc)::Tuple{Option, List}
   local outDeletedElement::Option = NONE()
-  local outList::IList = inList
+  local outList::List = inList
 
   local e::T
-  local rest::IList = inList
-  local acc::IList = list()
+  local rest::List = inList
+  local acc::List = list()
 
   while ! listEmpty(rest)
     e, rest = listHead(rest), listRest(rest)
@@ -4950,10 +4950,10 @@ end
 list. Note that positions are indexed from 0.
 Example: deletePositions({1, 2, 3, 4, 5}, {2, 0, 3}) => {2, 5} =#
 T = Any 
-function deletePositions(inList::IList, inPositions::IList)::IList
-  local outList::IList
+function deletePositions(inList::List, inPositions::List)::List
+  local outList::List
 
-  local sorted_pos::IList
+  local sorted_pos::List
 
   sorted_pos = sortedUnique(sort(inPositions, intGt), intEq)
   outList = deletePositionsSorted(inList, sorted_pos)
@@ -4964,12 +4964,12 @@ end
 deletes the positions from the list. Note that positions are indexed from 0.
 Example: deletePositionsSorted({1, 2, 3, 4, 5}, {0, 2, 3}) => {2, 5} =#
 T = Any 
-function deletePositionsSorted(inList::IList, inPositions::IList)::IList
-  local outList::IList = list()
+function deletePositionsSorted(inList::List, inPositions::List)::List
+  local outList::List = list()
 
   local i::ModelicaInteger = 0
   local e::T
-  local rest::IList = inList
+  local rest::List = inList
 
   for pos in inPositions
     while i != pos
@@ -4986,8 +4986,8 @@ end
 
 #= Removes all matching integers that occur first in a list. If the first
 element doesn't match it returns the list. =#
-function removeMatchesFirst(inList::IList, inN::ModelicaInteger)::IList
-  local outList::IList = inList
+function removeMatchesFirst(inList::List, inN::ModelicaInteger)::List
+  local outList::List = inList
 
   for e in inList
     if e != inN
@@ -5003,19 +5003,19 @@ position in the list. Position is an integer between 1 and n for a list of
 n elements.
 Example: replaceAt('A', 2, {'a', 'b', 'c'}) => {'a', 'A', 'c'} =#
 T = Any 
-function replaceAt(inElement::T, inPosition::ModelicaInteger #= one-based index =#, inList::IList)::ILis
+function replaceAt(inElement::T, inPosition::ModelicaInteger #= one-based index =#, inList::List)::ILis
 end
 
 #= Applies the function to each element of the list until the function returns
 true, and then replaces that element with the replacement.
 Example: replaceOnTrue(4, {1, 2, 3}, isTwo) => {1, 4, 3}. =#
 T = Any 
-function replaceOnTrue(inReplacement::T, inList::IList, inFunc::FuncType)::Tuple{Bool, IList}
+function replaceOnTrue(inReplacement::T, inList::List, inFunc::FuncType)::Tuple{Bool, List}
   local outReplaced::Bool = false
-  local outList::IList = list()
+  local outList::List = list()
 
   local e::T
-  local rest::IList = inList
+  local rest::List = inList
 
   while ! listEmpty(rest)
     e, rest = listHead(rest), listRest(rest)
@@ -5035,8 +5035,8 @@ position in the list. Position is an integer between 1 and n for a list of
 n elements.
 Example: replaceAtIndexFirst(2, 'A', {'a', 'b', 'c'}) => {'a', 'A', 'c'} =#
 T = Any 
-function replaceAtIndexFirst(inPosition::ModelicaInteger #= one-based index =#, inElement::T, inList::IList)::IList
-  local outList::IList
+function replaceAtIndexFirst(inPosition::ModelicaInteger #= one-based index =#, inElement::T, inList::List)::List
+  local outList::List
 
   outList = replaceAt(inElement, inPosition, inList)
   outList
@@ -5047,11 +5047,11 @@ position with the first list in the second list. Position is an integer
 between 0 and n - 1 for a list of n elements.
 Example: replaceAt({'A', 'B'}, 1, {'a', 'b', 'c'}) => {'a', 'A', 'B', 'c'} =#
 T = Any 
-function replaceAtWithList(inReplacementList::IList, inPosition::ModelicaInteger, inList::IList)::IList
-  local outList::IList = list()
+function replaceAtWithList(inReplacementList::List, inPosition::ModelicaInteger, inList::List)::List
+  local outList::List = list()
 
   local e::T
-  local rest::IList = inList
+  local rest::List = inList
 
   @assert true == (inPosition >= 0)
   #=  Shuffle elements from inList to outList until the position is reached.
@@ -5079,11 +5079,11 @@ that element position and then insert the value at the position
 Example: replaceAtWithFill(\\\"A\\\", 5, {\\\"a\\\",\\\"b\\\",\\\"c\\\"},\\\"dummy\\\") =>
 {\\\"a\\\",\\\"b\\\",\\\"c\\\",\\\"dummy\\\",\\\"A\\\"} =#
 T = Any 
-function replaceAtWithFill(inElement::T, inPosition::ModelicaInteger, inList::IList, inFillValue::T)::IList
-  local outList::IList
+function replaceAtWithFill(inElement::T, inPosition::ModelicaInteger, inList::List, inFillValue::T)::List
+  local outList::List
 
   local len::ModelicaInteger
-  local fill_lst::IList
+  local fill_lst::List
 
   @assert true == (inPosition >= 0)
   len = listLength(inList)
@@ -5106,7 +5106,7 @@ toString({1, 2, 3}, intString, 'nums', '{', ';', '}, true) =>
 'nums{1;2;3}'
 =#
 T = Any 
-function toString(inList::IList, inPrintFunc::FuncType, inListNameStr::String #= The name of the list. =#, inBeginStr::String #= The start of the list =#, inDelimitStr::String #= The delimiter between list elements. =#, inEndStr::String #= The end of the list. =#, inPrintEmpty::Bool #= If false, don't output begin and end if the list is empty. =#)::String
+function toString(inList::List, inPrintFunc::FuncType, inListNameStr::String #= The name of the list. =#, inBeginStr::String #= The start of the list =#, inDelimitStr::String #= The delimiter between list elements. =#, inEndStr::String #= The end of the list. =#, inPrintEmpty::Bool #= If false, don't output begin and end if the list is empty. =#)::String
   local outString::String
 
   outString = begin
@@ -5139,7 +5139,7 @@ end
 #= @author:adrpo
 returns true if the list has exactly one element, otherwise false =#
 T = Any 
-function hasOneElement(inList::IList)::Bool
+function hasOneElement(inList::List)::Bool
   local b::Bool
 
   b = begin
@@ -5159,7 +5159,7 @@ end
 #= author:waurich
 returns true if the list has more than one element, otherwise false =#
 T = Any 
-function hasSeveralElements(inList::IList)::Bool
+function hasSeveralElements(inList::List)::Bool
   local b::Bool
 
   b = begin
@@ -5181,7 +5181,7 @@ function hasSeveralElements(inList::IList)::Bool
 end
 
 T = Any 
-function lengthListElements(inListList::IList)::ModelicaInteger
+function lengthListElements(inListList::List)::ModelicaInteger
   local outLength::ModelicaInteger
 
   outLength = sum(listLength(lst) for lst in inListList)
@@ -5193,8 +5193,8 @@ argument. The elements generated by the function are accumulated in a list
 until the function returns false as the last return value. =#
 T = Any 
 ArgT1 = Any 
-function generate(inArg::ArgT1, inFunc::GenerateFunc)::IList
-  local outList::IList
+function generate(inArg::ArgT1, inFunc::GenerateFunc)::List
+  local outList::List
 
   outList = listReverseInPlace(generateReverse(inArg, inFunc))
   outList
@@ -5206,8 +5206,8 @@ until the function returns false as the last return value. This function
 returns the generated list reversed. =#
 T = Any 
 ArgT1 = Any 
-function generateReverse(inArg::ArgT1, inFunc::GenerateFunc)::IList
-  local outList::IList = list()
+function generateReverse(inArg::ArgT1, inFunc::GenerateFunc)::List
+  local outList::List = list()
 
   local cont::Bool
   local arg::ArgT1 = inArg
@@ -5227,9 +5227,9 @@ end
 TI = Any 
 TO = Any 
 FT = Any 
-function mapFoldSplit(inList::IList, inMapFunc::MapFunc, inFoldFunc::FoldFunc, inStartValue::FT)::Tuple{FT, IList}
+function mapFoldSplit(inList::List, inMapFunc::MapFunc, inFoldFunc::FoldFunc, inStartValue::FT)::Tuple{FT, List}
   local outResult::FT = inStartValue
-  local outList::IList = list()
+  local outList::List = list()
 
   local eo::TO
   local res::FT
@@ -5248,9 +5248,9 @@ TI = Any
 TO = Any 
 FT = Any 
 ArgT1 = Any 
-function map1FoldSplit(inList::IList, inMapFunc::MapFunc, inFoldFunc::FoldFunc, inConstArg::ArgT1, inStartValue::FT)::Tuple{FT, IList}
+function map1FoldSplit(inList::List, inMapFunc::MapFunc, inFoldFunc::FoldFunc, inConstArg::ArgT1, inStartValue::FT)::Tuple{FT, List}
   local outResult::FT = inStartValue
-  local outList::IList = list()
+  local outList::List = list()
 
   local eo::TO
   local res::FT
@@ -5270,8 +5270,8 @@ list, and the function is itself responsible for adding elements to the
 result list. =#
 TI = Any 
 TO = Any 
-function accumulateMapReverse(inList::IList, inMapFunc::MapFunc)::IList
-  local outList::IList = list()
+function accumulateMapReverse(inList::List, inMapFunc::MapFunc)::List
+  local outList::List = list()
 
   for e in inList
     outList = inMapFunc(e, outList)
@@ -5284,8 +5284,8 @@ element of the list, and the function is itself responsible for adding
 elements to the result list. =#
 TI = Any 
 TO = Any 
-function accumulateMapAccum(inList::IList, inMapFunc::MapFunc)::IList
-  local outList::IList = list()
+function accumulateMapAccum(inList::List, inMapFunc::MapFunc)::List
+  local outList::List = list()
 
   for e in inList
     outList = inMapFunc(e, outList)
@@ -5302,8 +5302,8 @@ for adding elements to the result list. =#
 TI = Any 
 TO = Any 
 ArgT1 = Any 
-function accumulateMapAccum1(inList::IList, inMapFunc::MapFunc, inArg::ArgT1)::IList
-  local outList::IList = list()
+function accumulateMapAccum1(inList::List, inMapFunc::MapFunc, inArg::ArgT1)::List
+  local outList::List = list()
 
   for e in inList
     outList = inMapFunc(e, inArg, outList)
@@ -5317,9 +5317,9 @@ end
 TI = Any 
 TO = Any 
 FT = Any 
-function accumulateMapFoldAccum(inList::IList, inFunc::FuncType, inFoldArg::FT)::Tuple{FT, IList}
+function accumulateMapFoldAccum(inList::List, inFunc::FuncType, inFoldArg::FT)::Tuple{FT, List}
   local outFoldArg::FT = inFoldArg
-  local outList::IList = list()
+  local outList::List = list()
 
   for e in inList
     (outList, outFoldArg) = inFunc(e, outFoldArg, outList)
@@ -5331,8 +5331,8 @@ end
 accumulateMapFold = accumulateMapFoldAccum
 
 T = Any 
-function first2FromTuple3(inTuple::Tuple)::IList
-  local outList::IList
+function first2FromTuple3(inTuple::Tuple)::List
+  local outList::List
 
   local a::T
   local b::T
@@ -5346,12 +5346,12 @@ end
 mapping function. Returns the new list, and whether the element was found or
 not. =#
 T = Any 
-function findMap(inList::IList, inFunc::FuncType)::Tuple{Bool, IList}
+function findMap(inList::List, inFunc::FuncType)::Tuple{Bool, List}
   local outFound::Bool = false
-  local outList::IList = list()
+  local outList::List = list()
 
   local e::T
-  local rest::IList = inList
+  local rest::List = inList
 
   while ! listEmpty(rest) && ! outFound
     e, rest = listHead(rest), listRest(rest)
@@ -5367,12 +5367,12 @@ mapping function. Returns the new list, and whether the element was found or
 not. =#
 T = Any 
 ArgT1 = Any 
-function findMap1(inList::IList, inFunc::FuncType, inArg1::ArgT1)::Tuple{Bool, IList}
+function findMap1(inList::List, inFunc::FuncType, inArg1::ArgT1)::Tuple{Bool, List}
   local outFound::Bool = false
-  local outList::IList = list()
+  local outList::List = list()
 
   local e::T
-  local rest::IList = inList
+  local rest::List = inList
 
   while ! listEmpty(rest) && ! outFound
     e, rest = listHead(rest), listRest(rest)
@@ -5389,12 +5389,12 @@ not. =#
 T = Any 
 ArgT1 = Any 
 ArgT2 = Any 
-function findMap2(inList::IList, inFunc::FuncType, inArg1::ArgT1, inArg2::ArgT2)::Tuple{Bool, IList}
+function findMap2(inList::List, inFunc::FuncType, inArg1::ArgT1, inArg2::ArgT2)::Tuple{Bool, List}
   local outFound::Bool = false
-  local outList::IList = list()
+  local outList::List = list()
 
   local e::T
-  local rest::IList = inList
+  local rest::List = inList
 
   while ! listEmpty(rest) && ! outFound
     e, rest = listHead(rest), listRest(rest)
@@ -5412,12 +5412,12 @@ T = Any
 ArgT1 = Any 
 ArgT2 = Any 
 ArgT3 = Any 
-function findMap3(inList::IList, inFunc::FuncType, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3)::Tuple{Bool, IList}
+function findMap3(inList::List, inFunc::FuncType, inArg1::ArgT1, inArg2::ArgT2, inArg3::ArgT3)::Tuple{Bool, List}
   local outFound::Bool = false
-  local outList::IList = list()
+  local outList::List = list()
 
   local e::T
-  local rest::IList = inList
+  local rest::List = inList
 
   while ! listEmpty(rest) && ! outFound
     e, rest = listHead(rest), listRest(rest)
@@ -5431,12 +5431,12 @@ end
 #= Applies the given function over the list and returns first returned value that is not NONE(). =#
 T1 = Any 
 T2 = Any 
-function findSome(inList::IList, inFunc::FuncType)::T2
+function findSome(inList::List, inFunc::FuncType)::T2
   local outVal::T2
 
   local retOpt::Option = NONE()
   local e::T1
-  local rest::IList = inList
+  local rest::List = inList
 
   while isNone(retOpt)
     e, rest = listHead(rest), listRest(rest)
@@ -5457,12 +5457,12 @@ end
 T1 = Any 
 T2 = Any 
 Arg = Any 
-function findSome1(inList::IList, inFunc::FuncType, inArg::Arg)::T2
+function findSome1(inList::List, inFunc::FuncType, inArg::Arg)::T2
   local outVal::T2
 
   local retOpt::Option = NONE()
   local e::T1
-  local rest::IList = inList
+  local rest::List = inList
 
   while isNone(retOpt)
     e, rest = listHead(rest), listRest(rest)
@@ -5481,14 +5481,14 @@ end
 
 T1 = Any 
 T2 = Any 
-function splitEqualPrefix(inFullList::IList, inPrefixList::IList, inEqFunc::EqFunc, inAccum::IList = list())::Tuple{IList, IList}
-  local outRest::IList
-  local outPrefix::IList = list()
+function splitEqualPrefix(inFullList::List, inPrefixList::List, inEqFunc::EqFunc, inAccum::List = list())::Tuple{List, List}
+  local outRest::List
+  local outPrefix::List = list()
 
   local e1::T1
   local e2::T2
-  local rest_e1::IList = inFullList
-  local rest_e2::IList = inPrefixList
+  local rest_e1::List = inFullList
+  local rest_e2::List = inPrefixList
 
   while true
     if listEmpty(rest_e1) || listEmpty(rest_e2)
@@ -5513,10 +5513,10 @@ Ex: combination({{1, 2}, {3}, {4, 5}}) =>
 {{1, 3, 4}, {1, 3, 5}, {2, 3, 4}, {2, 3, 5}}
 =#
 TI = Any 
-function combination(inElements::IList)::IList
-  local outElements::IList
+function combination(inElements::List)::List
+  local outElements::List
 
-  local elems::IList
+  local elems::List
 
   if listEmpty(inElements)
     outElements = list()
@@ -5528,13 +5528,13 @@ function combination(inElements::IList)::IList
 end
 
 TI = Any 
-function combination_tail(inElements::IList, inCombination::IList, inAccumElems::IList)::IList
-  local outElements::IList
+function combination_tail(inElements::List, inCombination::List, inAccumElems::List)::List
+  local outElements::List
 
   outElements = begin
-    local head::IList
-    local rest::IList
-    local acc::IList
+    local head::List
+    local rest::List
+    local acc::List
     @match inElements begin
       head <| rest  => begin
         acc = inAccumElems
@@ -5560,10 +5560,10 @@ Ex: combinationMap({{1, 2}, {3}, {4, 5}}, func) =>
 =#
 TI = Any 
 TO = Any 
-function combinationMap(inElements::IList, inMapFunc::MapFunc)::IList
-  local outElements::IList
+function combinationMap(inElements::List, inMapFunc::MapFunc)::List
+  local outElements::List
 
-  local elems::IList
+  local elems::List
 
   elems = combinationMap_tail(inElements, inMapFunc, list(), list())
   outElements = listReverse(elems)
@@ -5572,13 +5572,13 @@ end
 
 TI = Any 
 TO = Any 
-function combinationMap_tail(inElements::IList, inMapFunc::MapFunc, inCombination::IList, inAccumElems::IList)::IList
-  local outElements::IList
+function combinationMap_tail(inElements::List, inMapFunc::MapFunc, inCombination::List, inAccumElems::List)::List
+  local outElements::List
 
   outElements = begin
-    local head::IList
-    local rest::IList
-    local acc::IList
+    local head::List
+    local rest::List
+    local acc::List
     @match inElements begin
       head <| rest  => begin
         acc = inAccumElems
@@ -5606,10 +5606,10 @@ Ex: combinationMap({{1, 2}, {3}, {4, 5}}, func, x) =>
 TI = Any 
 TO = Any 
 ArgT1 = Any 
-function combinationMap1(inElements::IList, inMapFunc::MapFunc, inArg::ArgT1)::IList
-  local outElements::IList
+function combinationMap1(inElements::List, inMapFunc::MapFunc, inArg::ArgT1)::List
+  local outElements::List
 
-  local elems::IList
+  local elems::List
 
   elems = combinationMap1_tail(inElements, inMapFunc, inArg, list(), list())
   outElements = listReverse(elems)
@@ -5619,13 +5619,13 @@ end
 TI = Any 
 TO = Any 
 ArgT1 = Any 
-function combinationMap1_tail(inElements::IList, inMapFunc::MapFunc, inArg::ArgT1, inCombination::IList, inAccumElems::IList)::IList
-  local outElements::IList
+function combinationMap1_tail(inElements::List, inMapFunc::MapFunc, inArg::ArgT1, inCombination::List, inAccumElems::List)::List
+  local outElements::List
 
   outElements = begin
-    local head::IList
-    local rest::IList
-    local acc::IList
+    local head::List
+    local rest::List
+    local acc::List
     @match inElements begin
       head <| rest  => begin
         acc = inAccumElems
@@ -5646,14 +5646,14 @@ end
 TI = Any 
 TO = Any 
 ArgT1 = Any 
-function combinationMap1_tail2(inHead::IList, inRest::IList, inMapFunc::MapFunc, inArg::ArgT1, inCombination::IList, inAccumElems::IList)::IList
-  local outElements::IList
+function combinationMap1_tail2(inHead::List, inRest::List, inMapFunc::MapFunc, inArg::ArgT1, inCombination::List, inAccumElems::List)::List
+  local outElements::List
 
   outElements = begin
     local head::TI
-    local rest::IList
-    local comb::IList
-    local accum::IList
+    local rest::List
+    local comb::List
+    local accum::List
     @match (inHead, inCombination, inAccumElems) begin
       (head <| rest, comb, accum)  => begin
         accum = combinationMap1_tail(inRest, inMapFunc, inArg, head <| comb, accum)
@@ -5669,13 +5669,13 @@ end
 
 #= Checks if all elements in the lists have equal references =#
 T = Any 
-function allReferenceEq(inList1::IList, inList2::IList)::Bool
+function allReferenceEq(inList1::List, inList2::List)::Bool
   local outEqual::Bool
   outEqual = begin
     local el1::T
     local el2::T
-    local rest1::IList
-    local rest2::IList
+    local rest1::List
+    local rest2::List
     @match (inList1, inList2) begin
       (el1 <| rest1, el2 <| rest2)  => begin
         if referenceEq(el1, el2)
@@ -5702,9 +5702,9 @@ lists as long as they are equal. Ex:
 removeEqualPrefix({1, 2, 3, 5, 7}, {1, 2, 3, 9, 7}) => ({5, 7}, {9, 7}) =#
 T1 = Any 
 T2 = Any 
-function removeEqualPrefix(inList1::IList, inList2::IList, inCompFunc::CompFunc)::Tuple{IList, IList}
-  local outList2::IList = inList2
-  local outList1::IList = inList1
+function removeEqualPrefix(inList1::List, inList2::List, inCompFunc::CompFunc)::Tuple{List, List}
+  local outList2::List = inList2
+  local outList1::List = inList1
   local e1::T1
   local e2::T2
   while ! (listEmpty(outList1) || listEmpty(outList2))
@@ -5721,7 +5721,7 @@ end
 
 #= Returns true if inList1 is longer than inList2, otherwise false. =#
 T = Any 
-function listIsLonger(inList1::IList, inList2::IList)::Bool
+function listIsLonger(inList1::List, inList2::List)::Bool
   local isLonger::Bool
 
   isLonger = intGt(listLength(inList1), listLength(inList2))
@@ -5729,8 +5729,8 @@ function listIsLonger(inList1::IList, inList2::IList)::Bool
 end
 
 T = Any 
-function toListWithPositions(inList::IList)::IList
-  local outList::IList = list()
+function toListWithPositions(inList::List)::List
+  local outList::List = list()
   local pos::ModelicaInteger = 1
   for e in inList
     outList = (e, pos) <| outList
@@ -5744,7 +5744,7 @@ end
 make NONE() if the list is empty
 make SOME(list) if the list is not empty =#
 T = Any 
-function mkOption(inList::IList)::Option
+function mkOption(inList::List)::Option
   local outOption::Option
   outOption = if listEmpty(inList)
     NONE()
@@ -5757,7 +5757,7 @@ end
 #= Returns true if the given predicate function returns true for all elements in
 the given list. =#
 T = Any 
-function all(inList::IList, inFunc::PredFunc)::Bool
+function all(inList::List, inFunc::PredFunc)::Bool
   local outResult::Bool
   for e in inList
     if ! inFunc(e)
@@ -5772,9 +5772,9 @@ end
 #= Takes a list of values and a filter function over the values and returns 2
 sub lists of values for which the matching function returns true and false. =#
 T = Any 
-function separateOnTrue(inList::IList, inFilterFunc::FilterFunc)::Tuple{IList, IList}
-  local outListFalse::IList = list()
-  local outListTrue::IList = list()
+function separateOnTrue(inList::List, inFilterFunc::FilterFunc)::Tuple{List, List}
+  local outListFalse::List = list()
+  local outListTrue::List = list()
   for e in inList
     if inFilterFunc(e)
       outListTrue = e <| outListTrue
@@ -5789,9 +5789,9 @@ end
 sub lists of values for which the matching function returns true and false. =#
 T = Any 
 ArgT1 = Any 
-function separate1OnTrue(inList::IList, inFilterFunc::FilterFunc, inArg1::ArgT1)::Tuple{IList, IList}
-  local outListFalse::IList = list()
-  local outListTrue::IList = list()
+function separate1OnTrue(inList::List, inFilterFunc::FilterFunc, inArg1::ArgT1)::Tuple{List, List}
+  local outListFalse::List = list()
+  local outListTrue::List = list()
 
   for e in inList
     if inFilterFunc(e, inArg1)
@@ -5805,7 +5805,7 @@ end
 
 TI = Any 
 TO = Any 
-function mapFirst(inList::IList, inFunc::FindMapFunc)::TO
+function mapFirst(inList::List, inFunc::FindMapFunc)::TO
   local outElement::TO
   local found::Bool
   for e in inList
@@ -5819,7 +5819,7 @@ function mapFirst(inList::IList, inFunc::FindMapFunc)::TO
 end
 
 T = Any 
-function isSorted(inList::IList, inFunc::Comp)::Bool
+function isSorted(inList::List, inFunc::Comp)::Bool
   local b::Bool = true
   local found::Bool
   local prev::T
@@ -5838,13 +5838,13 @@ end
 
 #= Applies a function to only the elements given by the sorted list of indices. =#
 T = Any 
-function mapIndices(inList::IList, indices::IList, func::MapFunc)::IList
-  local outList::IList
+function mapIndices(inList::List, indices::List, func::MapFunc)::List
+  local outList::List
   local i::ModelicaInteger = 1
   local idx::ModelicaInteger
-  local rest_idx::IList
+  local rest_idx::List
   local e::T
-  local rest_lst::IList
+  local rest_lst::List
   if listEmpty(indices)
     outList = inList
     return outList

@@ -485,13 +485,13 @@ end
 #= O(n) =#
 
 function listReverse(inLst::List{T})::List{T} where {T <: Any}
-  local outLst::List{T} = Nil{T}()
-  if isa(inLst, Nil)
-    return Nil{T}()
+  local outLst::List{T} = nil()
+  if isa(inLst, Nothing)
+    return nil()
   end
   while true
     local prev::List{T}
-    if isa(inLst, Nil)
+    if isa(inLst, Nothing)
       break
     end
     outLst = listHead(inLst) => outLst
@@ -530,11 +530,11 @@ end
 
 #= O(1) =#
 function listRest(lst::List{T})::List{T} where {T <: Any}
-  if isa(lst, Nil) nil() else lst.tail end
+  if isa(lst, Nothing) nil() else lst.tail end
 end
 
 function listHead(lst::List{T})::T where {T <: Any }
-  if isa(lst, Nil) nil() else lst.head end
+  if isa(lst, Nothing) nil() else lst.head end
 end
 
 #= O(index) =#
@@ -546,7 +546,7 @@ end
 
 #= O(1) =#
 function listEmpty(lst::List{T})::Bool where {T <: Any}
-  if isa(lst, Nil) true else false end;
+  if isa(lst, Nothing) true else false end;
 end
 
 #= O(1) ? =#
@@ -583,7 +583,11 @@ end
 
 #= Better =#
 function arrayList(arr::Array{T})::List{T} where {T <: Any}
-  list(arr...)
+  local lst::List{T} = nil()
+  for i in length(arr):-1:1
+    lst = Cons{T}(arr[i], lst)
+  end
+  lst
 end
 
 #= O(n) =#

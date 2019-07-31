@@ -31,14 +31,15 @@
 
 module ListDef
 
-abstract type List{T} end
-
-struct Nil{T} <: List{T} end
-
-struct Cons{T} <: List{T}
-  head::T
-  tail::List{T}
+abstract type AbstractList{T}
 end
+
+struct Cons{T} <: AbstractList{T}
+  head::T
+  tail::Union{Cons{T}, Nothing}
+end
+
+List{T} = Union{AbstractList{T}, Nothing}
 
 #= 
   These promotion rules might seem a bit odd. Still it is the most efficient way I found of casting immutable lists
@@ -55,18 +56,6 @@ Base.convert(t::Type{Cons{S}}, x::Cons{T}) where {S, T <: S} = let
   List(S, promote(x)...)
 end
 
-Base.convert(::Type{List{T}}, x::Nil{Any}) where {T} = let
-  Nil{T}()
-end
-
-Base.convert(::Type{Nil{T}}, x::Nil) where {T} = let
-  Nil{T}()
-end
-
-Base.convert(::Type{List{S}}, x::Nil{T}) where {S, T <: S} = let
-  Nil{S}()
-end
-
 Base.convert(::Type{T}, a::List) where {T <: List} = let
   a isa T ? a : List(eltype(T), promote(a)...)
 end
@@ -76,13 +65,13 @@ Base.convert(::Type{List{T}}, x::Cons{T}) where {T} =  x
 
 Base.convert(::Type{Cons{T}}, x::Cons{T}) where {T} = x
 
-Base.convert(::Type{List{T}}, x::Nil{T}) where {T} = x
-
-Base.convert(::Type{List{Any}}, x::Nil{Any}) = x
-
 Base.convert(::Type{List{T}}, x::List{T}) where {T} = x
 
 Base.convert(::Type{List}, x::List) = x
+
+Base.convert(::Type{List{T}}, x::Nothing) where {T} = x
+
+Base.convert(::Type{Cons{T}}, x::Nothing) where {T} = x
 
 Base.promote_rule(a::Type{List{T}}, b::Type{List{S}}) where {T,S} = let
   el_same(promote_type(T,S), a, b)
@@ -114,8 +103,8 @@ List(T::Type #= Hack.. =#, args...) = let
   lst
 end
 
-nil(T) = Nil{T}()
-nil() = Nil{Any}()
+nil(T) = nothing
+nil() = nothing
 list() = nil()
 
 #= Support for primitive constructs. Numbers. Integer bool e.t.c =#
@@ -127,29 +116,19 @@ function list(els::T...)::List{T} where {T <: Number}
   lst
 end
 
-#= Strings can also be considered a primitive...=#
-function list(els::T...)::List{T} where {T <: AbstractString}
-  local lst::List{T} = nil()
-  for i in length(els):-1:1
-    lst = Cons{T}(els[i], lst)
-  end
-  lst
-end
 
 #= Support hieractical constructs. Concrete elements =#
 function list(els...)::List
   local S::Type = eltype(els)
-  local lst::List{S} = Nil{S}()
+  local lst::List{S} = nothing
   for i in length(els):-1:1
     lst = Cons{S}(els[i], lst)
   end
   lst
 end
 
-cons(v::T, ::Nil{Any}) where {T} = Cons{T}(v, nil(T))
-cons(v, ::Nil{T}) where {T} = Cons{T}(v, nil(T))
+cons(v::T, ::Nothing) where {T} = Cons{T}(v, nil())
 cons(v, l::Cons{T}) where {T} = Cons{T}(v, l)
-#= Mixed conses with one common superclass =#
 cons(v::T, l::Cons{S}) where {S, T <: S} = let
   Cons{S}(v, l)
 end
@@ -164,8 +143,10 @@ Base.Pair(v, l::List{T}) where {T} = cons(v, l)
 <|(v, lst::List{T}) where{T} = cons(v, lst)
 <|(v::S, lst::List{T}) where{T, S <: T} = cons(v, lst)
 
-Base.length(::Nil) = 0
 function Base.length(l::List)::Integer
+  if l == nothing
+    return 0
+  end
     local n::Int64 = 0
     for _ in l
         n += 1
@@ -173,7 +154,7 @@ function Base.length(l::List)::Integer
     n
 end
 
-Base.iterate(::List, ::Nil) = nothing
+Base.iterate(::List, ::Nothing) = nothing
 function Base.iterate(l::List, state::Cons = l)
     state.head, state.tail
 end
@@ -223,13 +204,10 @@ end
 
 #= Julia standard sort is pretty good =#
 Base.sort(lst::List) = let
-  list(sort([lst...])...)
+  list(sort(collect(lst...))...)
 end
 
-#= Immutable list. List is short for it but cannot be used in all contexts=#
-IList = List
-
-export List, list, Nil, nil, Cons, cons, <|, IList
+export List, list, Cons, cons, <|, nil
 export @do_threaded_for
 
 end

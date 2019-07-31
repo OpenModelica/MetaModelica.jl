@@ -141,7 +141,7 @@ end
 #= Takes an array and a list of indices, and returns a new array with the
 indexed elements. Will fail if any index is out of bounds. =#
 T = Any 
-function select(inArray::MArray, inIndices::IList)::MArray
+function select(inArray::MArray, inIndices::List)::MArray
   local outArray::MArray
   local i::ModelicaInteger = 1
   outArray = arrayCreateNoInit(listLength(inIndices), inArray[1])
@@ -212,7 +212,7 @@ end
 #= As map, but takes a list in and creates an array from the result. =#
 TI = Any 
 TO = Any 
-function mapList(inList::IList, inFunc::FuncType)::MArray
+function mapList(inList::List, inFunc::FuncType)::MArray
   local outArray::MArray
   local i::ModelicaInteger = 2
   local len::ModelicaInteger = listLength(inList)
@@ -367,7 +367,7 @@ reduce([1, 2, 3], intAdd) => 6 =#
 T = Any 
 function reduce(inArray::MArray, inReduceFunc::ReduceFunc)::T
   local outResult::T
-  local rest::IList
+  local rest::List
   outResult = arrayGet(inArray, 1)
   for i in 2:arrayLength(inArray)
     outResult = inReduceFunc(outResult, arrayGet(inArray, i))
@@ -396,14 +396,14 @@ function updatewithArrayIndexFirst(inIndex::ModelicaInteger, inArraySrc::MArray,
 end
 
 T = Any 
-function updatewithListIndexFirst(inList::IList, inStartIndex::ModelicaInteger, inArraySrc::MArray, inArrayDest::MArray)
+function updatewithListIndexFirst(inList::List, inStartIndex::ModelicaInteger, inArraySrc::MArray, inArrayDest::MArray)
   for i in inStartIndex:inStartIndex + listLength(inList)
     arrayUpdate(inArrayDest, i, inArraySrc[i])
   end
 end
 
 T = Any 
-function updateElementListAppend(inIndex::ModelicaInteger, inValue::IList, inArray::MArray)
+function updateElementListAppend(inIndex::ModelicaInteger, inValue::List, inArray::MArray)
   arrayUpdate(inArray, inIndex, listAppend(inArray[inIndex], inValue))
 end
 
@@ -485,7 +485,7 @@ end
 
 #= Appends a list to a list element of an array. =#
 T = Any 
-function appendToElement(inIndex::ModelicaInteger, inElements::IList, inArray::MArray)::MArray
+function appendToElement(inIndex::ModelicaInteger, inElements::List, inArray::MArray)::MArray
   local outArray::MArray
   outArray = arrayUpdate(inArray, inIndex, listAppend(inArray[inIndex], inElements))
   outArray
@@ -493,12 +493,12 @@ end
 
 #= Returns a new array with the list elements added to the end of the given array. =#
 T = Any 
-function appendList(arr::MArray, lst::IList)::MArray
+function appendList(arr::MArray, lst::List)::MArray
   local outArray::MArray
   local arr_len::ModelicaInteger = arrayLength(arr)
   local lst_len::ModelicaInteger
   local e::T
-  local rest::IList
+  local rest::List
   if listEmpty(lst)
     outArray = arr
   elseif arr_len == 0
@@ -584,8 +584,8 @@ end
 
 #= Gets the elements between inStart and inEnd. =#
 T = Any 
-function getRange(inStart::ModelicaInteger, inEnd::ModelicaInteger, inArray::MArray)::IList
-  local outList::IList = list()
+function getRange(inStart::ModelicaInteger, inEnd::ModelicaInteger, inArray::MArray)::List
+  local outList::List = list()
   local value::T
   if inStart > arrayLength(inArray)
     fail()
@@ -658,7 +658,7 @@ function arrayListsEmpty(arr::MArray)::Bool
 end
 
 T = Any 
-function arrayListsEmpty1(lst::IList, isEmptyIn::Bool)::Bool
+function arrayListsEmpty1(lst::List, isEmptyIn::Bool)::Bool
   local isEmptyOut::Bool
   isEmptyOut = listEmpty(lst) && isEmptyIn
   isEmptyOut
@@ -698,7 +698,7 @@ function exist(arr::MArray, pred::PredFunc)::Bool
 end
 
 T = Any 
-function insertList(arr::MArray, lst::IList, startPos::ModelicaInteger)::MArray
+function insertList(arr::MArray, lst::List, startPos::ModelicaInteger)::MArray
   local i::ModelicaInteger = startPos
   for e in lst
     arr[i] = e

@@ -25,7 +25,7 @@ using Test
   end
   
   #= The empty list is a List =#
-  @test supertype(typeof(nil())) == List{Any}
+  @test nil() == list()
   
   @test 3 == begin
     local lst = nil()
