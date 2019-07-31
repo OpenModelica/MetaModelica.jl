@@ -49,15 +49,15 @@ List{T} = Union{AbstractList{T}, Nothing}
 +=#
 
 Base.convert(::Type{List{S}}, x::Cons{T}) where {S, T <: S} = let
-  List(S, promote(x)...)
+  List(S, promote(x))
 end
 
 Base.convert(t::Type{Cons{S}}, x::Cons{T}) where {S, T <: S} = let
-  List(S, promote(x)...)
+  List(S, promote(x))
 end
 
 Base.convert(::Type{T}, a::List) where {T <: List} = let
-  a isa T ? a : List(eltype(T), promote(a)...)
+  a isa T ? a : List(eltype(T), promote(a))
 end
 
 #= Identity cases =#
@@ -95,10 +95,11 @@ Base.eltype(::Cons{T}) where {T} = let
 end
 
 #= For "Efficient" casting... O(N) * C" =#
-List(T::Type #= Hack.. =#, args...) = let
+List(T::Type #= Hack.. =#, args) = let
   local lst::List{T} = nil(T)
-  for e in first(args)
-    lst = Cons{T}(e, lst)
+  local t::Array{T} = collect(first(args))
+  for i in length(t):-1:1
+    lst = Cons{T}(t[i], lst)
   end
   lst
 end
