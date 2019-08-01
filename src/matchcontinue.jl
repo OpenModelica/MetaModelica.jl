@@ -244,12 +244,12 @@ end
 """
 function handleSugar(T)
   T =
-    if string(T) == "=>" || string(T) == "<|"
+    if string(T) == "<|"
       # Syntactic sugar cons. Two operators for now I suggest we remove =>
       :Cons
     elseif string(T) == "nil"
       # Syntactic sugar for Nil
-      :Nothing
+      :Nil
     elseif string(T) == "NONE"
       # Syntactic sugar for Nothing
       :Nothing

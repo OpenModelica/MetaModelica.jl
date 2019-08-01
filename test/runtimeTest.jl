@@ -56,7 +56,7 @@ end
     @test length(lst) == 3
     @test listHead(lst) == COMPLEX(0, 0)
     @test listLength(listReverse(lst)) == 3
-    local lst2::List{Complex} = COMPLEX(0,0) => lst
+    local lst2::List{Complex} = COMPLEX(0,0) <| lst
     @test length(lst2) == 4
     local lst3::List{Complex} = listAppend(lst, lst2)
     @test length(lst3) == 7

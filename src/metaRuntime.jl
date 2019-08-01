@@ -372,7 +372,6 @@ list elements with the string delimiter inserted between elements.
 Example: stringDelimitList({\\\"x\\\",\\\"y\\\",\\\"z\\\"}, \\\", \\\") => \\\"x, y, z\\\" =#
 function stringDelimitList(strs::List{String}, delimiter::String)::String
   local str::String
-
   #= Defined in the runtime =#
   str
 end
@@ -472,7 +471,7 @@ end
 
 #= O(length(lst1)), O(1) if either list is empty.. needs improvment =#
 
-function listAppend(lst1::List{T}, lst2 = list()::List{T})::List{T} where {T <: Any}
+function listAppend(lst1::List{T}, lst2 = list()::List{T})::List{T} where {T}
   if listEmpty(lst2)
     return lst1
   end
@@ -484,28 +483,28 @@ end
 
 #= O(n) =#
 
-function listReverse(inLst::List{T})::List{T} where {T <: Any}
+function listReverse(inLst::List{T})::List{T} where {T}
   local outLst::List{T} = nil()
   if isa(inLst, Nothing)
     return nil()
   end
   while true
     local prev::List{T}
-    if isa(inLst, Nothing)
+    if isa(inLst, Nil)
       break
     end
-    outLst = listHead(inLst) => outLst
-    inLst = listRest(inLst)
+    outLst = inLst.head <| outLst
+    inLst = inLst.tail
   end
   outLst
 end
 
-function listLength(lst::List{T})::ModelicaInteger where {T <: Any}
+function listLength(lst::List{T})::ModelicaInteger where {T}
   length(lst)
 end
 
 #= O(n) =#
-function listMember(element::T, lst::List{T})::Bool where {T <: Any}
+function listMember(element::T, lst::List{T})::Bool where {T}
   for e in lst
     if e == element
       return true
@@ -515,7 +514,7 @@ function listMember(element::T, lst::List{T})::Bool where {T <: Any}
 end
 
 #= O(index) =#
-function listGet(lst::List{T}, index #= one-based index =#::ModelicaInteger)::T where {T <: Any}
+function listGet(lst::List{T}, index #= one-based index =#::ModelicaInteger)::T where {T}
   if index == 1
     return listHead(lst)
   end
@@ -529,12 +528,12 @@ function listGet(lst::List{T}, index #= one-based index =#::ModelicaInteger)::T 
 end
 
 #= O(1) =#
-function listRest(lst::List{T})::List{T} where {T <: Any}
-  if isa(lst, Nothing) nil() else lst.tail end
+function listRest(lst::List{T})::List{T} where {T}
+  if isa(lst, Nil) nil() else lst.tail end
 end
 
-function listHead(lst::List{T})::T where {T <: Any }
-  if isa(lst, Nothing) nil() else lst.head end
+function listHead(lst::List{T})::T where {T }
+  if isa(lst, Nil) nil() else lst.head end
 end
 
 #= O(index) =#
@@ -545,12 +544,12 @@ function listDelete(inLst::List{A}, index #= one-based index =#::ModelicaInteger
 end
 
 #= O(1) =#
-function listEmpty(lst::List{T})::Bool where {T <: Any}
-  if isa(lst, Nothing) true else false end;
+function listEmpty(lst::List{T})::Bool where {T}
+  if isa(lst, Nil) true else false end;
 end
 
 #= O(1) ? =#
-function arrayLength(arr::Array{T})::ModelicaInteger where {T <: Any}
+function arrayLength(arr::Array{T})::ModelicaInteger where {T}
   length(arr)
 end
 
@@ -569,20 +568,8 @@ function arrayCreate(size::ModelicaInteger, initialValue::A)::Array{A} where {A 
   fill(initialValue, size)
 end
 
-#= O(n) =#
-# VERY INEFFICENT, 2000 elements and Julia dies. Not acceptable(!)
-
-# Pattern occurs in Compiler, how to handle?
-# function arrayList(arr::Array{T})::List{T} where {T <: Any}
-#   local lst::List{A} = nil()
-#   for i in arr
-#     lst = Cons(i, lst)
-#   end
-#   lst
-# end
-
 #= Better =#
-function arrayList(arr::Array{T})::List{T} where {T <: Any}
+function arrayList(arr::Array{T})::List{T} where {T}
   local lst::List{T} = nil()
   for i in length(arr):-1:1
     lst = Cons{T}(arr[i], lst)
@@ -591,7 +578,7 @@ function arrayList(arr::Array{T})::List{T} where {T <: Any}
 end
 
 #= O(n) =#
-function listArray(lst::List{T})::Array{T} where {T <: Any}
+function listArray(lst::List{T})::Array{T} where {T}
   local arr::Array{T} = []
   for i in lst
     push!(arr, i)
@@ -765,7 +752,7 @@ function referenceDebugString(functionSymbol::A)::String where {A <: Any}
 end
 
 #=TODO: I am far from sure that this will fly.. in Julia. The code generated from the transpiler is correct however=#
-function isPresent(ident::T)::Bool where {T <: Any}
+function isPresent(ident::T)::Bool where {T}
   local b::Bool
 
   b = true

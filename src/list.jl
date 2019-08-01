@@ -12,7 +12,7 @@
  # ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS PROGRAM CONSTITUTES
  # RECIPIENT'S ACCEPTANCE OF THE OSMC PUBLIC LICENSE OR THE GPL VERSION 3,
  # ACCORDING TO RECIPIENTS CHOICE.
- #
+ #'
  # The OpenModelica software and the Open Source Modelica
  # Consortium (OSMC) Public License (OSMC-PL) are obtained
  # from OSMC, either from the above address,
@@ -31,15 +31,17 @@
 
 module ListDef
 
-abstract type AbstractList{T}
-end
+#=!!! Observe we only ever create Nil{Any} !!!=#
+struct Nil{T} end
 
-struct Cons{T} <: AbstractList{T}
+struct Cons{T}
   head::T
-  tail::Union{Cons{T}, Nothing}
+  tail::Union{Nil, Cons{T}}
 end
 
-List{T} = Union{AbstractList{T}, Nothing}
+List{T} = Union{Nil{T}, Cons{T}, Nil}
+List() = Nil{Any}()
+Nil() = List()
 
 #= 
   These promotion rules might seem a bit odd. Still it is the most efficient way I found of casting immutable lists
@@ -48,11 +50,7 @@ List{T} = Union{AbstractList{T}, Nothing}
   recursivly 
 +=#
 
-Base.convert(::Type{List{S}}, x::Cons{T}) where {S, T <: S} = let
-  List(S, promote(x))
-end
-
-Base.convert(t::Type{Cons{S}}, x::Cons{T}) where {S, T <: S} = let
+Base.convert(::Type{List{S}}, x::List{T}) where {S, T <: S} = let
   List(S, promote(x))
 end
 
@@ -61,23 +59,9 @@ Base.convert(::Type{T}, a::List) where {T <: List} = let
 end
 
 #= Identity cases =#
-Base.convert(::Type{Nothing}, x::Cons{T}) where {S, T<:S}=  x
-
-Base.convert(::Type{List{T}}, x::Cons{T}) where {T} =  x
-
-Base.convert(::Type{Cons{T}}, x::Cons{T}) where {T} = x
-
 Base.convert(::Type{List{T}}, x::List{T}) where {T} = x
-
 Base.convert(::Type{List}, x::List) = x
-
-Base.convert(::Type{List{T}}, x::Nothing) where {T} = x
-
-Base.convert(::Type{List{T}}, x::List{Nothing}) where {T} = x
-
-Base.convert(::Type{Nothing}, x::Union{Nothing, AbstractList{Nothing}}) = nothing
-
-Base.convert(::Type{Cons{T}}, x::Nothing) where {T} = x
+Base.convert(::Type{List}, x::Nil) = x
 
 Base.promote_rule(a::Type{List{T}}, b::Type{List{S}}) where {T,S} = let
   el_same(promote_type(T,S), a, b)
@@ -88,21 +72,22 @@ Base.eltype(::Type{List{T}}) where {T} = let
   T
 end
 
-Base.eltype(::Type{Cons{T}}) where {T} = let
-  T
-end
-
 Base.eltype(::List{T}) where {T} = let
   T
 end
 
-Base.eltype(::Cons{T}) where {T} = let
-  T
+
+Base.eltype(::Type{Nil}) where {T} = let
+  Nil
+end
+
+Base.eltype(::Nil) where {T} = let
+  Any
 end
 
 #= For "Efficient" casting... O(N) * C" =#
 List(T::Type #= Hack.. =#, args) = let
-  local lst::List{T} = nil(T)
+  local lst::List{T} = nil()
   local t::Array{T} = collect(first(args))
   for i in length(t):-1:1
     lst = Cons{T}(t[i], lst)
@@ -110,9 +95,8 @@ List(T::Type #= Hack.. =#, args) = let
   lst
 end
 
-#= Yes...  (: =#
-nil(T) = nothing
-nil() = nothing
+#= if the head element is nil the list is empty.=#
+nil() = List()
 list() = nil()
 
 #= Support for primitive constructs. Numbers. Integer bool e.t.c =#
@@ -127,42 +111,42 @@ end
 #= Support hieractical constructs. Concrete elements =#
 function list(els...)::List
   local S::Type = eltype(els)
-  local lst::List{S} = nothing
+  local lst::List{S} = nil()
   for i in length(els):-1:1
     lst = Cons{S}(els[i], lst)
   end
   lst
 end
 
-cons(v::T, ::Nothing) where {T} = Cons{T}(v, nil())
-cons(v, l::Cons{T}) where {T} = Cons{T}(v, l)
-cons(v::T, l::Cons{S}) where {S, T <: S} = let
+cons(v::T, ::Nil) where {T} = Cons{T}(v, Nil())
+cons(v::T, l::Cons{T}) where {T} = Cons{T}(v, l)
+cons(v, l::Cons{S}) where {S} = let
+  List{S}(v, l)
+end
+cons(v::Type{A}, l::Type{Cons{B}}) where {S, A <:S, B <:S } = let
   Cons{S}(v, l)
 end
-cons(v::A, l::Cons{B}) where {A, B} = let
-  #= Where there's a whip there's a way.. =#
-  @assert supertype(A) == supertype(B)
-  Cons{supertype(A)}(v, l)
-end
-# Right-associative operator ; conflicts with => in match expressions...
-Base.Pair(v, l::List{T}) where {T} = cons(v, l)
+
 # Suggestion for new operator <| also right assoc <| :), See I got a hat
-<|(v, lst::List{T}) where{T} = cons(v, lst)
-<|(v::S, lst::List{T}) where{T, S <: T} = cons(v, lst)
+<|(v, lst::Nil)  = cons(v, lst)
+<|(v, lst::Cons{T}) where{T} = cons(v, lst)
+<|(v::S, lst::Cons{T}) where{T, S <: T} = cons(v, lst)
 
-function Base.length(l::List)::Integer
-  if l == nothing
-    return 0
-  end
-    local n::Int64 = 0
-    for _ in l
-        n += 1
-    end
-    n
+function Base.length(l::Nil)::Int
+  0
 end
 
-Base.iterate(::List, ::Nothing) = nothing
-function Base.iterate(l::List, state::Cons = l)
+function Base.length(l::List)::Int
+  local n::Int = 0
+  for _ in l
+    n += 1
+  end
+  n
+end
+
+Base.iterate(::Nil) = nothing
+Base.iterate(x::Cons, y::Nil) = nothing
+function Base.iterate(l::Cons, state::List = l)
     state.head, state.tail
 end
 
@@ -214,7 +198,7 @@ Base.sort(lst::List) = let
   list(sort(collect(lst))...)
 end
 
-export List, list, Cons, cons, <|, nil
-export @do_threaded_for
+export List, list, cons, <|, nil
+export @do_threaded_for, Cons, Nil
 
 end

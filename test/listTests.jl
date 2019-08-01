@@ -21,7 +21,7 @@ using Test
   
   #= Test cons operator =#
   @test 3 == begin
-    length(1 => 2 => 3 => nil())
+    length(1 <| 2 <| 3 <| nil())
   end
   
   #= The empty list is a List =#
@@ -30,14 +30,14 @@ using Test
   @test 3 == begin
     local lst = nil()
     for i in [1,2,3]
-      lst = i => lst
+      lst = i <| lst
     end
     length(lst)
   end
   @test 3 == begin
     local lst = nil()
     for i in [1,2,3]
-      lst = i => lst
+      lst = i <| lst
     end
   length(lst)
   end
@@ -54,7 +54,7 @@ using Test
   #Test generic type 1
   @test let
     try
-      lst1::Cons{Any} = 1 <| nil()
+      lst1::List{Any} = 1 <| nil()
       true
     catch E
       println(E)
@@ -164,7 +164,7 @@ end
     @testset "Threaded Reduction test" begin
       @test list(@do_threaded_for a + b (a,b) (1:2, 3:4)) == list(4,6)
       @test sum(list(@do_threaded_for a + b (a,b) (1:10,1:10))) == 110
-      lst = 1 => list(@do_threaded_for a + b (a,b) (1:2, 3:4))
+      lst = 1 <| list(@do_threaded_for a + b (a,b) (1:2, 3:4))
       @test lst == list(1,4,6)
     end
   end
@@ -172,6 +172,7 @@ end
 
 @testset "Eltype and instantiation of composite with subtype tests" begin
   @test Int64 == eltype(list(1,2,3))
+  #= Our list is now a union =#
   @test Cons{Int64} == eltype(list(list(1)))
 
   abstract type AS end

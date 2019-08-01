@@ -17,17 +17,17 @@ end
 
 @test @match Cons(1,nil()) begin
   # case _::{} then true, using the Nil type
-  Cons(tail=nothing) => true
+  Cons(tail=Nil) => true
 end
 
 @test @match Cons(1,nil()) begin
   # case _::{} then true, using the Nil value
-  Cons(tail=nothing) => true
+  Cons(tail=Nil) => true
 end
 
-@test 3 == @match 1 => 2 => nil() begin
+@test 3 == @match 1 <| 2 <| nil() begin
   # case x::y::{} then x+y
-  (x => y => nil()) => x+y
+  x <| y <| nil() => x+y
 end
 
 @test 1 == @match 1 <| nil() begin
@@ -42,7 +42,7 @@ end
 
 @test 1 == @match list(1,2) begin
   # case x::2::{} then x
-  Cons(head=x, tail=Cons(head=2, tail=nothing)) => x
+  Cons(head=x, tail=Cons(head=2, tail=Nil)) => x
 end
 
 #= More advanced matching =#
