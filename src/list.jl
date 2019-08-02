@@ -43,11 +43,11 @@ List{T} = Union{Nil{T}, Cons{T}, Nil}
 List() = Nil{Any}()
 Nil() = List()
 
-#= 
+#=
   These promotion rules might seem a bit odd. Still it is the most efficient way I found of casting immutable lists
-  If someone see a better alternative to this approach please fix me :). Basically I create a new list in O(N) * C time 
-  with the type we cast to. Also, do not create new conversion strategies without measuring performance as they will call themselves 
-  recursivly 
+  If someone see a better alternative to this approach please fix me :). Basically I create a new list in O(N) * C time
+  with the type we cast to. Also, do not create new conversion strategies without measuring performance as they will call themselves
+  recursivly
 +=#
 
 Base.convert(::Type{List{S}}, x::List{T}) where {S, T <: S} = let
@@ -120,11 +120,10 @@ end
 
 cons(v::T, ::Nil) where {T} = Cons{T}(v, Nil())
 cons(v::T, l::Cons{T}) where {T} = Cons{T}(v, l)
-cons(v, l::Cons{S}) where {S} = let
-  List{S}(v, l)
-end
-cons(v::Type{A}, l::Type{Cons{B}}) where {S, A <:S, B <:S } = let
-  Cons{S}(v, l)
+cons(v::A, l::Cons{B}) where {A,B} = let
+  C = typejoin(A,B)
+  @assert C != Any
+  Cons{C}(convert(C,v),convert(Cons{C},l))
 end
 
 # Suggestion for new operator <| also right assoc <| :), See I got a hat
