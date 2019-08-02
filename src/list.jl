@@ -125,6 +125,7 @@ cons(v::A, l::Cons{B}) where {A,B} = let
   @assert C != Any
   Cons{C}(convert(C,v),convert(Cons{C},l))
 end
+consExternalC(::Type{T}, v, l) where {T} = Cons{T}(v, l) # Added for the C interface to be happy
 
 # Suggestion for new operator <| also right assoc <| :), See I got a hat
 <|(v, lst::Nil)  = cons(v, lst)
