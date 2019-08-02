@@ -41,12 +41,12 @@ function listReverseInPlace(inList::List{T})::List{T} where {T <: Any}
   MetaModelica.listReverse(inList)
 end
 
-""" O(1). A destructive operation changing the \\\"first\\\" part of a cons-cell. """
+""" O(1). A destructive operation changing the \"first\" part of a cons-cell. """
 function listSetFirst(inConsCell #= A non-empty list =#::List{A}, inNewContent::A) where {A <: Any}
   #= Defined in the runtime =#
 end
 
-""" O(1). A destructive operation changing the \\\"rest\\\" part of a cons-cell """
+""" O(1). A destructive operation changing the rest part of a cons-cell """
 NOTE: Make sure you do NOT create cycles as infinite lists are not handled well in the compiler. =#
 function listSetRest(inConsCell #= A non-empty list =#::List{A}, inNewRest::List{A}) where {A <: Any}
   #= Defined in the runtime =#
