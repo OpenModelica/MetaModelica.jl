@@ -78,6 +78,10 @@ Base.eltype(::List{T}) where {T} = let
   T
 end
 
+Base.eltype(::Type{Cons{T}}) where {T} = let
+  T
+end
+
 Base.eltype(::Type{Nil}) where {T} = let
   Nil
 end

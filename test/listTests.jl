@@ -3,30 +3,30 @@ module ListTests
 using MetaModelica
 using Test
 @testset "Baseline tests" begin
-  
+
   @test 0 == begin
     Ints = MetaModelica.List{Int}
     a::Ints = nil
     length(a)
   end
-  
+
   @test 3 == begin
     ints::List{Int} = list(1, 2, 3)
     length(ints)
   end
-  
+
   @test 3 == begin
     length(Cons(1, Cons(2, Cons(3,nil))))
   end
-  
+
   #= Test cons operator =#
   @test 3 == begin
     length(1 <| 2 <| 3 <| nil)
   end
-  
+
   #= The empty list is a List =#
   @test nil == list()
-  
+
   @test 3 == begin
     local lst = nil
     for i in [1,2,3]
@@ -89,8 +89,10 @@ struct SUB <: SUPER
   A
   B
 end
+struct SUB2 <: SUPER
+end
 
-@test let 
+@test let
   try
     lst1::List{Any} = list(SUB(1,2), SUB(1,2), SUB(1,2))
     true
@@ -120,6 +122,17 @@ end
   try
     lst2::List{SUPER} = bar(list(SUB(1,2), SUB(1,2), SUB(1,2)))
     true
+  catch E
+    println(E)
+    false
+  end
+end
+
+@test let
+  try
+    x = cons(SUB(1,2), cons(SUB2(), Cons{SUB2}(SUB2(),nil)))
+    t = convert(List{SUPER},x)
+    Cons{SUPER} == typeof(x)
   catch E
     println(E)
     false
