@@ -52,7 +52,7 @@ Nil() = List()
 
 """ For converting lists with more then one element"""
 Base.convert(::Type{List{S}}, x::Cons{T}) where {S, T <: S} = let
-    List(S, x)
+  List(S, x)
 end
 
 """ For converting lists of lists """
@@ -75,6 +75,10 @@ Base.eltype(::Type{List{T}}) where {T} = let
 end
 
 Base.eltype(::List{T}) where {T} = let
+  T
+end
+
+Base.eltype(::Type{Cons{T}}) where {T} = let
   T
 end
 
@@ -109,7 +113,7 @@ List(T::Type #= Hack.. =#, args) = let
   end
   local lst1::Cons{T} = Cons{T}(convert(T, args.head) ,nil)
   if args.tail isa Nil
-    return nil
+    return lst1
   end
   for i in args.tail
     lst1 = Cons{T}(i, lst1)
@@ -160,6 +164,25 @@ cons(v::A, l::Cons{B}) where {A,B} = let
   @assert C != Any
   Cons{C}(convert(C,v),convert(Cons{C},l))
 end
+
+"""
+_cons is a special cons function that returns a list of the common
+abstract type instead of the type of the struct itself. Using this
+may avoid future type conversions on the entire list to occur.
+Use this in particular in generated code where you cannot use cons
+responsibly.
+"""
+function _cons(head::A, tail::Cons{B}) where {A,B}
+  C = typejoin(A,B)
+  D = supertype(C)
+  if isstructtype(C) && !isabstracttype(C) && isabstracttype(D)
+    Cons{D}(convert(D,head),convert(List{D},tail))
+  else
+    Cons{C}(convert(C,head),convert(List{C},tail))
+  end
+end
+_cons(head::T, tail::Nil) where {T} = Cons{T}(v, nil)
+
 consExternalC(::Type{T}, v, l) where {T} = Cons{T}(v, l) # Added for the C interface to be happy
 
 # Suggestion for new operator <| also right assoc <| :), See I got a hat
