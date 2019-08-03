@@ -50,20 +50,22 @@ Nil() = List()
   recursivly
 +=#
 
-Base.convert(::Type{List{S}}, x::List{T}) where {S, T <: S} = let
-  List(S, promote(x))
+""" For converting lists with more then one element"""
+Base.convert(::Type{List{S}}, x::Cons{T}) where {S, T <: S} = let
+    List(S, x)
 end
 
-Base.convert(::Type{T}, a::List) where {T <: List} = let
-  a isa T ? a : List(eltype(T), promote(a))
+""" For converting lists of lists """
+Base.convert(::Type{T}, x::Cons) where {T <: Cons} = let
+  x isa T ? x : List(eltype(T), x)
 end
 
-#= Identity cases =#
-Base.convert(::Type{List{T}}, x::List{T}) where {T} = x
-Base.convert(::Type{List}, x::List) = x
-Base.convert(::Type{List}, x::Nil) = x
+#= Identiy cases =#
+Base.convert(::Type{List{T}}, x::Cons{T}) where {T} = x
+Base.convert(::Type{Cons{T}}, x::Cons{T}) where {T} = x
+Base.convert(::Type{Nil}, x::Nil) where {T} = nil
 
-Base.promote_rule(a::Type{List{T}}, b::Type{List{S}}) where {T,S} = let
+Base.promote_rule(a::Type{Cons{T}}, b::Type{Cons{S}}) where {T,S} = let
   el_same(promote_type(T,S), a, b)
 end
 
@@ -76,7 +78,6 @@ Base.eltype(::List{T}) where {T} = let
   T
 end
 
-
 Base.eltype(::Type{Nil}) where {T} = let
   Nil
 end
@@ -85,23 +86,44 @@ Base.eltype(::Nil) where {T} = let
   Any
 end
 
-#= For "Efficient" casting... O(N) * C" =#
-List(T::Type #= Hack.. =#, args) = let
-  local lst::List{T} = nil()
-  local t::Array{T} = collect(first(args))
-  for i in length(t):-1:1
-    lst = Cons{T}(t[i], lst)
+#= O(n) =#
+function listReverse(inLst::List{T})::List{T} where {T}
+  local outLst::List = nil
+  if isa(inLst, Nil)
+    return nil
   end
-  lst
+  while true
+    if isa(inLst, Nil)
+      break
+    end
+    outLst = Cons{T}(inLst.head, outLst)
+    inLst = inLst.tail
+  end
+  outLst
+end
+
+""" For \"Efficient\" casting... O(N) * C" """
+List(T::Type #= Hack.. =#, args) = let
+  if args isa Nil
+    return nil
+  end
+  local lst1::Cons{T} = Cons{T}(convert(T, args.head) ,nil)
+  if args.tail isa Nil
+    return nil
+  end
+  for i in args.tail
+    lst1 = Cons{T}(i, lst1)
+  end
+  lst1
 end
 
 #= if the head element is nil the list is empty.=#
-nil() = List()
-list() = nil()
+const nil = List()
+list() = nil
 
 #= Support for primitive constructs. Numbers. Integer bool e.t.c =#
 function list(els::T...)::List{T} where {T <: Number}
-  local lst::List{T} = nil()
+  local lst::List{T} = nil
   for i in length(els):-1:1
     lst = Cons{T}(els[i], lst)
   end
@@ -109,16 +131,29 @@ function list(els::T...)::List{T} where {T <: Number}
 end
 
 #= Support hieractical constructs. Concrete elements =#
-function list(els...)::List
-  local S::Type = eltype(els)
-  local lst::List{S} = nil()
+function list(a::A, b::B, els...) where {A, B}
+  local S::Type = typejoin(A, B, eltype(els))
+  @assert S != Any
+  local lst::Cons{S} = Cons{S}(a, Cons{S}(b, nil))
   for i in length(els):-1:1
     lst = Cons{S}(els[i], lst)
   end
   lst
 end
 
-cons(v::T, ::Nil) where {T} = Cons{T}(v, Nil())
+#= List of one element =#
+function list(a::T) where {T}
+  Cons{T}(a, nil)
+end
+
+#=List of two elements=#
+function list(a::A, b::B) where {A, B}
+  local S::Type = typejoin(A, B)
+  @assert S != Any
+  Cons{S}(a, Cons{S}(b, nil))
+end
+
+cons(v::T, ::Nil) where {T} = Cons{T}(v, nil)
 cons(v::T, l::Cons{T}) where {T} = Cons{T}(v, l)
 cons(v::A, l::Cons{B}) where {A,B} = let
   C = typejoin(A,B)
@@ -128,7 +163,7 @@ end
 consExternalC(::Type{T}, v, l) where {T} = Cons{T}(v, l) # Added for the C interface to be happy
 
 # Suggestion for new operator <| also right assoc <| :), See I got a hat
-<|(v, lst::Nil)  = cons(v, lst)
+<|(v, lst::Nil)  = cons(v, nil)
 <|(v, lst::Cons{T}) where{T} = cons(v, lst)
 <|(v::S, lst::Cons{T}) where{T, S <: T} = cons(v, lst)
 
@@ -199,6 +234,6 @@ Base.sort(lst::List) = let
 end
 
 export List, list, cons, <|, nil
-export @do_threaded_for, Cons, Nil
+export @do_threaded_for, Cons, Nil, listReverse
 
 end

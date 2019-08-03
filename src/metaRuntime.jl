@@ -471,7 +471,7 @@ end
 
 #= O(length(lst1)), O(1) if either list is empty.. needs improvment =#
 
-function listAppend(lst1::List{T}, lst2 = list()::List{T})::List{T} where {T}
+function listAppend(lst1::List{T}, lst2 = nil::List{T})::List{T} where {T}
   if listEmpty(lst2)
     return lst1
   end
@@ -481,23 +481,7 @@ function listAppend(lst1::List{T}, lst2 = list()::List{T})::List{T} where {T}
  list(lst1..., lst2...)
 end
 
-#= O(n) =#
 
-function listReverse(inLst::List{T})::List{T} where {T}
-  local outLst::List{T} = nil()
-  if isa(inLst, Nothing)
-    return nil()
-  end
-  while true
-    local prev::List{T}
-    if isa(inLst, Nil)
-      break
-    end
-    outLst = inLst.head <| outLst
-    inLst = inLst.tail
-  end
-  outLst
-end
 
 function listLength(lst::List{T})::ModelicaInteger where {T}
   length(lst)
@@ -529,11 +513,11 @@ end
 
 #= O(1) =#
 function listRest(lst::List{T})::List{T} where {T}
-  if isa(lst, Nil) nil() else lst.tail end
+  if isa(lst, Nil) nil else lst.tail end
 end
 
 function listHead(lst::List{T})::T where {T }
-  if isa(lst, Nil) nil() else lst.head end
+  if isa(lst, Nil) nil else lst.head end
 end
 
 #= O(index) =#
@@ -570,7 +554,7 @@ end
 
 #= Better =#
 function arrayList(arr::Array{T})::List{T} where {T}
-  local lst::List{T} = nil()
+  local lst::List{T} = nil
   for i in length(arr):-1:1
     lst = Cons{T}(arr[i], lst)
   end
@@ -781,5 +765,6 @@ end
 function sourceInfo()::SourceInfo
   local info::SourceInfo
   #= Defined in the runtime =#
-  info
+
+  SOURCEINFO("", true, 1, 2, 3, 4, 0.0)
 end
