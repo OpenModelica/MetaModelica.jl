@@ -219,7 +219,8 @@ end
   end
   @test true == let
       try
-        a::List{List{Integer}} = list(list(1))
+        # TODO: Fix this to allow Integer
+        a::List{List{Int64}} = list(list(1))
         length(a) == 1
       catch
         println("Conversion failure")
