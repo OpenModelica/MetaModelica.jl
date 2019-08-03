@@ -3,39 +3,39 @@ module MatchTests
 using MetaModelica
 using Test
 
-@test 1 == @match Cons(1,nil()) begin
+@test 1 == @match Cons(1,nil) begin
   # case x::_ then x
   Cons(head=x) => x
   # else 2
   _ => 2
 end
 
-@test_throws MatchFailure 1 == @match 1 <| nil() begin
+@test_throws MatchFailure 1 == @match 1 <| nil begin
   # case 2::_ then x // unbound variable error
   Cons(head=2) => x
 end
 
-@test @match Cons(1,nil()) begin
+@test @match Cons(1,nil) begin
   # case _::{} then true, using the Nil type
   Cons(tail=Nil) => true
 end
 
-@test @match Cons(1,nil()) begin
+@test @match Cons(1,nil) begin
   # case _::{} then true, using the Nil value
   Cons(tail=Nil) => true
 end
 
-@test 3 == @match 1 <| 2 <| nil() begin
+@test 3 == @match 1 <| 2 <| nil begin
   # case x::y::{} then x+y
   x <| y <| nil() => x+y
 end
 
-@test 1 == @match 1 <| nil() begin
+@test 1 == @match 1 <| nil begin
   # case x::y::{} then x+y
   x <| nil() => x
 end
 
-@test 3 == @match 1 <| 2 <| nil() begin
+@test 3 == @match 1 <| 2 <| nil begin
   # case x::y::{} then x+y
   x <| y <| nil() => x+y
 end

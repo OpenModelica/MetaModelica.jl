@@ -6,7 +6,7 @@ using Test
   
   @test 0 == begin
     Ints = MetaModelica.List{Int}
-    a::Ints = nil()
+    a::Ints = nil
     length(a)
   end
   
@@ -16,26 +16,26 @@ using Test
   end
   
   @test 3 == begin
-    length(Cons(1, Cons(2, Cons(3,nil()))))
+    length(Cons(1, Cons(2, Cons(3,nil))))
   end
   
   #= Test cons operator =#
   @test 3 == begin
-    length(1 <| 2 <| 3 <| nil())
+    length(1 <| 2 <| 3 <| nil)
   end
   
   #= The empty list is a List =#
-  @test nil() == list()
+  @test nil == list()
   
   @test 3 == begin
-    local lst = nil()
+    local lst = nil
     for i in [1,2,3]
       lst = i <| lst
     end
     length(lst)
   end
   @test 3 == begin
-    local lst = nil()
+    local lst = nil
     for i in [1,2,3]
       lst = i <| lst
     end
@@ -44,7 +44,7 @@ using Test
   #Test Concrete type
   @test let
     try
-      lst1::List{Int64} = 1 <| nil()
+      lst1::List{Int64} = 1 <| nil
       true
     catch E
       println(E)
@@ -54,7 +54,7 @@ using Test
   #Test generic type 1
   @test let
     try
-      lst1::List{Any} = 1 <| nil()
+      lst1::List{Any} = 1 <| nil
       true
     catch E
       println(E)
@@ -64,7 +64,7 @@ using Test
   #Test generic type 2
   @test let
     try
-      lst1::List{Any} = 1 <| nil()
+      lst1::List{Any} = 1 <| nil
       true
     catch E
       println(E)
@@ -190,5 +190,28 @@ end
     false
   end
 end
+end
+
+@testset "Testing type conversion for lists of lists" begin
+  @test true == begin
+    try
+      let
+        a::List{List{Integer}} = list(list())
+        true
+      end
+    catch
+      println("Conversion failure")
+      false
+    end
+  end
+  @test true == let
+      try
+        a::List{List{Integer}} = list(list(1))
+        length(a) == 1
+      catch
+        println("Conversion failure")
+        false
+      end
+  end
 end
 end #=End module=#
