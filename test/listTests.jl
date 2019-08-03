@@ -219,9 +219,9 @@ end
   end
   @test true == let
       try
-        # TODO: Fix this to allow Integer
-        a::List{List{Int64}} = list(list(1))
-        length(a) == 1
+        a::List{List{Integer}} = list(list(1))
+        b::List{List{Integer}} = list(list(1,2,3))
+        length(a) == length(b)
       catch
         println("Conversion failure")
         false
