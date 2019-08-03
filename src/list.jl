@@ -56,7 +56,7 @@ Base.convert(::Type{List{S}}, x::Cons{T}) where {S, T <: S} = let
 end
 
 """ For converting lists of lists """
-Base.convert(::Type{T}, x::Cons) where {T <: Cons} = let
+Base.convert(::Type{T}, x::Cons) where {T <: List} = let
   x isa T ? x : List(eltype(T), x)
 end
 
@@ -116,7 +116,7 @@ List(T::Type #= Hack.. =#, args) = let
     return lst1
   end
   for i in args.tail
-    lst1 = Cons{T}(i, lst1)
+    lst1 = Cons{T}(convert(T, i), lst1)
   end
   lst1
 end
