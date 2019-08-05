@@ -2,8 +2,8 @@
 module MetaModelicaTypes
 
 #= Real numbers are a bit different in Modelica compared to Julia =#
-ModelicaReal = Union{Signed, AbstractFloat}
-ModelicaInteger = Signed
+const ModelicaReal = Union{Signed, AbstractFloat}
+const ModelicaInteger = Signed
 #=
 TODO:
 
