@@ -188,7 +188,7 @@ function _cons(head::A, tail::Cons{B}) where {A,B}
 end
 _cons(head::T, tail::Nil) where {T} = Cons{T}(head, nil)
 
-consExternalC(::Type{T}, v, l) where {T} = Cons{T}(v, l) # Added for the C interface to be happy
+consExternalC(::Type{T}, v :: X, l :: List{T}) where {T, X <: T} = Cons{T}(v, l) # Added for the C interface to be happy
 
 """ <| Right associative cons operator """
 <|(v, lst::Nil)  = cons(v, nil)
