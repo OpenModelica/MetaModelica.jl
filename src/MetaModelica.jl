@@ -4,8 +4,8 @@ import MacroTools
 import MacroTools: @capture
 import ExportAll
   #=
-  Have to treat the types slightly different. 
-  Precompilation of the types need to occur before everything else 
+  Have to treat the types slightly different.
+  Precompilation of the types need to occur before everything else
 =#
 include("metaModelicaTypes.jl")
 import .MetaModelicaTypes

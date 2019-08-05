@@ -1,5 +1,5 @@
 #=
-  This file contains all functions that should be exported for the MetaModelica runtime. 
+  This file contains all functions that should be exported for the MetaModelica runtime.
   Add new exports here :)
 =#
 export boolAnd

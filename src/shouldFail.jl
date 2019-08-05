@@ -1,6 +1,6 @@
 """
-  This module provides the @shouldFail macro. 
-  @shouldFail(arg) succeeds if arg fails, where arg is a local equation/statement.
+  This function implements the @shouldFail macro.
+  @shouldFail(arg) succeeds if arg fails, where arg is a local match-equation/statement.
 """
 function genShouldFail(expr)
   quote
@@ -15,10 +15,9 @@ function genShouldFail(expr)
     end
   end
 end
-
+""" @shouldFail(arg) succeeds if arg fails, where arg is a local match-equation/statement. """
 macro shouldFail(expr)
   genShouldFail(expr)
 end
 
 export @shouldFail
-

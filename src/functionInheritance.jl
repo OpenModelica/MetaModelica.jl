@@ -1,27 +1,27 @@
-#= 
+"""
   Implementation of function inheritance. E.g enabling functions to extend other functions
   @ExtendedFunction pathStringNoQual pathString(usefq=false)
 
-  This means defining a new function pathStringNoQual equal to pathString. However, 
+  This means defining a new function pathStringNoQual equal to pathString. However,
   the usefq argument now has a different default value.
 
   We do so by creating a new function but passing the redefined arguments to it.
 
   It is also possible to define an anonymous function using the following syntax:
- 
+
   @ExtendedAnonFunction pathString(usefq=false)
- 
-  The later defines a lambda function that extends pathString. However, the default values of the 
+
+  The later defines a lambda function that extends pathString. However, the default values of the
   parameters can be changed MetaModelica style.
 
 @Author John Tinnerholm, same license as the rest of this package
 
-TODO: Note that ExtendedAnonFunction does not work for inline expressions 
-      Same with @ExtendedFunction. The reason being that certain variables will not be in use by 
+TODO: Note that ExtendedAnonFunction does not work for inline expressions
+      Same with @ExtendedFunction. The reason being that certain variables will not be in use by
       then.
-      Implement @ExtendedAnonInlineFunction, which does the same but requires less available compile time 
-      information.  
-=#
+      Implement @ExtendedAnonInlineFunction, which does the same but requires less available compile time
+      information.
+"""
 
 #= Used to indicate that a specific symbolic parameter does not have a default argument =#
 struct NoDefaultArg end
@@ -39,7 +39,7 @@ function getSignatureAsArrayFor(func::Function)::Array
   local nDefaultValues::Integer = size(defaultValues, 1)
   local nArgumentSymbols::Integer = size(argumentSymbols, 1)
   for i in 1:nArgumentSymbols
-    #= 
+    #=
       If no default value is present. We add nothing instead place.
       This case occurs if i is larger then the ammount of default values.
       However, sometimes Core.SlotNumber occurs other times it does not.
@@ -67,12 +67,12 @@ function getNewFunctionArgs(functionToExtend, func::Function)::Array{Tuple}
     push!(functionToExtendArgsAsTuples, (first(pair), last(pair)))
     end
   local numberOfArguments::Integer = size(functionToExtendArgsAsTuples, 1)
-  #= Create arguments for the new function. 
+  #= Create arguments for the new function.
      Generally the new functions have more symbols then the old =#
   newArgsAsString::Array = []
   for i in 1:numberOfArguments
       symToFind = first(functionToExtendArgsAsTuples[i])
-      findFunc(x) = first(x) == symToFind 
+      findFunc(x) = first(x) == symToFind
       #= We will get an array with one index! Functions must have unique symbols as arguments=#
       indexOfSym = first(findall(findFunc, oldFunctionSig))
       oldFunctionSig[indexOfSym] = functionToExtendArgsAsTuples[i]
@@ -113,7 +113,7 @@ function makeExtendedFunction(nameOfNewFunc::Symbol, functionToExtend::Expr, __m
   quote
     function $nameOfNewFunc($(newFuncArgs...))
       $func($(argSymArr...))
-    end 
+    end
   end |> esc
 end
 

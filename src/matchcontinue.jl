@@ -83,7 +83,7 @@ function handle_destruct_fields(value::Symbol, pattern, subpatterns, len, get::S
        end)
 end
 """
- Top level utility function. 
+ Top level utility function.
  Handles deconstruction of patterns together with the value symbol.
 """
 function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Vector{Expr})
@@ -183,7 +183,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
               if $(esc(T)) != NONE
                 if evaluated_fieldcount($(esc(T))) != $(esc(len))
                   error("Field count for pattern of type: $pattern is $($(esc(len))) expected $(evaluated_fieldcount($(esc(T))))")
-              end            
+              end
               end
               end)
       else
@@ -238,8 +238,8 @@ end
 end
 
 """
-  Handle syntactic sugar for MetaModelica mode. 
-  Mostly lists but also for the optional type. 
+  Handle syntactic sugar for MetaModelica mode.
+  Mostly lists but also for the optional type.
   Parenthesis for these expressions are skipped
 """
 function handleSugar(T)
@@ -259,7 +259,7 @@ function handleSugar(T)
 end
 
 """
-Handles match equations such as 
+Handles match equations such as
 @match x = 4
 """
 function handle_match_eq(expr)
@@ -328,7 +328,7 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
 end
 
 """
-Top level function for all match macros except 
+Top level function for all match macros except
 the match equation macro.
 """
 function handle_match_cases(value, match ; mathcontinue::Bool = false)

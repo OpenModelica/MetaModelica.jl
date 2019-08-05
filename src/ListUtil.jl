@@ -242,7 +242,7 @@ end
 
 #= Returns a list of n integers from 1 to inStop.
 Example: listIntRange(3) => {1,2,3} =#
-function intRange(inStop::ModelicaInteger) ::List{ModelicaInteger} 
+function intRange(inStop::ModelicaInteger) ::List{ModelicaInteger}
   local outRange::List{ModelicaInteger} = nil
 
   local i::ModelicaInteger = inStop
@@ -256,7 +256,7 @@ end
 
 #= Returns a list of integers from inStart to inStop.
 Example listIntRange2(3,5) => {3,4,5} =#
-function intRange2(inStart::ModelicaInteger, inStop::ModelicaInteger) ::List{ModelicaInteger} 
+function intRange2(inStart::ModelicaInteger, inStop::ModelicaInteger) ::List{ModelicaInteger}
   local outRange::List{ModelicaInteger} = nil
 
   local i::ModelicaInteger = inStop
@@ -277,7 +277,7 @@ end
 
 #= Returns a list of integers from inStart to inStop with step inStep.
 Example: listIntRange2(3,2,9) => {3,5,7,9} =#
-function intRange3(inStart::ModelicaInteger, inStep::ModelicaInteger, inStop::ModelicaInteger) ::List{ModelicaInteger} 
+function intRange3(inStart::ModelicaInteger, inStep::ModelicaInteger, inStop::ModelicaInteger) ::List{ModelicaInteger}
   local outRange::List{ModelicaInteger}
 
   if inStep == 0
@@ -299,7 +299,7 @@ function toOption(inList::List{T})  where {T}
       nil()  => begin
         NONE()
       end
-      
+
       e <|  nil()  => begin
         SOME(e)
       end
@@ -319,7 +319,7 @@ function fromOption(inElement::Option{T})  where {T}
       SOME(e)  => begin
         list(e)
       end
-      
+
       _  => begin
         nil
       end
@@ -348,19 +348,19 @@ function isEqual(inList1::List{T}, inList2::List{T}, inEqualLength::Bool)  where
       (e1 <| rest1, e2 <| rest2, _) where (valueEq(e1, e2))  => begin
         isEqual(rest1, rest2, inEqualLength)
       end
-      
+
       ( nil(),  nil(), _)  => begin
         true
       end
-      
+
       ( nil(), _, false)  => begin
         true
       end
-      
+
       (_,  nil(), false)  => begin
         true
       end
-      
+
       _  => begin
         false
       end
@@ -383,11 +383,11 @@ function isEqualOnTrue(inList1::List{T1}, inList2::List{T2}, inCompFunc::CompFun
       (e1 <| rest1, e2 <| rest2) where (inCompFunc(e1, e2))  => begin
         isEqualOnTrue(rest1, rest2, inCompFunc)
       end
-      
+
       ( nil(),  nil())  => begin
         true
       end
-      
+
       _  => begin
         false
       end
@@ -411,11 +411,11 @@ function isPrefixOnTrue(inList1::List{T1}, inList2::List{T2}, inCompFunc::CompFu
       (e1 <| rest1, e2 <| rest2) where (inCompFunc(e1, e2))  => begin
         isPrefixOnTrue(rest1, rest2, inCompFunc)
       end
-      
+
       ( nil(), _)  => begin
         true
       end
-      
+
       _  => begin
         false
       end
@@ -470,7 +470,7 @@ function consOption(inElement::Option{T}, inList::List{T})  where {T}
       SOME(e)  => begin
         e <| inList
       end
-      
+
       _  => begin
         inList
       end
@@ -564,11 +564,11 @@ function appendLastList(inListList::List{List{T}}, inList::List{T})  where {T}
       ( nil(), _)  => begin
         list(inList)
       end
-      
+
       (l <|  nil(), _)  => begin
         list(listAppend(l, inList))
       end
-      
+
       (l <| ll, _)  => begin
         while ! listEmpty(ll)
           ol = l <| ol
@@ -623,15 +623,15 @@ function insertListSorted1(inList::List{T}, inList2::List{T}, inCompFunc::Compar
       ( nil(),  nil(), _, _)  => begin
         inResultList
       end
-      
+
       ( nil(), _, _, _)  => begin
         append_reverse(inList2, inResultList)
       end
-      
+
       (_,  nil(), _, _)  => begin
         append_reverse(inList, inResultList)
       end
-      
+
       (listHead <| listRest, listHead2 <| listRest2, _, _)  => begin
         if inCompFunc(listHead, listHead2)
           tmpResultList = listHead <| inResultList
@@ -688,7 +688,7 @@ function firstOrEmpty(inList::List{T})  where {T}
       e <| _  => begin
         list(e)
       end
-      
+
       _  => begin
         nil
       end
@@ -862,7 +862,7 @@ function stripN(inList::List{T}, inN::ModelicaInteger)  where {T}
   outList
 end
 
-function heapSortIntList(lst::List{<:ModelicaInteger}) ::List{ModelicaInteger} 
+function heapSortIntList(lst::List{<:ModelicaInteger}) ::List{ModelicaInteger}
 
 
   lst = begin
@@ -870,11 +870,11 @@ function heapSortIntList(lst::List{<:ModelicaInteger}) ::List{ModelicaInteger}
       nil()  => begin
         lst
       end
-      
+
       _ <|  nil()  => begin
         lst
       end
-      
+
       _  => begin
         arrayList(ArrayUtil.heapSort(listArray(lst)))
       end
@@ -954,10 +954,10 @@ function sortedListAllUnique(lst::List{T}, compare::CompareFunc)  where {T}
         _ <|  nil()  => begin
           nil
         end
-        
+
         e1 <| rest && e2 <| _  => begin
           if compare(e1, e2)
-            return 
+            return
           end
           rest
         end
@@ -1050,15 +1050,15 @@ function merge(inLeft::List{T}, inRight::List{T}, inCompFunc::CompareFunc, acc::
         end
         merge(l_rest, r_rest, inCompFunc, el <| acc)
       end
-      
+
       ( nil(),  nil())  => begin
         listReverseInPlace(acc)
       end
-      
+
       ( nil(), _)  => begin
         append_reverse(acc, inRight)
       end
-      
+
       (_,  nil())  => begin
         append_reverse(acc, inLeft)
       end
@@ -1109,7 +1109,7 @@ end
 
 #= Provides same functionality as sort, but for integer values between 1
 and N. The complexity in this case is O(n) =#
-function sortIntN(inList::List{<:ModelicaInteger}, inN::ModelicaInteger) ::List{ModelicaInteger} 
+function sortIntN(inList::List{<:ModelicaInteger}, inN::ModelicaInteger) ::List{ModelicaInteger}
   local outSorted::List{ModelicaInteger} = nil
   local a1::Array{Bool}
   a1 = arrayCreate(inN, false)
@@ -1138,7 +1138,7 @@ end
 
 #= Takes a list of integes and returns a list with duplicates removed, so that
 each element in the new list is unique. O(listLength(inList)) =#
-function uniqueIntN(inList::List{<:ModelicaInteger}, inN::ModelicaInteger) ::List{ModelicaInteger} 
+function uniqueIntN(inList::List{<:ModelicaInteger}, inN::ModelicaInteger) ::List{ModelicaInteger}
   local outList::List{ModelicaInteger} = nil
 
   local arr::Array{Bool}
@@ -1158,7 +1158,7 @@ each element in the new list is unique. O(listLength(inList)). The function
 also takes an array of Integer of size N+1 to mark the already selected entries <= N.
 The last entrie of the array is used for the mark index. It will be updated after
 each call =#
-function uniqueIntNArr(inList::List{<:ModelicaInteger}, inMarkArray::Array{<:ModelicaInteger}, inAccum::List{<:ModelicaInteger}) ::List{ModelicaInteger} 
+function uniqueIntNArr(inList::List{<:ModelicaInteger}, inMarkArray::Array{<:ModelicaInteger}, inAccum::List{<:ModelicaInteger}) ::List{ModelicaInteger}
   local outAccum::List{ModelicaInteger}
 
   local len::ModelicaInteger
@@ -1176,7 +1176,7 @@ function uniqueIntNArr(inList::List{<:ModelicaInteger}, inMarkArray::Array{<:Mod
 end
 
 #= Helper for uniqueIntNArr1. =#
-function uniqueIntNArr1(inList::List{<:ModelicaInteger}, inLength::ModelicaInteger, inMark::ModelicaInteger, inMarkArray::Array{<:ModelicaInteger}, inAccum::List{<:ModelicaInteger}) ::List{ModelicaInteger} 
+function uniqueIntNArr1(inList::List{<:ModelicaInteger}, inLength::ModelicaInteger, inMark::ModelicaInteger, inMarkArray::Array{<:ModelicaInteger}, inAccum::List{<:ModelicaInteger}) ::List{ModelicaInteger}
   local outAccum::List{ModelicaInteger} = inAccum
 
   for i in inList
@@ -1361,7 +1361,7 @@ function splitFirstOption(inList::List{T})  where {T}
       el <| rest  => begin
         (SOME(el), rest)
       end
-      
+
       _  => begin
         (NONE(), nil())
       end
@@ -1602,7 +1602,7 @@ end
 
 #= Provides same functionality as listIntersection, but for integer values
 in sorted lists. The complexity in this case is O(n). =#
-function intersectionIntSorted(inList1::List{<:ModelicaInteger}, inList2::List{<:ModelicaInteger}) ::List{ModelicaInteger} 
+function intersectionIntSorted(inList1::List{<:ModelicaInteger}, inList2::List{<:ModelicaInteger}) ::List{ModelicaInteger}
   local outResult::List{ModelicaInteger} = nil
 
   local i1::ModelicaInteger
@@ -1661,7 +1661,7 @@ end
 
 #= Provides same functionality as listIntersection, but for integer values
 between 1 and N. The complexity in this case is O(n). =#
-function intersectionIntN(inList1::List{<:ModelicaInteger}, inList2::List{<:ModelicaInteger}, inN::ModelicaInteger) ::List{ModelicaInteger} 
+function intersectionIntN(inList1::List{<:ModelicaInteger}, inList2::List{<:ModelicaInteger}, inN::ModelicaInteger) ::List{ModelicaInteger}
   local outResult::List{ModelicaInteger}
 
   local a::Array{ModelicaInteger}
@@ -1678,7 +1678,7 @@ function intersectionIntN(inList1::List{<:ModelicaInteger}, inList2::List{<:Mode
 end
 
 #= Helper function to intersectionIntN. =#
-function intersectionIntVec(inArray::Array{<:ModelicaInteger}, inList1::List{<:ModelicaInteger}) ::List{ModelicaInteger} 
+function intersectionIntVec(inArray::Array{<:ModelicaInteger}, inList1::List{<:ModelicaInteger}) ::List{ModelicaInteger}
   local outResult::List{ModelicaInteger} = nil
 
   for i in inList1
@@ -1690,7 +1690,7 @@ function intersectionIntVec(inArray::Array{<:ModelicaInteger}, inList1::List{<:M
 end
 
 #= Helper function to intersectionIntN. =#
-function addPos(inList::List{<:ModelicaInteger}, inArray::Array{<:ModelicaInteger}, inIndex::ModelicaInteger) ::Array{ModelicaInteger} 
+function addPos(inList::List{<:ModelicaInteger}, inArray::Array{<:ModelicaInteger}, inIndex::ModelicaInteger) ::Array{ModelicaInteger}
   local outArray::Array{ModelicaInteger}
 
   for i in inList
@@ -1759,7 +1759,7 @@ end
 
 #= Provides same functionality as setDifference, but for integer values
 between 1 and N. The complexity in this case is O(n) =#
-function setDifferenceIntN(inList1::List{<:ModelicaInteger}, inList2::List{<:ModelicaInteger}, inN::ModelicaInteger) ::List{ModelicaInteger} 
+function setDifferenceIntN(inList1::List{<:ModelicaInteger}, inList2::List{<:ModelicaInteger}, inN::ModelicaInteger) ::List{ModelicaInteger}
   local outDifference::List{ModelicaInteger} = nil
 
   local a::Array{ModelicaInteger}
@@ -1813,7 +1813,7 @@ end
 
 #= Provides same functionality as listUnion, but for integer values between 1
 and N. The complexity in this case is O(n) =#
-function unionIntN(inList1::List{<:ModelicaInteger}, inList2::List{<:ModelicaInteger}, inN::ModelicaInteger) ::List{ModelicaInteger} 
+function unionIntN(inList1::List{<:ModelicaInteger}, inList2::List{<:ModelicaInteger}, inN::ModelicaInteger) ::List{ModelicaInteger}
   local outUnion::List{ModelicaInteger} = nil
 
   local a::Array{ModelicaInteger}
@@ -3489,7 +3489,7 @@ function threadMapAllValue(inList1::List{T1}, inList2::List{T2}, inMapFunc::MapF
         threadMapAllValue(rest1, rest2, inMapFunc, inValue)
         ()
       end
-      
+
       ( nil(),  nil())  => begin
         ()
       end
@@ -3525,7 +3525,7 @@ function threadMap1_0(inList1::List{T1}, inList2::List{T2}, inMapFunc::MapFunc, 
       ( nil(),  nil(), _, _)  => begin
         ()
       end
-      
+
       (e1 <| rest1, e2 <| rest2, _, _)  => begin
         inMapFunc(e1, e2, inArg1)
         threadMap1_0(rest1, rest2, inMapFunc, inArg1)
@@ -3569,7 +3569,7 @@ function threadMap2ReverseFold(inList1::List{T1}, inList2::List{T2}, inMapFunc::
       ( nil(),  nil())  => begin
         (inAccum, inFoldArg)
       end
-      
+
       (e1 <| rest1, e2 <| rest2)  => begin
         (res, foldArg) = inMapFunc(e1, e2, inArg1, inArg2, inFoldArg)
         (outList, foldArg) = threadMap2ReverseFold(rest1, rest2, inMapFunc, inArg1, inArg2, foldArg, res <| inAccum)
@@ -3623,7 +3623,7 @@ function threadMap3ReverseFold(inList1::List{T1}, inList2::List{T2}, inMapFunc::
         (outList, foldArg) = threadMap3ReverseFold(rest1, rest2, inMapFunc, inArg1, inArg2, inArg3, foldArg, res <| inAccum)
         (outList, foldArg)
       end
-      
+
       ( nil(),  nil())  => begin
         (inAccum, inFoldArg)
       end
@@ -3713,7 +3713,7 @@ function threadFold1(inList1::List{T1}, inList2::List{T2}, inFoldFunc::FoldFunc,
         res = inFoldFunc(e1, e2, inArg1, inFoldArg)
         threadFold1(rest1, rest2, inFoldFunc, inArg1, res)
       end
-      
+
       ( nil(),  nil())  => begin
         inFoldArg
       end
@@ -3739,7 +3739,7 @@ function threadFold2(inList1::List{T1}, inList2::List{T2}, inFoldFunc::FoldFunc,
         res = inFoldFunc(e1, e2, inArg1, inArg2, inFoldArg)
         threadFold2(rest1, rest2, inFoldFunc, inArg1, inArg2, res)
       end
-      
+
       ( nil(),  nil())  => begin
         inFoldArg
       end
@@ -3765,7 +3765,7 @@ function threadFold3(inList1::List{T1}, inList2::List{T2}, inFoldFunc::FoldFunc,
         res = inFoldFunc(e1, e2, inArg1, inArg2, inArg3, inFoldArg)
         threadFold3(rest1, rest2, inFoldFunc, inArg1, inArg2, inArg3, res)
       end
-      
+
       ( nil(),  nil())  => begin
         inFoldArg
       end
@@ -3791,7 +3791,7 @@ function threadFold4(inList1::List{T1}, inList2::List{T2}, inFoldFunc::FoldFunc,
         res = inFoldFunc(e1, e2, inArg1, inArg2, inArg3, inArg4, inFoldArg)
         threadFold4(rest1, rest2, inFoldFunc, inArg1, inArg2, inArg3, inArg4, res)
       end
-      
+
       ( nil(),  nil())  => begin
         inFoldArg
       end
@@ -3816,7 +3816,7 @@ function threadFold(inList1::List{T1}, inList2::List{T2}, inFoldFunc::FoldFunc, 
         res = inFoldFunc(e1, e2, inFoldArg)
         threadFold(rest1, rest2, inFoldFunc, res)
       end
-      
+
       ( nil(),  nil())  => begin
         inFoldArg
       end
@@ -4411,7 +4411,7 @@ end
 
 #= Removes all matching integers that occur first in a list. If the first
 element doesn't match it returns the list. =#
-function removeMatchesFirst(inList::List{<:ModelicaInteger}, inN::ModelicaInteger) ::List{ModelicaInteger} 
+function removeMatchesFirst(inList::List{<:ModelicaInteger}, inN::ModelicaInteger) ::List{ModelicaInteger}
   local outList::List{ModelicaInteger} = inList
 
   for e in inList
@@ -4540,11 +4540,11 @@ function toString(inList::List{T}, inPrintFunc::FuncType, inListNameStr::String 
       ( nil(), true)  => begin
         stringAppendList(list(inListNameStr, inBeginStr, inEndStr))
       end
-      
+
       ( nil(), false)  => begin
         inListNameStr
       end
-      
+
       _  => begin
         str = stringDelimitList(map(inList, inPrintFunc), inDelimitStr)
         str = stringAppendList(list(inListNameStr, inBeginStr, str, inEndStr))
@@ -4567,7 +4567,7 @@ function hasOneElement(inList::List{T})  where {T}
       _ <|  nil()  => begin
         true
       end
-      
+
       _  => begin
         false
       end
@@ -4586,11 +4586,11 @@ function hasSeveralElements(inList::List{T})  where {T}
       _ <|  nil()  => begin
         false
       end
-      
+
       nil()  => begin
         false
       end
-      
+
       _  => begin
         true
       end
@@ -4919,7 +4919,7 @@ function combination_tail(inElements::List{List{TI}}, inCombination::List{TI}, i
         end
         acc
       end
-      
+
       _  => begin
         listReverse(inCombination) <| inAccumElems
       end
@@ -4959,7 +4959,7 @@ function combinationMap_tail(inElements::List{List{TI}}, inMapFunc::MapFunc, inC
         end
         acc
       end
-      
+
       _  => begin
         inMapFunc(listReverse(inCombination)) <| inAccumElems
       end
@@ -5000,7 +5000,7 @@ function combinationMap1_tail(inElements::List{List{TI}}, inMapFunc::MapFunc, in
         end
         acc
       end
-      
+
       _  => begin
         inMapFunc(listReverse(inCombination), inArg) <| inAccumElems
       end
@@ -5022,7 +5022,7 @@ function combinationMap1_tail2(inHead::List{TI}, inRest::List{List{TI}}, inMapFu
         accum = combinationMap1_tail(inRest, inMapFunc, inArg, head <| comb, accum)
         combinationMap1_tail2(rest, inRest, inMapFunc, inArg, comb, accum)
       end
-      
+
       _  => begin
         inAccumElems
       end
@@ -5048,11 +5048,11 @@ function allReferenceEq(inList1::List{T}, inList2::List{T})  where {T}
           false
         end
       end
-      
+
       ( nil(),  nil())  => begin
         true
       end
-      
+
       _  => begin
         false
       end

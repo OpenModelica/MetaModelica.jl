@@ -7,7 +7,7 @@ ModelicaInteger = Signed
 #=
 TODO:
 
-#1 Ideally we would like MetaModelica Real to be defined in such a way that it 
+#1 Ideally we would like MetaModelica Real to be defined in such a way that it
  can accept Int64, but when it returns it will return AbstractFloat
 
 #2 Furthermore, we do not wish to mix ModelicaInteger with ModelicaReal.

@@ -1,4 +1,4 @@
-#= 
+#=
 Implementation of tagged unions for MetaModelica.jl
 They can be used in that way with match.jl
 =#
@@ -7,7 +7,7 @@ They can be used in that way with match.jl
 #@Uniontype number begin
 #    @Record real begin
 #    r::Real
-#    end    
+#    end
 #    @Record img begin
 #    r::Real
 #    i::Real
@@ -15,7 +15,7 @@ They can be used in that way with match.jl
 #end
 # Or for short:
 #@Uniontype number begin
-#    @Record real r::Real 
+#    @Record real r::Real
 #    @Record img r::Real i::Real
 #end
 # This is syntactic sugar for:

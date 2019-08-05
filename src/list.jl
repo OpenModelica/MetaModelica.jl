@@ -29,9 +29,14 @@
  #
  #/
 
+"""
+  This module provides an immutable list compatible with
+  the MetaModelica list datatype. It is immutable and supports common operations
+  associated with immutable single linked lists such as map and reduce.
+"""
 module ListDef
 
-#=!!! Observe we only ever create Nil{Any} !!!=#
+#=!!! Observe we only EVER create Nil{Any} !!!=#
 struct Nil{T} end
 
 struct Cons{T}
@@ -48,7 +53,7 @@ Nil() = List()
   If someone see a better alternative to this approach please fix me :). Basically I create a new list in O(N) * C time
   with the type we cast to. Also, do not create new conversion strategies without measuring performance as they will call themselves
   recursivly
-+=#
+=#
 
 """ For converting lists with more then one element"""
 Base.convert(::Type{List{S}}, x::Cons{T}) where {S, T <: S} = let
@@ -185,14 +190,12 @@ _cons(head::T, tail::Nil) where {T} = Cons{T}(v, nil)
 
 consExternalC(::Type{T}, v, l) where {T} = Cons{T}(v, l) # Added for the C interface to be happy
 
-# Suggestion for new operator <| also right assoc <| :), See I got a hat
+""" <| Right associative cons operator """
 <|(v, lst::Nil)  = cons(v, nil)
 <|(v, lst::Cons{T}) where{T} = cons(v, lst)
 <|(v::S, lst::Cons{T}) where{T, S <: T} = cons(v, lst)
 
-function Base.length(l::Nil)::Int
-  0
-end
+Base.length(l::Nil)::Int = 0
 
 function Base.length(l::List)::Int
   local n::Int = 0
@@ -251,7 +254,7 @@ macro do_threaded_for(expr::Expr, iter_names::Expr, ranges...)
   make_threaded_for(expr, iter_names, ranges)
 end
 
-#= Julia standard sort is pretty good =#
+""" Sorts the list by first converting it into an array """
 Base.sort(lst::List) = let
   list(sort(collect(lst))...)
 end
