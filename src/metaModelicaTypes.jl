@@ -14,9 +14,6 @@ TODO:
    Attemped this during the 7th of July. I failed :(
 =#
 
-
-#=Martin was right as always. Martin is always right ignoring 100% Modelica semantics here... Not common, we can fix it if it occurs=#
-
 export ModelicaInteger, ModelicaReal
 
 end
