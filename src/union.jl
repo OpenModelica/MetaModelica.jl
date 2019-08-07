@@ -38,45 +38,66 @@ import .MetaModelicaTypes
 
 function makeRecord(recordExpr::Expr)
   local arr = []
+  local sourceInfo = nothing
   for i in recordExpr.args
     if typeof(i) == Expr
-      push!(arr, i)
+      push!(arr, (i,sourceInfo))
+    elseif typeof(i) <: LineNumberNode
+      sourceInfo = i
     end
   end
-  local res = []
-  for el in arr
-    push!(res, (el.args[3], el.args[4]))
-  end
-  return [(el.args[3], el.args[4]) for el in arr]
+  return [(el[1].args[3], el[1].args[4], el[2]) for el in arr]
 end
 
 function makeTuple(name, fields)
   return quote ($name, $fields) end
 end
 
-function makeUniontypes(name, records)
+function isLineNumberNode(a, lines::LineNumberNode)
+  if typeof(a) <: LineNumberNode
+    a.file == Symbol(@__FILE__)
+  else
+    false
+  end
+end
+
+function replaceLineNum(a::Expr, lines::LineNumberNode)
+  replace!(arg -> isLineNumberNode(arg, lines) ? lines : arg, a.args)
+  for n in a.args
+    replaceLineNum(n, lines)
+  end
+end
+function replaceLineNum(a::Any, lines::LineNumberNode)
+end
+
+function makeUniontypes(name, records, lineNode::LineNumberNode)
   recordsArray1 = Array.(records)
   recordsArray2 = recordsArray1[1]
   constructedRecords = []
   for r in recordsArray2
-    push!(constructedRecords,
-          quote
-          struct $(r[1]) <: $name
-          $(r[2])
-          end
-          end)
+    recordNode = quote
+      struct $(r[1]) <: $name
+      $(r[2])
+      end
+    end
+    replaceLineNum(recordNode, isa(r[3],Nothing) ? lineNode : r[3])
+    push!(constructedRecords, recordNode)
   end
   #= Construct the Union =#
-  return quote
+  res = quote
     abstract type $name end
-  $(constructedRecords...)
-end
+    $(constructedRecords...)
+  end
+  # Make debugging and profiling easier by pretending the record was
+  # allocated in the source file where the macro was invoked
+  replaceLineNum(res, lineNode)
+  return res
 end
 
 #= Creates a uniontype consisting of 0...N records =#
 macro Uniontype(name, records...)
   recordCollection = [makeRecord(r) for r in records]
-  esc(makeUniontypes(name, recordCollection))
+  esc(makeUniontypes(name, recordCollection, __source__))
 end
 
 #= Creates a record belonging to a Uniontype =#
