@@ -44,7 +44,7 @@ struct Cons{T}
   tail::Union{Nil, Cons{T}}
 end
 
-List{T} = Union{Nil{T}, Cons{T}, Nil}
+const List{T} = Union{Nil{T}, Cons{T}, Nil}
 List() = Nil{Any}()
 Nil() = List()
 
@@ -155,7 +155,7 @@ function list(a::T) where {T}
   Cons{T}(a, nil)
 end
 
-#=List of two elements=#
+#= List of two elements =#
 function list(a::A, b::B) where {A, B}
   local S::Type = typejoin(A, B)
   @assert S != Any
