@@ -20,11 +20,12 @@ include("matchcontinue.jl")
 include("functionInheritance.jl")
 include("metaRuntime.jl")
 include("shouldFail.jl")
+#include("Mutable.jl")
 
 export @match, @matchcontinue, MatchFailure, ModelicaReal, ModelicaInteger
 export @Uniontype, @Record, @UniontypeDecl, @ExtendedFunction, @ExtendedAnonFunction
 export List, list, Nil, nil, Cons, cons, =>, Option, SOME, NONE, SourceInfo, SOURCEINFO
-export @do_threaded_for, <|, IList, MArray, @shouldFail, sourceInfo
+export @do_threaded_for, <|, @shouldFail, sourceInfo, Mutable
 
 include("exportmetaRuntime.jl")
 include("dangerous.jl")
