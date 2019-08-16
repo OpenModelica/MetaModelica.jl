@@ -2,8 +2,8 @@
 module MetaModelicaTypes
 
 #= Real numbers are a bit different in Modelica compared to Julia =#
-const ModelicaReal = Union{Signed, AbstractFloat}
-const ModelicaInteger = Signed
+const ModelicaReal = Float64
+const ModelicaInteger = Int
 #=
 TODO:
 
@@ -14,6 +14,8 @@ TODO:
    Attemped this during the 7th of July. I failed :(
 =#
 
-export ModelicaInteger, ModelicaReal
+abstract type MetaModelicaException <: Exception end
+
+export ModelicaInteger, ModelicaReal, MetaModelicaException
 
 end
