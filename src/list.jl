@@ -123,7 +123,7 @@ List(T::Type #= Hack.. =#, args) = let
   for i in args.tail
     lst1 = Cons{T}(convert(T, i), lst1)
   end
-  lst1
+  listReverse(lst1)
 end
 
 #= if the head element is nil the list is empty.=#
