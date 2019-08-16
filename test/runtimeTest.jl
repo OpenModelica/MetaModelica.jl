@@ -31,6 +31,7 @@ end
   lstB = list(1,2,3)
   lstC = listAppend(lstA, lstB)
   @test listLength(lstC) == 6
+  @test listAppend(list(1,2,3),list(4.0,5)) == list(1,2,3,4,5)
   lstD = listReverse(lstC)
   @test listHead(lstD) == 3
   @test listMember(6, lstD) == false
@@ -96,16 +97,16 @@ end
     false
   end
 end
-  
+
   struct foo1
     a
   end
-  
+
   struct bar2
     a
     b
   end
-  
+
   struct baz3
     a
     b
@@ -122,7 +123,7 @@ end
     #= We should match the wildcard =#
     _ => 0
   end
-  
+
   struct optionalFoo
     a::Option{Integer}
     b::Option{Integer}
@@ -145,17 +146,17 @@ end
   cc = optionalFoo(NONE(), SOME(2), NONE())
   dd = optionalFoo(NONE(), NONE(), SOME(3))
   ee = optionalFoo(SOME(1),SOME(2), SOME(3))
-  
+
   @test 1 == @match aa begin
     optionalFoo(SOME(2), _, _) => 2
     _ => 1
   end
-  
+
   @test 1 == @match aa begin
     optionalFoo(SOME(1), _, _) => 1
     _ => 1
   end
-  
+
   @test 1 == @match cc begin
     optionalFoo(_, _, _) => 1
     _ => 2
@@ -174,7 +175,7 @@ end
 
   a = optionalBar(NONE())
   b = optionalBar(SOME(1))
-  
+
  @test 2 ==  @match a begin
    optionalBar(SOME(1)) => 1
    optionalBar(NONE()) => 2
@@ -184,7 +185,7 @@ end
    optionalBar(NONE()) => 2
    optionalBar(SOME(1)) => 1
   end
-    
+
   @test 4 == @match ee begin
     optionalFoo(SOME(1), NONE(), NONE()) => 1
     optionalFoo(NONE(), SOME(2), NONE()) => 2
@@ -192,6 +193,6 @@ end
     optionalFoo(SOME(1),SOME(2), SOME(3)) => 4
     _ => 4
   end
- 
+
 end #=End runtime tests=#
 end #=End module=#
