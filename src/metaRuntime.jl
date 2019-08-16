@@ -483,7 +483,10 @@ function listAppend(lst1::List{T}, lst2 = nil::List{T})::List{T} where {T}
   if listEmpty(lst1)
     return lst2
   end
- list(lst1..., lst2...)
+  for c in listReverse(lst1)
+    lst2 = cons(c, lst2)
+  end
+  lst2
 end
 
 function listLength(lst::List{T})::ModelicaInteger where {T}
