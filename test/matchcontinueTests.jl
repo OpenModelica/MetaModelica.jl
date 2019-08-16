@@ -5,7 +5,7 @@ using Test
 
 @test 2 == @matchcontinue Cons(1,nil) begin
   # case x::_ then fail()
-  Cons(head=x) => throw(MatchFailure)
+  Cons(head=x) => throw(MatchFailure("Some custom failure here"))
   # case (x as 1)::_ then 2*x
   Cons(x && 1,_) => 2*x
   _ => 3
@@ -46,13 +46,13 @@ end
       a
       b
     end
-    
+
     struct baz3
       a
       b
       c
     end
-    
+
     a = baz3(1, 2, 3)
     @test 4 == begin
       @match a begin
@@ -70,7 +70,7 @@ end
       bar2(__) => 5
       bar2(a = 1, b = 2) => 6
       foo1(__) => 1
-    end  
+    end
   end
 
   @test begin

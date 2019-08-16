@@ -26,7 +26,7 @@ macro splice(iterator, body)
   Expr(:..., :(($(esc(body)) for $(esc(iterator.args[2])) in $(esc(iterator.args[3])))))
 end
 
-struct MatchFailure
+struct MatchFailure <: MetaModelicaException
   value
 end
 
@@ -168,7 +168,8 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
       @assert length(named_fields)==length(unique(named_fields)) "Pattern $pattern has duplicate named arguments: $(named_fields)"
       @assert nNamed == 0 || len == nNamed "Pattern $pattern mixes named and positional arguments"
       # struct
-      if nNamed == 0
+      if false
+      elseif nNamed == 0
         push!(asserts, quote
               a = typeof($(esc(T)))
               #= NONE is a function. However, we treat it a bit special=#
@@ -181,9 +182,9 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
               end
               pattern = $(esc(T))
               if $(esc(T)) != NONE
-                if evaluated_fieldcount($(esc(T))) != $(esc(len))
+                if evaluated_fieldcount($(esc(T))) < $(esc(len))
                   error("Field count for pattern of type: $pattern is $($(esc(len))) expected $(evaluated_fieldcount($(esc(T))))")
-              end
+                end
               end
               end)
       else
@@ -301,7 +302,10 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
               $(esc(result))
             end
             done = true
-          catch
+          catch e
+            if !isa(e, MetaModelicaException)
+              rethrow(e)
+            end
             done = false
           end
         end

@@ -4,6 +4,10 @@ Functions that are named   #= Defined in the runtime =#
 are defined in the C runtime in the compiler and interfaces Boehm GC.
 These functions should be remimplemented here or removed  all together =#
 
+struct MetaModelicaGeneralException <: MetaModelicaException
+  msg
+end
+
 """
 SOME
 Optional with a value T
@@ -713,7 +717,7 @@ function stringCharListString(strs::List{String})::String
 end
 
 function fail()
-  throw("Runtime defined generic Meta Modelica failure")
+  throw(MetaModelicaGeneralException("Runtime defined generic Meta Modelica failure"))
 end
 
 """ Sets the stack overflow signal to the given value and returns the old one """
