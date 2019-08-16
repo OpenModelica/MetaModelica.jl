@@ -19,6 +19,7 @@
   supporting @matchcontinue (try the next case when any exception is thrown).
   """
 
+include("fixLines.jl")
 
 macro splice(iterator, body)
   @assert iterator.head == :call
@@ -335,26 +336,38 @@ end
 Top level function for all match macros except
 the match equation macro.
 """
-function handle_match_cases(value, match ; mathcontinue::Bool = false)
+function handle_match_cases(value, match :: Expr ; mathcontinue::Bool = false)
   tail = nothing
-  if @capture(match, begin cases__ end)
-    asserts = Expr[]
-    for case in reverse(cases)
-      tail = handle_match_case(:value, case, tail, asserts, mathcontinue)
+  if match.head != :block
+    error("Unrecognized match syntax: Expected begin block $match")
+  end
+  line = nothing
+  cases = Expr[]
+  asserts = Expr[]
+  for arg in match.args
+    if isa(arg, LineNumberNode)
+      line = arg
+      continue
+    elseif isa(arg, Expr)
+      push!(cases, arg)
     end
-    quote
-      $(asserts...)
-      local value = $(esc(value))
-      local done::Bool = false
-      local res
-      $tail
-      if !done
-        throw(MatchFailure(value))
-      end
-      res
+  end
+  for case in reverse(cases)
+    tail = handle_match_case(:value, case, tail, asserts, mathcontinue)
+    if line != nothing
+      replaceLineNum(tail, @__FILE__, line)
     end
-  else
-    error("Unrecognized match syntax: $value $match")
+  end
+  quote
+    $(asserts...)
+    local value = $(esc(value))
+    local done::Bool = false
+    local res
+    $tail
+    if !done
+      throw(MatchFailure(value))
+    end
+    res
   end
 end
 
@@ -364,7 +377,9 @@ end
   If `value` matches `pattern`, bind variables and return `value`. Otherwise, throw `MatchFailure`.
   """
 macro match(expr)
-  handle_match_eq(expr)
+  res = handle_match_eq(expr)
+  replaceLineNum(res, @__FILE__, __source__)
+  res
 end
 
 """
@@ -377,7 +392,9 @@ end
   Return `result` for the first matching `pattern`. If there are no matches, throw `MatchFailure`.
   """
 macro matchcontinue(value, cases)
-  handle_match_cases(value, cases ; mathcontinue = true)
+  res = handle_match_cases(value, cases ; mathcontinue = true)
+  replaceLineNum(res, @__FILE__, __source__)
+  res
 end
 
 """
@@ -390,7 +407,9 @@ end
   Return `result` for the first matching `pattern`. If there are no matches, throw `MatchFailure`.
   """
 macro match(value, cases)
-  handle_match_cases(value, cases ; mathcontinue = false)
+  res = handle_match_cases(value, cases ; mathcontinue = false)
+  replaceLineNum(res, @__FILE__, __source__)
+  res
 end
 
 """
