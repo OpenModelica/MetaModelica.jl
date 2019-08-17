@@ -249,6 +249,9 @@ function handleSugar(T)
     if string(T) == "<|"
       # Syntactic sugar cons. Two operators for now I suggest we remove =>
       :Cons
+    elseif string(T) == "_cons"
+      #= This is legacy for the code generator. For match equation we need to allow this as well =#
+      :Cons
     elseif string(T) == "nil"
       # Syntactic sugar for Nil
       :Nil
