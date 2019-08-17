@@ -259,7 +259,7 @@ Base.sort(lst::List) = let
   list(sort(collect(lst))...)
 end
 
-export List, list, cons, <|, nil
+export List, list, cons, <|, nil, _cons
 export @do_threaded_for, Cons, Nil, listReverse
 
 end
