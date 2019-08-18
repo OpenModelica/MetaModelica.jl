@@ -194,5 +194,9 @@ end
     _ => 4
   end
 
+@testset "Testing String for MetaModelica" begin
+  @test "AB" == "A" + "B"
+end
+
 end #=End runtime tests=#
 end #=End module=#

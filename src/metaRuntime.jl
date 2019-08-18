@@ -770,3 +770,7 @@ function sourceInfo()::SourceInfo
   #= Defined in the runtime =#
   SOURCEINFO("", true, 1, 2, 3, 4, 0.0)
 end
+
+Base.:+(x::String, y::String) = let
+  x * y
+end
