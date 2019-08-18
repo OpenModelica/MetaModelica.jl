@@ -32,6 +32,5 @@ include("dangerous.jl")
 include("array.jl")
 #======Expose libraries=======#
 include("ArrayUtil.jl")
-include("ListUtil.jl")
 #=============================#
 end
