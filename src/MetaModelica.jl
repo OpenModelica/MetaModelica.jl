@@ -13,14 +13,11 @@ using .MetaModelicaTypes
 include("union.jl")
 import .UniontypeDef
 using .UniontypeDef
-include("list.jl")
-import .ListDef
-using .ListDef
+using ImmutableList
 include("matchcontinue.jl")
 include("functionInheritance.jl")
 include("metaRuntime.jl")
 include("shouldFail.jl")
-#include("Mutable.jl")
 
 export @match, @matchcontinue, MatchFailure, ModelicaReal, ModelicaInteger
 export @Uniontype, @Record, @UniontypeDecl, @ExtendedFunction, @ExtendedAnonFunction
