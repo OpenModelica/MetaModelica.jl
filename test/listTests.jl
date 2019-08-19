@@ -5,7 +5,7 @@ using Test
 @testset "Baseline tests" begin
 
   @test 0 == begin
-    Ints = MetaModelica.List{Int}
+    Ints = List{Int}
     a::Ints = nil
     length(a)
   end
@@ -96,7 +96,7 @@ end
   try
     lst1::List{Any} = list(SUB(1,2), SUB(1,2), SUB(1,2))
     true
-  catch
+  catch E
     println(E)
     false
   end
