@@ -27,7 +27,5 @@ export @do_threaded_for, <|, @shouldFail, sourceInfo, _cons
 include("exportmetaRuntime.jl")
 include("dangerous.jl")
 include("array.jl")
-#======Expose libraries=======#
-include("ArrayUtil.jl")
 #=============================#
 end
