@@ -24,6 +24,7 @@ This is provided by an extension of Rematch.jl
     * `x => y` is syntactic sugar for `cons(x,y)` [Preliminary]
     * Anything else is treated as a constant and tested for equality
 
-# Patterns can be nested arbitrarily.
+* Patterns can be nested arbitrarily.
 
-# Repeated variables only match if they are `==` eg `(x,x)` matches `(1,1)` but not `(1,2)`.
+* Repeated variables only match if they are equal: 
+eg `(x,x)` matches `(1,1)` but not `(1,2)`.
