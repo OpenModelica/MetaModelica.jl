@@ -27,7 +27,12 @@ This is provided by an extension of Rematch.jl
 
 * Pattern matching is also possible on the list implementation provided by ImmutableList.jl:
 
-* H <| T matches the head to H and the tail to T for a given input list
+  `H <| T matches the head to H and the tail to T for a given input list `
+  
+  `_ <| T matches a wildcard head and the tail to T for a given input list `
+  
+  `nil() or list() matches the empty list`
+
 
 * Repeated variables only match if they are equal: 
 eg `(x,x)` matches `(1,1)` but not `(1,2)`.
