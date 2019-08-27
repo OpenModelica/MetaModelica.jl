@@ -21,10 +21,13 @@ This is provided by an extension of Rematch.jl
     * `x || y` matches values which match either `x` or `y` (only variables which exist in both branches will be bound)
     * `x && y` matches values which match both `x` and `y`
     * `x where condition` matches only if `condition` is true (`condition` may use any variables that occur earlier in the pattern eg `(x, y, z where x + y > z)`)
-    * `x => y` is syntactic sugar for `cons(x,y)` [Preliminary]
     * Anything else is treated as a constant and tested for equality
 
 * Patterns can be nested arbitrarily.
+
+* Pattern matching is also possible on the list implementation provided by ImmutableList.jl:
+
+* H <| T matches the head to H and the tail to T for a given input list
 
 * Repeated variables only match if they are equal: 
 eg `(x,x)` matches `(1,1)` but not `(1,2)`.
