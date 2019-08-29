@@ -6,7 +6,7 @@ other packages that are a part of this runtime such as ImmutableList.jl
 MetaModelica supports a powerfull but expensive mechanism for pattern matching called matchcontinue
 This is provided by an extension of Rematch.jl
 
-# Patterns:
+# Pattern Matching and Patterns:
 
     * `_` matches anything
     * `foo` matches anything, binds value to `foo`
@@ -36,3 +36,10 @@ This is provided by an extension of Rematch.jl
 
 * Repeated variables only match if they are equal: 
 eg `(x,x)` matches `(1,1)` but not `(1,2)`.
+
+# @shouldFail
+
+`@shouldFail(arg)` Is a special construct of MetaModelica.
+ It succeeds if arg fails, where arg is a local match-equation/statement.
+
+
