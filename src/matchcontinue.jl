@@ -151,8 +151,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
           $(esc(guard))
         end
     end
-  elseif @capture(pattern, T_(subpatterns__))
-    #=All wild =#
+  elseif @capture(pattern, T_(subpatterns__)) #= All wild =#
     if length(subpatterns) == 1 && subpatterns[1] == :(__)
       #=
         Fields not interesting when matching against a wildcard.
@@ -188,8 +187,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
                 end
               end
               end)
-      else
-        # Uses keyword arguments
+      else # Uses keyword arguments
         struct_name = gensym("$(T)_match")
         type_name = string(T)
         assertcond = true
@@ -216,26 +214,29 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
                                  asserts; allow_splat=false))
       end
     end
-  elseif @capture(pattern, (subpatterns__,))
-    # tuple
+  elseif @capture(pattern, (subpatterns__,)) # Tuple
     quote
       ($value isa Tuple) &&
         $(handle_destruct_fields(value, pattern, subpatterns, :(length($value)), :getindex, bound, asserts; allow_splat=true))
     end
-  elseif @capture(pattern, [subpatterns__])
-    # array
+  elseif @capture(pattern, [subpatterns__]) # Array
     quote
       ($value isa AbstractArray) &&
         $(handle_destruct_fields(value, pattern, subpatterns, :(length($value)), :getindex, bound, asserts; allow_splat=true))
     end
-elseif @capture(pattern, subpattern_::T_)
-# typeassert
-quote
+elseif @capture(pattern, subpattern_::T_) #ImmutableList
+  quote
+  # typeassert
   ($value isa $(esc(T))) &&
     $(handle_destruct(value, subpattern, bound, asserts))
-end
+  end
+elseif @capture(pattern, _.__) #Sub member of a variable
+  quote
+    $value == $(esc(pattern))
+  end
 else
-error("Unrecognized pattern syntax: $pattern")
+  println(pattern)
+  error("Unrecognized pattern syntax: $pattern")
 end
 end
 
