@@ -91,4 +91,17 @@ end
     testSideEffects(1)
   end
 end
+
+@testset "Matching on member variables" begin
+  struct FOO
+    a
+  end
+  foo = FOO(1)
+  @test 1 == @match (@match foo.a = 1) begin
+    1 => true
+    _ => false
+  end
+end
+
+
 end #= End module =#

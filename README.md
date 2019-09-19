@@ -41,5 +41,3 @@ eg `(x,x)` matches `(1,1)` but not `(1,2)`.
 
 `@shouldFail(arg)` Is a special construct of MetaModelica.
  It succeeds if arg fails, where arg is a local match-equation/statement.
-
-
