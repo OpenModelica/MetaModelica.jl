@@ -89,7 +89,7 @@ export stringAppendList
 export stringCharInt
 export stringCharListString
 export stringCompare
-export stringDelimList
+export stringDelimitList
 export stringEmpty
 export stringEqual
 export stringGet
