@@ -364,9 +364,10 @@ end
 
 """ O(str) """
 function stringAppendList(strs::List{String})::String
-  local str::String
-
-  #= Defined in the runtime =#
+  local str::String = ""
+  for n in strs
+    str = str + n
+  end
   str
 end
 
@@ -376,8 +377,14 @@ end
   Example: stringDelimitList({\"x\",\"y\",\"z\"}, \", \") => \"x, y, z\"
 """
 function stringDelimitList(strs::List{String}, delimiter::String)::String
-  local str::String
-  #= Defined in the runtime =#
+  local str::String = ""
+  for n in strs
+    if isempty(str)
+      str = n
+    else
+      str = str + delimiter + n
+    end
+  end 
   str
 end
 
