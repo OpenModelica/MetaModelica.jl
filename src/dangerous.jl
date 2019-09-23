@@ -26,8 +26,8 @@ lucky, and pretty much anything else if you're not. Do not use unless you will
 immediately fill the whole array with data. The dummy variable is used to fix
 the type of the array. """
 function arrayCreateNoInit(size::ModelicaInteger, dummy::A)::Array{A} where {A <: Any}
-  local arr::Array{A}
-  arr = fill(arr, 0)
+  local arr::Array{A} = fill(dummy, size)
+  arr
 end
 
 """ O(1) """
