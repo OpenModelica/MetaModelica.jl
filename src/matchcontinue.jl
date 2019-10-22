@@ -1,5 +1,5 @@
 """
-  Copyright 2019: Open Source Modelica Consortium (OSMC)
+  Copyright 2019-CurrentYear: Open Source Modelica Consortium (OSMC)
   Copyright 2018: RelationalAI, Inc.
 
   Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -36,11 +36,7 @@ end
   fieldcount.
 """
 @generated function evaluated_fieldcount(t::Type{T}) where T
-  if T != NONE
-    fieldcount(T)
-  else
-    0
-  end
+  res = T != NONE ? fieldcount(T) : 0
 end
 
 """
@@ -308,7 +304,12 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
             end
             done = true
           catch e
-            if !isa(e, MetaModelicaException)
+            #=
+              We only rethrow for two kinds of exceptions currently.
+              One for list, and one for generic MetaModelicaExceptions.
+            =#
+            if !isa(e, MetaModelicaException) && !isa(e, ImmutableListException)
+              print(e)
               rethrow(e)
             end
             done = false
@@ -335,6 +336,7 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
     error("Unrecognized case syntax: $case")
   end
 end
+
 
 """
 Top level function for all match macros except
