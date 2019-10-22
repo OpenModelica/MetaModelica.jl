@@ -20,6 +20,7 @@ export cons
 export debug_print
 export equality
 export fail
+export getGlobalRoot
 export intAbs
 export intAdd
 export intBitLShift

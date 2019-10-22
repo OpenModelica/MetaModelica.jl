@@ -570,8 +570,24 @@ end
 This is a global mutable value and should be used sparingly.
 You are recommended not to use 0 or false since the runtime system may treat these values as uninitialized and fail getGlobalRoot later on.
 """
-function setGlobalRoot(index::ModelicaInteger, value::A) where {A}
-  #= Defined in the runtime =#
+global globalRoots = Array{Any,1}(nothing, 1024)
+
+function setGlobalRoot(index::ModelicaInteger, value::T) where {T}
+  if index > 1023 || index < 0
+    fail()
+  end
+  globalRoots[index+1] = value
+end
+
+function getGlobalRoot(index::ModelicaInteger)
+  if index > 1023 || index < 0
+    fail()
+  end
+  val = globalRoots[index+1]
+  if val == nothing
+    fail()
+  end
+  val
 end
 
 """ The return-value is compiler-dependent on the runtime implementation of
