@@ -384,7 +384,7 @@ function stringDelimitList(strs::List{String}, delimiter::String)::String
     else
       str = str + delimiter + n
     end
-  end 
+  end
   str
 end
 
@@ -434,29 +434,27 @@ function stringEq(s1::String, s2::String)::Bool
 end
 
 function stringEqual(s1::String, s2::String)::Bool
-  local b::Bool
-  b = s1 == s2
+  s1 == s2
 end
 
 function stringCompare(s1::String, s2::String)::ModelicaInteger
-  local cmp::ModelicaInteger
-
-  #= Defined in the runtime =#
-  cmp
+  res = cmp(s1, s2)
+  if res < 0
+    return -1
+  end
+  if res > 0
+    return 1
+  end
+  return 0
 end
 
 function stringHash(str::String)::ModelicaInteger
-  local hash::ModelicaInteger
-
-  #= Defined in the runtime =#
-  hash
+  hash(str)
 end
 
+#= TODO: Defined in the runtime =#
 function stringHashDjb2(str::String)::ModelicaInteger
-  local hash::ModelicaInteger
-
-  #= Defined in the runtime =#
-  hash
+  hash(str)
 end
 
 """ Does hashing+modulo without intermediate results. """
