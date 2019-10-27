@@ -93,6 +93,7 @@ export stringCompare
 export stringDelimitList
 export stringEmpty
 export stringEqual
+export stringEq
 export stringGet
 export stringGetStringChar
 export stringHash

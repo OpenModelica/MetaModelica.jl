@@ -244,7 +244,7 @@ end
 function handleSugar(T)
   T =
     if string(T) == "<|"
-      # Syntactic sugar cons. Two operators for now I suggest we remove =>
+      # Syntactic sugar cons.
       :Cons
     elseif string(T) == "_cons"
       #= This is legacy for the code generator. For match equation we need to allow this as well =#
@@ -283,6 +283,7 @@ function handle_match_eq(expr)
     error("Unrecognized match syntax: $expr")
   end
 end
+
 """
 Handles match cases both for the matchcontinue and regular match case
 calls handle_destruct. See handle_destruct for more details.
@@ -378,10 +379,9 @@ function handle_match_cases(value, match :: Expr ; mathcontinue::Bool = false)
 end
 
 """
-      @match pattern = value
-
+  @match pattern = value
   If `value` matches `pattern`, bind variables and return `value`. Otherwise, throw `MatchFailure`.
-  """
+"""
 macro match(expr)
   res = handle_match_eq(expr)
   replaceLineNum(res, @__FILE__, __source__)
@@ -396,7 +396,7 @@ end
       end
 
   Return `result` for the first matching `pattern`. If there are no matches, throw `MatchFailure`.
-  """
+"""
 macro matchcontinue(value, cases)
   res = handle_match_cases(value, cases ; mathcontinue = true)
   replaceLineNum(res, @__FILE__, __source__)
