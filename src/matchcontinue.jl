@@ -28,6 +28,7 @@ macro splice(iterator, body)
 end
 
 struct MatchFailure <: MetaModelicaException
+  msg
   value
 end
 
@@ -273,7 +274,7 @@ function handle_match_eq(expr)
       $(asserts...)
       value = $(esc(value))
       done = false
-      $body || throw(MatchFailure(value))
+      $body || throw(MatchFailure("bad body", value))
       $(@splice variable in bound quote
         $(esc(variable)) = $(Symbol("variable_$variable"))
         end)
@@ -372,7 +373,7 @@ function handle_match_cases(value, match :: Expr ; mathcontinue::Bool = false)
     local res
     $tail
     if !done
-      throw(MatchFailure(value))
+      throw(MatchFailure("unfinished", value))
     end
     res
   end

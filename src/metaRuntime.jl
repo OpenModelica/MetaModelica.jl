@@ -388,6 +388,18 @@ function stringDelimitList(strs::List{String}, delimiter::String)::String
   str
 end
 
+function stringDelimitList(strs::List{Any}, delimiter::String)::String
+  local str::String = ""
+  for n in strs
+    if isempty(str)
+      str = n
+    else
+      str = str + delimiter + n
+    end
+  end
+  str
+end
+
 """ O(1) """
 function stringLength(str::String)::ModelicaInteger
   length(str)
@@ -605,9 +617,7 @@ end
 
 """ Structural equality """
 function valueEq(a1::A, a2::A)::Bool where {A}
-  local b::Bool
-
-  #= Defined in the runtime =#
+  local b::Bool = a1 === a2
   b
 end
 
