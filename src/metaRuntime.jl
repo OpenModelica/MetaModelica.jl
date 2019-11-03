@@ -468,25 +468,19 @@ function stringHashDjb2(str::String)::ModelicaInteger
 end
 
 """ Does hashing+modulo without intermediate results. """
-function stringHashDjb2Mod(str::String, mod::ModelicaInteger)::ModelicaInteger
-  local hash::ModelicaInteger
-
-  #= Defined in the runtime =#
-  hash
+function stringHashDjb2Mod(str::String, m::ModelicaInteger)::ModelicaInteger
+  local h::ModelicaInteger = mod(hash(str), m)
+  h
 end
 
 function stringHashSdbm(str::String)::ModelicaInteger
-  local hash::ModelicaInteger
-
-  #= Defined in the runtime =#
-  hash
+  local h::ModelicaInteger = hash(str)
+  h
 end
 
 function substring(str::String, start #=start index, first character is 1 =#::ModelicaInteger, stop #= stop index, first character is 1 =#::ModelicaInteger)::String
-  local out #= Length is stop-start+1 =#::String
-
-  #= Defined in the runtime =#
-  out #= Length is stop-start+1 =#
+  local out = str[start:stop]
+  out
 end
 
 """ O(1) ? """
@@ -563,6 +557,8 @@ end
 """ For RML compatibility """
 function debug_print(str::String, a::A) where {A}
   #= Defined in the runtime =#
+  println(str)
+  @show a
 end
 
 global tickCounter = 0
@@ -570,8 +566,11 @@ function tick()::ModelicaInteger
   global tickCounter = tickCounter + 1
 end
 
-function equality(a1::A, a2::A) where {A}
+function equality(a1::A1, a2::A2) where {A1,A2}
   #= Defined in the runtime =#
+  if !valueEq(a1, a2)
+    fail()
+  end
 end
 
 """ Sets the index of the root variable with index 9..1023, or thread-local root variable with index 0..8.
@@ -616,8 +615,12 @@ function valueSlots(value::A)::ModelicaInteger where {A}
 end
 
 """ Structural equality """
-function valueEq(a1::A, a2::A)::Bool where {A}
-  local b::Bool = a1 === a2
+function valueEq(a1::A, a2::B)::Bool where {A, B}
+  local b::Bool =
+  @match (a1, a2) begin
+    (SOME(x1), SOME(x2)) => valueEq(x1, x2)
+    (_, _) => a1 === a2
+  end
   b
 end
 
@@ -630,14 +633,11 @@ function valueCompare(a1::A, a2::A)::ModelicaInteger where {A}
 end
 
 function valueHashMod(value::A, mod::ModelicaInteger)::ModelicaInteger where {A}
-  local hash::ModelicaInteger
-
-  #= Defined in the runtime =#
-  hash
+  local hash::ModelicaInteger = hash(A)
 end
 
 """ This is a very fast comparison of two values which only checks if the pointers are equal. """
-function referenceEq(a1::A, a2::A)::Bool where {A}
+function referenceEq(a1::A1, a2::A2)::Bool where {A1, A2}
   #TODO: Should be like this?
   a1===a2
 end

@@ -175,7 +175,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
                 throw(LoadError("Attempted to match on a function", @__LINE__, AssertionError("Incorrect match usage attempted to match on: $func")))
               end
               if !(isstructtype(typeof($(esc(T)))) || issabstracttype(typeof($(esc(T)))))
-                throw(LoadError("Attempted to match on a pattern that is not a struct", @__LINE__, AssertionError("Incorrect match usage. Attempted to match on a pattern that is not a stru ")))
+                throw(LoadError("Attempted to match on a pattern that is not a struct", @__LINE__, AssertionError("Incorrect match usage. Attempted to match on a pattern that is not a struct")))
               end
               pattern = $(esc(T))
               if $(esc(T)) != NONE
@@ -273,8 +273,8 @@ function handle_match_eq(expr)
     quote
       $(asserts...)
       value = $(esc(value))
-      done = false
-      $body || throw(MatchFailure("bad body", value))
+      __omc_match_done = false
+      $body || throw(MatchFailure("no match", value))
       $(@splice variable in bound quote
         $(esc(variable)) = $(Symbol("variable_$variable"))
         end)
@@ -295,7 +295,7 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
     body = handle_destruct(:value, pattern, bound, asserts)
     if matchcontinue
       quote
-        if (!done) && $body
+        if (!__omc_match_done) && $body
           try
             res = let $(bound...)
               # export bindings
@@ -304,24 +304,29 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
                 end)
               $(esc(result))
             end
-            done = true
+            __omc_match_done = true
           catch e
             #=
               We only rethrow for two kinds of exceptions currently.
               One for list, and one for generic MetaModelicaExceptions.
             =#
+            #if isa(e, MetaModelicaException) || isa(e, ImmutableListException)
+            #  println(e.msg)
+            #else
+            #  showerror(stderr, e, catch_backtrace())
+            #end
             if !isa(e, MetaModelicaException) && !isa(e, ImmutableListException)
-              print(e)
+              showerror(stderr, e, catch_backtrace())
               rethrow(e)
             end
-            done = false
+            __omc_match_done = false
           end
         end
         $tail
       end
     else
       quote
-        if (!done) && $body
+        if (!__omc_match_done) && $body
           res = let $(bound...)
             # export bindings
             $(@splice variable in bound quote
@@ -329,7 +334,7 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
               end)
             $(esc(result))
           end
-          done = true
+          __omc_match_done = true
         end
         $tail
       end
@@ -369,10 +374,10 @@ function handle_match_cases(value, match :: Expr ; mathcontinue::Bool = false)
   quote
     $(asserts...)
     local value = $(esc(value))
-    local done::Bool = false
+    local __omc_match_done::Bool = false
     local res
     $tail
-    if !done
+    if !__omc_match_done
       throw(MatchFailure("unfinished", value))
     end
     res
