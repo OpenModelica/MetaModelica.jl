@@ -573,11 +573,15 @@ function equality(a1::A1, a2::A2) where {A1,A2}
   end
 end
 
+# cannot use nothing in the globalRoots array
+# as NONE() is nothing so we use the struct below
+# to signal when an element is not set
+
 """ Sets the index of the root variable with index 9..1023, or thread-local root variable with index 0..8.
 This is a global mutable value and should be used sparingly.
 You are recommended not to use 0 or false since the runtime system may treat these values as uninitialized and fail getGlobalRoot later on.
 """
-global globalRoots = Array{Any,1}(nothing, 1024)
+global globalRoots = Array{Any,1}(missing, 1024)
 
 function setGlobalRoot(index::ModelicaInteger, value::T) where {T}
   if index > 1023 || index < 0
@@ -591,7 +595,7 @@ function getGlobalRoot(index::ModelicaInteger)
     fail()
   end
   val = globalRoots[index+1]
-  if val == nothing
+  if ismissing(val)
     fail()
   end
   val
