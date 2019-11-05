@@ -458,23 +458,30 @@ function stringCompare(s1::String, s2::String)::ModelicaInteger
   return 0
 end
 
+function myhash(s::String)::ModelicaInteger
+  local h::ModelicaInteger = mod(hash(s), typemax(ModelicaInteger))
+  h
+end
+
 function stringHash(str::String)::ModelicaInteger
-  hash(str)
+  local h::ModelicaInteger = ModelicaInteger(myhash(str))
+  h
 end
 
 #= TODO: Defined in the runtime =#
 function stringHashDjb2(str::String)::ModelicaInteger
-  hash(str)
+  local h::ModelicaInteger = ModelicaInteger(myhash(str))
+  h
 end
 
 """ Does hashing+modulo without intermediate results. """
 function stringHashDjb2Mod(str::String, m::ModelicaInteger)::ModelicaInteger
-  local h::ModelicaInteger = mod(hash(str), m)
+  local h::ModelicaInteger = mod(ModelicaInteger(myhash(str)), m)
   h
 end
 
 function stringHashSdbm(str::String)::ModelicaInteger
-  local h::ModelicaInteger = hash(str)
+  local h::ModelicaInteger = ModelicaInteger(myhash(str))
   h
 end
 
@@ -522,9 +529,14 @@ function listArray(lst::List{T})::Array{T} where {T}
 end
 
 """ O(1) """
-function arrayUpdate(arr::Array{A}, index::ModelicaInteger, newValue::A)::Array{A} where {A}
+function arrayUpdate(arr::Array{A}, index::ModelicaInteger, newValue::B)::Array{A} where {A,B}
   local newArray #= same as the input array; used for folding =#::Array{A} = arr
-  newArray[index] = newValue;
+  if !(A <: B)
+    println("!(A<:B)")
+    @show A
+    @show B
+  end
+  newArray[index] = newValue
   #= Defined in the runtime =#
   newArray #= same as the input array; used for folding =#
 end
@@ -631,13 +643,14 @@ end
 """ a1 > a2? """
 function valueCompare(a1::A, a2::A)::ModelicaInteger where {A}
   local i #= -1, 0, 1 =#::ModelicaInteger
-
+  @assert (false)
   #= Defined in the runtime =#
   i #= -1, 0, 1 =#
 end
 
 function valueHashMod(value::A, mod::ModelicaInteger)::ModelicaInteger where {A}
-  local hash::ModelicaInteger = hash(A)
+  local h::ModelicaInteger = mod(ModelicaInteger(myhash(value)), m)
+  h
 end
 
 """ This is a very fast comparison of two values which only checks if the pointers are equal. """
@@ -665,7 +678,7 @@ end
 
 """ Returns true if the input is NONE() """
 function isNone(opt::Option{A})::Bool where {A}
-  isa(opt, NONE)
+  (opt==nothing) # isa(opt, NONE))
 end
 
 """ Returns true if the input is SOME() """
