@@ -11,7 +11,7 @@ function genShouldFail(expr)
     catch
     end
     if __have_failed__
-      throw(MatchFailure("Failure fail"))
+      throw(MatchFailure("got failure", "Failure fail"))
     end
   end
 end
