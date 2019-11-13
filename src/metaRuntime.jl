@@ -363,7 +363,7 @@ function stringListStringChar(str::String)::List{String}
 end
 
 """ O(str) """
-function stringAppendList(strs::List{String})::String
+function stringAppendList(strs::List)::String
   local str::String = ""
   for n in strs
     str = str + n
@@ -471,10 +471,7 @@ function stringHashSdbm(str::String)::ModelicaInteger
 end
 
 function substring(str::String, start #=start index, first character is 1 =#::ModelicaInteger, stop #= stop index, first character is 1 =#::ModelicaInteger)::String
-  local out #= Length is stop-start+1 =#::String
-
-  #= Defined in the runtime =#
-  out #= Length is stop-start+1 =#
+  str[start:stop]
 end
 
 """ O(1) ? """
@@ -727,4 +724,14 @@ end
 
 Base.:+(x::String, y::String) = let
   x * y
+end
+
+""" Imports and prints if the import is sucessful """
+macro importDBG(moduleName)
+  quote
+    import $moduleName
+    x = string(@__MODULE__)
+    y = string($(esc(moduleName)))
+    println("Importing " * y  * " in " * x)
+  end
 end
