@@ -111,3 +111,4 @@ export valueConstructor
 export valueEq
 export valueHashMod
 export valueSlots
+export _listAppend
