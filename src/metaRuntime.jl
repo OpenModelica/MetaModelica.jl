@@ -165,52 +165,43 @@ end
 
 """ Returns bitwise inverted Integer number of i """
 function intBitNot(i::ModelicaInteger)::ModelicaInteger
-  local o::ModelicaInteger
-  #= Defined in the runtime =#
+  local o::ModelicaInteger = ~i
   o
 end
 
 """ Returns bitwise \'and\' of Integers i1 and i2 """
 function intBitAnd(i1::ModelicaInteger, i2::ModelicaInteger)::ModelicaInteger
-  local o::ModelicaInteger
-  #= Defined in the runtime =#
+  local o::ModelicaInteger = i1 & i2
   o
 end
 
 """ Returns bitwise 'or' of Integers i1 and i2 """
 function intBitOr(i1::ModelicaInteger, i2::ModelicaInteger)::ModelicaInteger
-  local o::ModelicaInteger
-  #= Defined in the runtime =#
+  local o::ModelicaInteger = i1 | i2
   o
 end
 
 """ Returns bitwise 'xor' of Integers i1 and i2 """
 function intBitXor(i1::ModelicaInteger, i2::ModelicaInteger)::ModelicaInteger
-  local o::ModelicaInteger
-
-  #= Defined in the runtime =#
+  local o::ModelicaInteger = i1 ⊻ i2
   o
 end
 
 """ Returns bitwise left shift of Integer i by s bits """
 function intBitLShift(i::ModelicaInteger, s::ModelicaInteger)::ModelicaInteger
-  local o::ModelicaInteger
-
-  #= Defined in the runtime =#
+  local o::ModelicaInteger = i << i
   o
 end
 
 """ Returns bitwise right shift of Integer i by s bits """
 function intBitRShift(i::ModelicaInteger, s::ModelicaInteger)::ModelicaInteger
-  local o::ModelicaInteger
-
-  #= Defined in the runtime =#
+  local o::ModelicaInteger = i >> s
   o
 end
 
 """ Converts Integer to Real """
 function intReal(i::ModelicaInteger)::ModelicaReal
-  float(i)
+  Float64(i)
 end
 
 """ Converts Integer to String """
@@ -325,40 +316,33 @@ function realString(r::ModelicaReal)::String
 end
 
 function stringCharInt(ch::String)::ModelicaInteger
-  local i::ModelicaInteger
-
-  #= Defined in the runtime =#
+  local i::ModelicaInteger = Int64(char(ch[1]))
   i
 end
 
 function intStringChar(i::ModelicaInteger)::String
-  local ch::String
-
-  #= Defined in the runtime =#
+  local ch::String = string(char(i))
   ch
 end
 
 function stringInt(str::String)::ModelicaInteger
-  local i::ModelicaInteger
-
-  #= Defined in the runtime =#
+  local i::ModelicaInteger = Int64(str)
   i
 end
 
 """ This function fails unless the whole string can be consumed by strtod without
 setting errno. For more details, see man 3 strtod """
 function stringReal(str::String)::ModelicaReal
-  local r::ModelicaReal
-
-  #= Defined in the runtime =#
+  local r::ModelicaReal = Float64(str)
   r
 end
 
 """ O(str) """
 function stringListStringChar(str::String)::List{String}
-  local chars::List{String}
-
-  #= Defined in the runtime =#
+  local chars::List{String} = nil
+  for i in length(chars):-1:1
+    chars = _cons(string(str[i]), chars)
+  end
   chars
 end
 
@@ -418,17 +402,14 @@ end
 
 """ O(1) """
 function stringGetStringChar(str::String, index::ModelicaInteger)::String
-  local ch::String
-
-  #= Defined in the runtime =#
+  local ch::String = string(str[index])
   ch
 end
 
 """ O(n) """
 function stringUpdateStringChar(str::String, newch::String, index::ModelicaInteger)::String
-  local news::String
-
-  #= Defined in the runtime =#
+  local news::String = str
+  news[index] = newch[1]
   news
 end
 
@@ -617,8 +598,8 @@ end
 boxed values. The number of bits reserved for the constructor is generally
 between 6 and 8 bits. """
 function valueConstructor(value::A)::ModelicaInteger where {A}
-  local ctor::ModelicaInteger
-  #= Defined in the runtime =#
+  # hack! hack! hack!
+  local ctor::ModelicaInteger = integer(hash(string(typeof(value))))
   ctor
 end
 
@@ -626,7 +607,7 @@ end
 on the architecture in question. """
 function valueSlots(value::A)::ModelicaInteger where {A}
   local slots::ModelicaInteger
-  #= Defined in the runtime =#
+  @assert false "not implemented, use valueEq to compare objects"
   slots
 end
 
@@ -642,14 +623,19 @@ end
 
 """ a1 > a2? """
 function valueCompare(a1::A, a2::A)::ModelicaInteger where {A}
-  local i #= -1, 0, 1 =#::ModelicaInteger
-  @assert (false)
-  #= Defined in the runtime =#
+  local i::ModelicaInteger =
+    if valueConstructor(a1) < valueConstructor(a2)
+      -1
+    elseif valueConstructor(a1) > valueConstructor(a2)
+      1
+    else
+      0
+    end
   i #= -1, 0, 1 =#
 end
 
 function valueHashMod(value::A, mod::ModelicaInteger)::ModelicaInteger where {A}
-  local h::ModelicaInteger = mod(ModelicaInteger(myhash(value)), m)
+  local h::ModelicaInteger = mod(ModelicaInteger(myhash(string(value))), m)
   h
 end
 
@@ -663,16 +649,14 @@ end
 be used for debugging. """
 function referencePointerString(ref::A)::String where {A}
   local str::String
-
-  #= Defined in the runtime =#
+  @assert false "not implemented"
   str
 end
 
 """ Use the diff to compare two time samples to each other. Not very accurate. """
 function clock()::ModelicaReal
   local t::ModelicaReal
-
-  #= Defined in the runtime =#
+  @assert false "not implemented"
   t
 end
 
@@ -688,15 +672,15 @@ end
 
 function listStringCharString(strs::List{String})::String
   local str::String
-
-  #= Defined in the runtime =#
+  @assert false "not implemented"
   str
 end
 
 function stringCharListString(strs::List{String})::String
-  local str::String
-
-  #= Defined in the runtime =#
+  local str::String = ""
+  for s in strs
+    str = str + s
+  end
   str
 end
 
@@ -714,15 +698,13 @@ end
 
 function referenceDebugString(functionSymbol::A)::String where {A}
   local name::String
-
-  #= Defined in the runtime =#
+  @assert false "not implemented"
   name
 end
 
 """ TODO: I am far from sure that this will fly.. in Julia. The code generated from the transpiler is correct however"""
 function isPresent(ident::T)::Bool where {T}
   local b::Bool
-
   b = true
   b
 end
