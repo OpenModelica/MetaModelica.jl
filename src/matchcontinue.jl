@@ -316,7 +316,11 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
             #  showerror(stderr, e, catch_backtrace())
             #end
             if !isa(e, MetaModelicaException) && !isa(e, ImmutableListException)
-              showerror(stderr, e, catch_backtrace())
+              if isa(e, MatchFailure)
+                println("MatchFailure:" + e.msg)
+              else
+                showerror(stderr, e, catch_backtrace())
+              end
               rethrow(e)
             end
             __omc_match_done = false
