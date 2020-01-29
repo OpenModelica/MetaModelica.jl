@@ -599,15 +599,19 @@ boxed values. The number of bits reserved for the constructor is generally
 between 6 and 8 bits. """
 function valueConstructor(value::A)::ModelicaInteger where {A}
   # hack! hack! hack!
-  local ctor::ModelicaInteger = integer(hash(string(typeof(value))))
+  local ctor::ModelicaInteger = myhash(string(typeof(value)))
   ctor
 end
 
 """ The number of slots a boxed value has. This is dependent on sizeof(void*)
 on the architecture in question. """
 function valueSlots(value::A)::ModelicaInteger where {A}
-  local slots::ModelicaInteger
-  @assert false "not implemented, use valueEq to compare objects"
+  local slots::ModelicaInteger = 0
+  try
+    slots = nfields(value)
+  catch ex
+    # do nothing
+  end
   slots
 end
 
