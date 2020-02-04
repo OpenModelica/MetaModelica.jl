@@ -21,8 +21,8 @@ RUN export HOME=/home/julia && \
     julia -O3 -e 'using Pkg;Pkg.REPLMode.pkgstr("add LightXML  ;precompile");using LightXML' && \
     julia -O3 -e 'using Pkg;Pkg.REPLMode.pkgstr("add Random  ;precompile");using Random' && \
     julia -O3 -e 'using Pkg;Pkg.REPLMode.pkgstr("add Test  ;precompile");using Test' && \
-    julia -O3 -e 'using Pkg;Pkg.REPLMode.pkgstr("add https://github.com/OpenModelica/ImmutableList.jl  ;precompile"); using ImmutableList' && \
+    julia -O3 -e 'using Pkg;Pkg.REPLMode.pkgstr("add https://github.com/OpenModelica/ImmutableList.jl.git  ;precompile"); using ImmutableList' && \
     julia -O3 -e 'using Pkg;Pkg.REPLMode.pkgstr("add ExportAll  ;precompile");using ExportAll' && \
     julia -O3 -e 'using Pkg;Pkg.REPLMode.pkgstr("add MacroTools   ;precompile");using MacroTools' && \
-    julia -O3 -e 'using Pkg;Pkg.REPLMode.pkgstr("add https://github.com/OpenModelica/MetaModelica.jl   ;precompile"); using MetaModelica' && \
+    julia -O3 -e 'using Pkg;Pkg.REPLMode.pkgstr("add https://github.com/OpenModelica/MetaModelica.jl.git   ;precompile"); using MetaModelica' && \
     (cd /home/julia && tar cf /home/julia.tar .julia) && rm -rf /home/julia/.julia && chmod ugo+rwx /home/julia
