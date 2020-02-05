@@ -333,7 +333,7 @@ end
 """ This function fails unless the whole string can be consumed by strtod without
 setting errno. For more details, see man 3 strtod """
 function stringReal(str::String)::ModelicaReal
-  local r::ModelicaReal = Float64(str)
+  local r::ModelicaReal = parse(Float64, str)
   r
 end
 
