@@ -751,3 +751,7 @@ macro importDBG(moduleName)
     println("Importing " * y  * " in " * x)
   end
 end
+
+function getInstanceName()::String
+  "__NOT_IMPLEMENTED__"
+end
