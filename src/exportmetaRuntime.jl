@@ -112,3 +112,4 @@ export valueEq
 export valueHashMod
 export valueSlots
 export _listAppend
+export getInstanceName
