@@ -98,6 +98,7 @@ export stringGet
 export stringGetStringChar
 export stringHash
 export stringHashDjb2
+export stringHashDjb2Mod
 export stringHashSdbm
 export stringInt
 export stringLength
