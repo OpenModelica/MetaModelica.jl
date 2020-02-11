@@ -11,6 +11,7 @@ export arrayGet
 export arrayLength
 export arrayList
 export arrayUpdate
+export boolNot
 export boolAnd
 export boolEq
 export boolOr
@@ -98,6 +99,7 @@ export stringGet
 export stringGetStringChar
 export stringHash
 export stringHashDjb2
+export stringHashDjb2Mod
 export stringHashSdbm
 export stringInt
 export stringLength
@@ -113,3 +115,4 @@ export valueHashMod
 export valueSlots
 export _listAppend
 export getInstanceName
+export StringFunction

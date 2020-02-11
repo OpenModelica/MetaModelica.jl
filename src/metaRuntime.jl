@@ -397,11 +397,19 @@ end
 
 """ O(1) """
 function stringGet(str::String, index::ModelicaInteger)::ModelicaInteger
+  if index < 0
+    println("stringGet: index < 0!")
+    fail()
+  end
   str[index]
 end
 
 """ O(1) """
 function stringGetStringChar(str::String, index::ModelicaInteger)::String
+  if index < 0
+    println("stringGetStringChar: index < 0!")
+    fail()
+  end
   local ch::String = string(str[index])
   ch
 end
@@ -409,6 +417,10 @@ end
 """ O(n) """
 function stringUpdateStringChar(str::String, newch::String, index::ModelicaInteger)::String
   local news::String = str
+  if index < 0
+    println("stringUpdateStringChar: index < 0!")
+    fail()
+  end
   news[index] = newch[1]
   news
 end
@@ -467,6 +479,10 @@ function stringHashSdbm(str::String)::ModelicaInteger
 end
 
 function substring(str::String, start #=start index, first character is 1 =#::ModelicaInteger, stop #= stop index, first character is 1 =#::ModelicaInteger)::String
+  if start < 0
+    println("substring: start < 0!")
+    fail()
+  end
   local out = str[start:stop]
   out
 end
@@ -483,6 +499,10 @@ end
 
 """ O(1) """
 function arrayGet(arr::Array{A}, index::ModelicaInteger)::A where {A}
+  if index < 0
+    println("arrayGet: index < 0!")
+    fail()
+  end
   arr[index]
 end
 
@@ -512,10 +532,14 @@ end
 """ O(1) """
 function arrayUpdate(arr::Array{A}, index::ModelicaInteger, newValue::B)::Array{A} where {A,B}
   local newArray #= same as the input array; used for folding =#::Array{A} = arr
-  if !(A <: B)
-    println("!(A<:B)")
-    @show A
-    @show B
+  #if !(A <: B)
+  #  println("!(A<:B)")
+  #  @show A
+  #  @show B
+  #end
+  if index < 0
+    println("arrayUpdate: index < 0!")
+    fail()
   end
   newArray[index] = newValue
   #= Defined in the runtime =#
@@ -754,4 +778,12 @@ end
 
 function getInstanceName()::String
   "__NOT_IMPLEMENTED__"
+end
+
+function StringFunction(i::Int64)::String
+  intString(i)
+end
+
+function StringFunction(r::Float64)::String
+  realString(r)
 end
