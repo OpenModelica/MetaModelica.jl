@@ -10,12 +10,18 @@ using ..MetaModelica
 
 """ O(1) """
 function arrayGetNoBoundsChecking(arr::Array{A}, index::ModelicaInteger)::A where {A <: Any}
+  if index < 0
+    println("arrayGetNoBoundsChecking: index < 0!")
+  end
   @inbounds arr[index]
 end
 
 """ O(1) """
 function arrayUpdateNoBoundsChecking(arr::Array{A}, index::ModelicaInteger, newValue::A)::Array{A} where {A <: Any}
   local newArray::Array{A} = arr
+  if index < 0
+    println("arrayUpdateNoBoundsChecking: index < 0!")
+  end
   @inbounds newArray[index] = newValue
   newArray
 end
@@ -33,6 +39,9 @@ end
 """ O(1) """
 function stringGetNoBoundsChecking(str::String, index::ModelicaInteger)::ModelicaInteger
   local ch::ModelicaInteger
+  if index < 0
+    println("stringGetNoBoundsChecking: index < 0!")
+  end
   ch = @inbounds str[index]
 end
 
