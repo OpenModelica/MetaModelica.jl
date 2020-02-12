@@ -21,7 +21,9 @@ pipeline {
           checkout scm
           sh '''
           export HOME=$PWD
-          julia -e "using Pkg; Pkg.add(\\"ExportAll\\"); Pkg.add(\\"DataStructures\\"); Pkg.add(\\"MacroTools\\");
+          julia -e "using Pkg; Pkg.add(\\"ExportAll\\"); Pkg.add(\\"DataStructures\\");
+          Pkg.add(\\"MacroTools\\");
+          Pkg.add(\\"Test\\");
           Pkg.add(PackageSpec(url=\\"https://github.com/OpenModelica/ImmutableList.jl\\"));
           Pkg.develop(PackageSpec(path=\\".\\"))
           Pkg.test(\\"MetaModelica\\", coverage=true)"
