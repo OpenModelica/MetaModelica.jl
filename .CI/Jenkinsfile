@@ -27,9 +27,9 @@ pipeline {
           Pkg.add(\\"MacroTools\\");
           Pkg.add(\\"Test\\");
           Pkg.add(PackageSpec(url=\\"https://github.com/OpenModelica/ImmutableList.jl\\"));
-          Pkg.develop(PackageSpec(path=\\".\\"));
-          Pkg.test(\\"MetaModelica\\", coverage=true)"
+          Pkg.develop(PackageSpec(path=\\".\\"))"          
           '''
+          sh 'julia -e "using Pkg; Pkg.test(\\"MetaModelica\\", coverage=true)"'
         }
       }
     }
