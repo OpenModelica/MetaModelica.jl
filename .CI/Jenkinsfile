@@ -19,6 +19,7 @@ pipeline {
       steps {
         dir("MetaModelica.jl") {
           checkout scm
+          sh '(cd /home/julia && tar xf /home/julia.tar)'
           sh '''
           export HOME=$PWD
           julia -e "using Pkg;
