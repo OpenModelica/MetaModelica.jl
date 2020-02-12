@@ -26,7 +26,7 @@ pipeline {
           Pkg.add(\\"DataStructures\\");
           Pkg.add(\\"MacroTools\\");
           Pkg.add(\\"Test\\");
-          Pkg.add(PackageSpec(url=\\"https://github.com/OpenModelica/ImmutableList.jl\\"));  
+          Pkg.add(PackageSpec(url=\\"https://github.com/OpenModelica/ImmutableList.jl\\"))"
           '''
           sh 'julia -e "using Pkg; Pkg.REPLMode.pkgstr(\\"add $PWD\\")"'
           sh 'julia -e "using Pkg; Pkg.test(\\"MetaModelica\\", coverage=true)"'
