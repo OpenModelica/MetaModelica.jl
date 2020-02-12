@@ -22,7 +22,7 @@ pipeline {
           checkout scm
           sh '(cd /home/julia && tar xf /home/julia.tar)'
           sh 'test -d $HOME/.julia/compiled/v1.0/PEG/'
-          sh 'julia -e "using Pkg; Pkg.test(\\"MetaModelica\\", coverage=true)"'
+          sh 'julia -e "using Pkg; Pkg.add(\\"DataStructures\\"); Pkg.add(\\"ExportAll\\"); Pkg.add(\\"MacroTools\\"); Pkg.add(\\"https://github.com/OpenModelica/ImmutableList.jl\\"); Pkg.test(\\"MetaModelica\\", coverage=true)"'
         }
       }
     }
