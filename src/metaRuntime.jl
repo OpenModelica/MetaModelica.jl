@@ -316,12 +316,12 @@ function realString(r::ModelicaReal)::String
 end
 
 function stringCharInt(ch::String)::ModelicaInteger
-  local i::ModelicaInteger = Int64(char(ch[1]))
+  local i::ModelicaInteger = Int64(ch[1])
   i
 end
 
 function intStringChar(i::ModelicaInteger)::String
-  local ch::String = string(char(i))
+  local ch::String = string(Char(i))
   ch
 end
 
