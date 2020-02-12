@@ -20,7 +20,6 @@ pipeline {
         dir("MetaModelica.jl") {
           checkout scm
           sh '(pwd)'
-          sh 'whoami'
           sh '''
           export HOME=$PWD
           julia -e "using Pkg;
