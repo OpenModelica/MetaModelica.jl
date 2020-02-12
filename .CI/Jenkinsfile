@@ -14,13 +14,15 @@ pipeline {
   stages {
     stage('build') {
       environment {
-        HOME = '/home/julia'
         USER = 'jenkins'
       }
       steps {
         dir("MetaModelica.jl") {
           checkout scm
-          sh 'julia -e "using Pkg; Pkg.add(\\"ExportAll\\"); Pkg.add(\\"DataStructures\\"); Pkg.add(\\"MacroTools\\"); Pkg.add(\\"https://github.com/OpenModelica/ImmutableList.jl\\"); Pkg.test(\\"MetaModelica\\", coverage=true)"'
+          sh '''
+          export HOME=$PWD
+          julia -e "using Pkg; Pkg.add(\\"ExportAll\\"); Pkg.add(\\"DataStructures\\"); Pkg.add(\\"MacroTools\\"); Pkg.add(\\"https://github.com/OpenModelica/ImmutableList.jl\\"); Pkg.test(\\"MetaModelica\\", coverage=true)"
+          '''
         }
       }
     }
