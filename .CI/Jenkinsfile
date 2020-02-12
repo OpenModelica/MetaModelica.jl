@@ -19,7 +19,7 @@ pipeline {
       steps {
         dir("MetaModelica.jl") {
           checkout scm
-          sudo chown -R jenkins ~/.julia
+          sh 'sudo chown -R jenkins ~/.julia'
           sh '(pwd)'
           sh '''
           export HOME=$PWD
