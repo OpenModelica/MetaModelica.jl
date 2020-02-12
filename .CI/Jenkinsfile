@@ -28,10 +28,7 @@ pipeline {
           Pkg.add(\\"Test\\");
           Pkg.add(PackageSpec(url=\\"https://github.com/OpenModelica/ImmutableList.jl\\"));
           Pkg.develop(PackageSpec(path=\\".\\"))"
-
-          julia -e "using Pkg;
-          import Test;
-          Pkg.test(\\"MetaModelica\\", coverage=true)"
+          Pkg.test(coverage=true)
           '''
         }
       }
