@@ -26,9 +26,9 @@ pipeline {
           Pkg.add(\\"DataStructures\\");
           Pkg.add(\\"MacroTools\\");
           Pkg.add(\\"Test\\");
-          Pkg.add(PackageSpec(url=\\"https://github.com/OpenModelica/ImmutableList.jl\\"));
-          Pkg.develop(PackageSpec(path=\\".\\"))
-          Pkg.test(coverage=true))"
+          Pkg.add(PackageSpec(url=\\"https://github.com/OpenModelica/ImmutableList.jl\\");
+          Pkg.develop(PackageSpec(path=\\".\\"));
+          Pkg.test(coverage=true)"
           '''
         }
       }
