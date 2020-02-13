@@ -30,6 +30,7 @@ pipeline {
           Pkg.add(PackageSpec(url=\\"https://github.com/OpenModelica/ImmutableList.jl\\"))"
           '''
           sh 'export HOME=$PWD; julia -e "using Pkg; Pkg.REPLMode.pkgstr(\\"add $PWD\\")"'
+          sh 'export HOME=$PWD; julia -e "using Pkg; Pkg.status()"'
           sh 'export HOME=$PWD; julia -e "using Pkg; Pkg.test(\\"MetaModelica\\", coverage=true)"'
         }
       }
