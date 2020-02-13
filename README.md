@@ -1,3 +1,5 @@
+# OpenModelica [![License: OSMC-PL](https://img.shields.io/badge/license-OSMC--PL-lightgrey.svg)](OSMC-License.txt)
+
 # MetaModelica.jl
 
 This package replicates the runtime of the programming language MetaModelica. It also exposes
