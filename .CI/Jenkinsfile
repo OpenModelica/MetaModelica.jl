@@ -22,7 +22,7 @@ pipeline {
           sh '''
           export HOME=$PWD
           julia -e "using Pkg;
-          Pkg.add(test/\"ExportAll\\");
+          Pkg.add(test/\\"ExportAll\\");
           Pkg.add(test/\\"DataStructures\\");
           Pkg.add(test/\\"MacroTools\\");
           Pkg.add(test/\\"Test\\");
