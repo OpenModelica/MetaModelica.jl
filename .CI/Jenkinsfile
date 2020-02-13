@@ -3,7 +3,7 @@ pipeline {
     docker {
       // Large image with full OpenModelica build dependencies; lacks omc and OMPython
       label 'linux'
-      image 'docker.openmodelica.org/omjulia-build-deps:v0.1.0'
+      image 'julia:1.1-buster'
       alwaysPull  true
       args '--privileged'
     }
@@ -14,15 +14,23 @@ pipeline {
   stages {
     stage('build') {
       environment {
-        HOME = '/home/julia'
         USER = 'jenkins'
       }
       steps {
         dir("MetaModelica.jl") {
           checkout scm
-          sh '(cd /home/julia && tar xf /home/julia.tar)'
-          sh 'test -d $HOME/.julia/compiled/v1.0/PEG/'
-          sh 'julia -e "using Pkg; Pkg.test(\\"MetaModelica\\", coverage=true)"'
+          sh '(pwd)'
+          sh '''
+          export HOME=$PWD
+          julia -e "using Pkg;
+          Pkg.add(\\"ExportAll\\");
+          Pkg.add(\\"DataStructures\\");
+          Pkg.add(\\"MacroTools\\");
+          Pkg.add(\\"Test\\");
+          Pkg.add(PackageSpec(url=\\"https://github.com/OpenModelica/ImmutableList.jl\\"))"
+          '''
+          sh 'export HOME=$PWD; julia -e "using Pkg; Pkg.REPLMode.pkgstr(\\"add $PWD\\")"'
+          sh 'export HOME=$PWD; julia -e "using Pkg; Pkg.test(\\"MetaModelica\\", coverage=true)"'
         }
       }
     }
