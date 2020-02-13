@@ -1,6 +1,7 @@
 pipeline {
   agent {
     docker {
+      // Large image with full OpenModelica build dependencies; lacks omc and OMPython
       label 'linux'
       image 'julia:1.2-buster'
       alwaysPull  true
@@ -22,14 +23,13 @@ pipeline {
           sh '''
           export HOME=$PWD
           julia -e "using Pkg;
-          Pkg.add(\\"./test/ExportAll\\");
-          Pkg.add(\\"./test/DataStructures\\");
-          Pkg.add(\\"./test/MacroTools\\");
-          Pkg.add(\\"./test/"Test\\");
+          Pkg.add(\\"ExportAll\\");
+          Pkg.add(\\"DataStructures\\");
+          Pkg.add(\\"MacroTools\\");
+          Pkg.add(\\"Test\\");
           Pkg.add(PackageSpec(url=\\"https://github.com/OpenModelica/ImmutableList.jl\\"))"
           '''
           sh 'export HOME=$PWD; julia -e "using Pkg; Pkg.REPLMode.pkgstr(\\"add $PWD\\")"'
-          sh 'export HOME=$PWD; julia -e "using Pkg; Pkg.status()"'
           sh 'export HOME=$PWD; julia -e "using Pkg; Pkg.test(\\"MetaModelica\\", coverage=true)"'
         }
       }
