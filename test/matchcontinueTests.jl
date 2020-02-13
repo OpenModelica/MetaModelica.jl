@@ -5,7 +5,7 @@ using Test
 
 @test 2 == @matchcontinue Cons(1,nil) begin
   # MM: case x::_ then fail()
-  x <| _ => throw(MatchFailure("Some custom failure here"))
+  x <| _ => throw(MatchFailure("Some custom failure here", 0))
   # MM: case (x as 1)::_ then 2*x
   (x && 1) <| _ => 2*x
   _ => 3
