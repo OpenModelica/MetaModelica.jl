@@ -1,5 +1,5 @@
 @info("MetaModelica: Starting build script")
-
+push!(LOAD_PATH, "@v#.#", "@stdlib")
 using Pkg
 
 # Add dependencies
