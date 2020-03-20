@@ -198,5 +198,24 @@ end
   @test "AB" == "A" + "B"
 end
 
+@testset "Testing MetaModelica assignment semantics" begin
+  struct A
+    a
+  end
+  struct B
+    b
+  end
+  struct C
+    c
+  end
+  nested = A(B(C(1)))
+  @assign nested.a.b.c = 4
+  @test nested.a.b.c == 4
+  @assign a = 4
+  @test a == 4
+  @assign simple = 4
+  @test simple == 4
+end
+
 end #=End runtime tests=#
 end #=End module=#
