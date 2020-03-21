@@ -3,7 +3,9 @@ module MetaModelica
 import MacroTools
 import MacroTools: @capture
 import ExportAll
-  #=
+import Setfield: @set!
+import Setfield: @set
+#=
   Have to treat the types slightly different.
   Precompilation of the types need to occur before everything else
 =#
@@ -18,17 +20,16 @@ include("matchcontinue.jl")
 include("functionInheritance.jl")
 include("metaRuntime.jl")
 include("shouldFail.jl")
+include("utilityMacros.jl")
 
 export @match, @matchcontinue, MatchFailure, ModelicaReal, ModelicaInteger
 export @Uniontype, @Record, @UniontypeDecl, @ExtendedFunction, @ExtendedAnonFunction
 export List, list, Nil, nil, Cons, cons, =>, Option, SOME, NONE, SourceInfo, SOURCEINFO
 export @do_threaded_for, <|, @shouldFail, sourceInfo, _cons, @importDBG
+export @assign
 
 include("exportmetaRuntime.jl")
 include("dangerous.jl")
 include("array.jl")
 
-
-#=============================#
 end
-

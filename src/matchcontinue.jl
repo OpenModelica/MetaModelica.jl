@@ -15,9 +15,10 @@
   limitations under the License.
 
   The code is based on https://github.com/RelationalAI-oss/Rematch.jl with
-  changed to allow keyword argument matching on a struct as well as
-  supporting @matchcontinue (try the next case when any exception is thrown).
-  """
+  changed to allow keyword argument matching on a struct, matching on the immutable list construct
+  accompanying MetaModelica.
+  It also provides  @matchcontinue macro (try the next case when any exception is thrown).
+"""
 
 include("fixLines.jl")
 
@@ -421,7 +422,7 @@ end
       end
 
   Return `result` for the first matching `pattern`. If there are no matches, throw `MatchFailure`.
-  """
+"""
 macro match(value, cases)
   res = handle_match_cases(value, cases ; mathcontinue = false)
   replaceLineNum(res, @__FILE__, __source__)
