@@ -9,6 +9,7 @@ function buildDeps()
   Pkg.add("DataStructures")
   Pkg.add("MacroTools")
   Pkg.add("ImmutableList")
+  Pkg.add("Setfield")
   @info("Build all dependencies succesfull")
 end
 
