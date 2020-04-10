@@ -15,7 +15,6 @@ TODO:
 =#
 
 abstract type MetaModelicaException <: Exception end
-
 export ModelicaInteger, ModelicaReal, MetaModelicaException
 
 end

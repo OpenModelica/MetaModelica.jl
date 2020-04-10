@@ -1,0 +1,134 @@
+## Runtime Functions provided by MetaModelica.jl
+```@docs
+ anyString
+ arrayAppend
+ arrayCopy
+ arrayCreate
+ arrayEmpty
+ arrayGet
+ arrayLength
+ arrayList
+ arrayUpdate
+ boolNot
+ boolAnd
+ boolEq
+ boolOr
+ boolString
+ clock
+ cons
+ debug_print
+ equality
+ fail
+ getGlobalRoot
+ intAbs
+ intAdd
+ intBitLShift
+ intBitNot
+ intBitOr
+ intBitRShift
+ intBitXor
+ intDiv
+ intEq
+ intGe
+ intGt
+ intLe
+ intLt
+ intMax
+ intMin
+ intMod
+ intMul
+ intMul
+ intNe
+ intNeg
+ intReal
+ intString
+ intStringChar
+ intSub
+ isNone
+ isPresent
+ isSome
+ listAppend
+ listArray
+ listDelete
+ listEmpty
+ listGet
+ listHead
+ listLength
+ listMember
+ listRest
+ listReverse
+ listReverseInPlace
+ listStringCharString
+ printAny
+ realAbs
+ realAdd
+ realDiv
+ realEq
+ realGe
+ realGt
+ realInt
+ realLe
+ realLt
+ realMax
+ realMin
+ realMod
+ realMul
+ realNe
+ realNeg
+ realNeg
+ realPow
+ realString
+ realSub
+ referenceDebugString
+ referenceEq
+ referencePointerString
+ setGlobalRoot
+ setStackOverflowSignal
+ stringAppend
+ stringAppendList
+ stringCharInt
+ stringCharListString
+ stringCompare
+ stringDelimitList
+ stringEmpty
+ stringEqual
+ stringEq
+ stringGet
+ stringGetStringChar
+ stringHash
+ stringHashDjb2
+ stringHashDjb2Mod
+ stringHashSdbm
+ stringInt
+ stringLength
+ stringListStringChar
+ stringReal
+ stringUpdateStringChar
+ substring
+ tick
+ valueCompare
+ valueConstructor
+ valueEq
+ valueHashMod
+ valueSlots
+ _listAppend
+ getInstanceName
+ StringFunction
+ ```
+
+## Patternmatching
+```@docs
+match
+matchcontinue
+MatchFailure
+```
+## Extended Semantics
+```
+Uniontype
+Record
+UniontypeDecl
+ExtendedFunction
+ExtendedAnonFunction
+assign
+shouldFail
+```
