@@ -6,6 +6,10 @@ other packages that are a part of this runtime such as ImmutableList.jl
 MetaModelica supports a powerfull but expensive mechanism for pattern matching called matchcontinue
 This is provided by an extension of Rematch.jl
 
+# Style
+This package follows [YASGuide](https://github.com/jrevels/YASGuide).
+Adherence to the standard will be checked during CI.
+
 # Pattern Matching and Patterns:
 
     * `_` matches anything
