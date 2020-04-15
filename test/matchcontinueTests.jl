@@ -3,18 +3,18 @@ module MatchContinueTests
 using MetaModelica
 using Test
 
-@test 2 == @matchcontinue Cons(1,nil) begin
+@test 2 == @matchcontinue Cons(1, nil) begin
   # MM: case x::_ then fail()
   x <| _ => throw(MatchFailure("Some custom failure here", 0))
   # MM: case (x as 1)::_ then 2*x
-  (x && 1) <| _ => 2*x
+  (x && 1) <| _ => 2 * x
   _ => 3
 end
 
 #= Try nested matchcontinue =#
 @test 1 == @matchcontinue 2 begin
   2 => @match 3 begin
-    3 =>  @match 3 begin
+    3 => @match 3 begin
       2 => 1
     end
   end
@@ -24,10 +24,8 @@ end
 #= Test support for all wildcard matching =#
 @testset "Wildcard test" begin
   begin
-    struct foo
-    end
-    struct bar
-    end
+    struct foo end
+    struct bar end
     a = bar()
     #=Empty fields. Wildcard match=#
     @test 2 == @match a begin
@@ -39,18 +37,18 @@ end
   #= Test the new all wild syntax. Needed since I cannot figure out how to get that info from Susan =#
   let
     struct foo1
-      a
+      a::Any
     end
 
     struct bar2
-      a
-      b
+      a::Any
+      b::Any
     end
 
     struct baz3
-      a
-      b
-      c
+      a::Any
+      b::Any
+      c::Any
     end
 
     a = baz3(1, 2, 3)
@@ -68,7 +66,7 @@ end
       bar2(__) => 2
       foo1(a=7) => 3
       bar2(__) => 5
-      bar2(a = 1, b = 2) => 6
+      bar2(a=1, b=2) => 6
       foo1(__) => 1
     end
   end
@@ -94,7 +92,7 @@ end
 
 @testset "Matching on member variables" begin
   struct FOO
-    a
+    a::Any
   end
   foo = FOO(1)
   @test 1 == @match (@match foo.a = 1) begin

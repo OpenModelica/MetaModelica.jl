@@ -41,7 +41,7 @@ function makeRecord(recordExpr::Expr)
   local sourceInfo = nothing
   for i in recordExpr.args
     if typeof(i) == Expr
-      push!(arr, (i,sourceInfo))
+      push!(arr, (i, sourceInfo))
     elseif typeof(i) <: LineNumberNode
       sourceInfo = i
     end
@@ -50,7 +50,9 @@ function makeRecord(recordExpr::Expr)
 end
 
 function makeTuple(name, fields)
-  return quote ($name, $fields) end
+  return quote
+    ($name, $fields)
+  end
 end
 
 function isLineNumberNode(a, lines::LineNumberNode)
@@ -67,8 +69,7 @@ function replaceLineNum(a::Expr, lines::LineNumberNode)
     replaceLineNum(n, lines)
   end
 end
-function replaceLineNum(a::Any, lines::LineNumberNode)
-end
+function replaceLineNum(a::Any, lines::LineNumberNode) end
 
 function makeUniontypes(name, records, lineNode::LineNumberNode)
   recordsArray1 = Array.(records)
@@ -77,10 +78,10 @@ function makeUniontypes(name, records, lineNode::LineNumberNode)
   for r in recordsArray2
     recordNode = quote
       struct $(r[1]) <: $name
-      $(r[2])
+        $(r[2])
       end
     end
-    replaceLineNum(recordNode, isa(r[3],Nothing) ? lineNode : r[3])
+    replaceLineNum(recordNode, isa(r[3], Nothing) ? lineNode : r[3])
     push!(constructedRecords, recordNode)
   end
   #= Construct the Union =#
@@ -108,7 +109,7 @@ end
 #= It is "possible" to manipulate the Julia ast during compilation time so that all declaration of a uniontype creates a module-top-level abstract type definition. I leave that as a exercise to the reader of this comment :D =#
 macro UniontypeDecl(uDecl)
   esc(quote
-      abstract type $uDecl end
+        abstract type $uDecl end
       end)
 end
 
