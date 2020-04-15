@@ -5,7 +5,7 @@ are defined in the C runtime in the compiler and interfaces Boehm GC.
 These functions should be remimplemented here or removed  all together =#
 
 struct MetaModelicaGeneralException <: MetaModelicaException
-  msg
+  msg::Any
 end
 
 """
@@ -17,27 +17,31 @@ struct SOME{T}
 end
 
 """The optional type is defined as the Union of SOME{T} and the Nothing type. """
-const Option{T} = Union{SOME{T}, Nothing}
+const Option{T} = Union{SOME{T},Nothing}
 
 """ NONE is defined as nothing. """
 NONE() = Nothing()
 
-Base.convert(::Type{Option{S}}, x::SOME{T})  where {S, T <: S} = let
-  SOME{S}(convert(S, x.data))
-end
+Base.convert(::Type{Option{S}}, x::SOME{T}) where {S,T<:S} =
+  let
+    SOME{S}(convert(S, x.data))
+  end
 
-Base.convert(::Type{Option{T}}, nothing) where {T} = let
-  Nothing()
-end
+Base.convert(::Type{Option{T}}, nothing) where {T} =
+  let
+    Nothing()
+  end
 
 """ Identity case """
-Base.convert(::Type{Union{Nothing, SOME{T}}}, x::Union{Nothing, SOME{T}}) where {T} = let
-  x
-end
+Base.convert(::Type{Union{Nothing,SOME{T}}}, x::Union{Nothing,SOME{T}}) where {T} =
+  let
+    x
+  end
 
-Base.convert(::Type{Union{Nothing, SOME{S}}}, x::SOME{S}) where{S} = let
-  x
-end
+Base.convert(::Type{Union{Nothing,SOME{S}}}, x::SOME{S}) where {S} =
+  let
+    x
+  end
 
 """ Logically combine two Booleans with 'and' operator """
 function boolAnd(b1::Bool, b2::Bool)::Bool
@@ -51,7 +55,7 @@ end
 
 """ Logically invert Boolean value using 'not' operator """
 function boolNot(b::Bool)::Bool
-  nb = ! b
+  nb = !b
 end
 
 """ Compares two Booleans """
@@ -61,7 +65,11 @@ end
 
 """ Returns \\\"true\\\" or \\\"false\\\" string """
 function boolString(b::Bool)::String
-  str = if (b) "true" else "false" end
+  str = if (b)
+    "true"
+  else
+    "false"
+  end
 end
 
 """ Adds two Integer values """
@@ -247,7 +255,7 @@ end
 function realPow(r1::ModelicaReal, r2::ModelicaReal)::ModelicaReal
   local r::ModelicaReal
 
-  r = r1 ^ r2
+  r = r1^r2
   r
 end
 
@@ -340,7 +348,7 @@ end
 """ O(str) """
 function stringListStringChar(str::String)::List{String}
   local chars::List{String} = nil
-  for i in length(chars):-1:1
+  for i = length(chars):-1:1
     chars = _cons(string(str[i]), chars)
   end
   chars
@@ -478,7 +486,7 @@ function stringHashSdbm(str::String)::ModelicaInteger
   h
 end
 
-function substring(str::String, start #=start index, first character is 1 =#::ModelicaInteger, stop #= stop index, first character is 1 =#::ModelicaInteger)::String
+function substring(str::String, start::ModelicaInteger, stop::ModelicaInteger)::String #= stop index, first character is 1 =#
   if start < 0
     println("substring: start < 0!")
     fail()
@@ -514,7 +522,7 @@ end
 """ Better """
 function arrayList(arr::Array{T})::List{T} where {T}
   local lst::List{T} = nil
-  for i in length(arr):-1:1
+  for i = length(arr):-1:1
     lst = Cons{T}(arr[i], lst)
   end
   lst
@@ -530,8 +538,9 @@ function listArray(lst::List{T})::Array{T} where {T}
 end
 
 """ O(1) """
-function arrayUpdate(arr::Array{A}, index::ModelicaInteger, newValue::B)::Array{A} where {A,B}
-  local newArray #= same as the input array; used for folding =#::Array{A} = arr
+function arrayUpdate(arr::Array{A}, index::ModelicaInteger,
+                     newValue::B)::Array{A} where {A,B}
+  local newArray::Array{A} = arr #= same as the input array; used for folding =#
   #if !(A <: B)
   #  println("!(A<:B)")
   #  @show A
@@ -640,9 +649,8 @@ function valueSlots(value::A)::ModelicaInteger where {A}
 end
 
 """ Structural equality """
-function valueEq(a1::A, a2::B)::Bool where {A, B}
-  local b::Bool =
-  @match (a1, a2) begin
+function valueEq(a1::A, a2::B)::Bool where {A,B}
+  local b::Bool = @match (a1, a2) begin
     (SOME(x1), SOME(x2)) => valueEq(x1, x2)
     (_, _) => a1 === a2
   end
@@ -651,14 +659,13 @@ end
 
 """ a1 > a2? """
 function valueCompare(a1::A, a2::A)::ModelicaInteger where {A}
-  local i::ModelicaInteger =
-    if valueConstructor(a1) < valueConstructor(a2)
-      -1
-    elseif valueConstructor(a1) > valueConstructor(a2)
-      1
-    else
-      0
-    end
+  local i::ModelicaInteger = if valueConstructor(a1) < valueConstructor(a2)
+    -1
+  elseif valueConstructor(a1) > valueConstructor(a2)
+    1
+  else
+    0
+  end
   i #= -1, 0, 1 =#
 end
 
@@ -668,9 +675,9 @@ function valueHashMod(value::A, mod::ModelicaInteger)::ModelicaInteger where {A}
 end
 
 """ This is a very fast comparison of two values which only checks if the pointers are equal. """
-function referenceEq(a1::A1, a2::A2)::Bool where {A1, A2}
+function referenceEq(a1::A1, a2::A2)::Bool where {A1,A2}
   #TODO: Should be like this?
-  a1===a2
+  a1 === a2
 end
 
 """ Returns the pointer address of a reference as a hexadecimal string that can
@@ -690,11 +697,11 @@ end
 
 """ Returns true if the input is NONE() """
 function isNone(opt::Option{A})::Bool where {A}
-  (opt==nothing) # isa(opt, NONE))
+  (opt == nothing) # isa(opt, NONE))
 end
 
 """ Returns true if the input is SOME() """
-function isSome(opt::Option{A})::Bool where{A}
+function isSome(opt::Option{A})::Bool where {A}
   isa(opt, SOME)
 end
 
@@ -740,21 +747,25 @@ end
 #= The Info attribute provides location information for elements and classes. =#
 @Uniontype SourceInfo begin
   @Record SOURCEINFO begin
-    fileName #= fileName where the class is defined in =#::String
-    isReadOnly #= isReadOnly : (true|false). Should be true for libraries =#::Bool
-    lineNumberStart #= lineNumberStart =#::ModelicaInteger
-    columnNumberStart #= columnNumberStart =#::ModelicaInteger
-    lineNumberEnd #= lineNumberEnd =#::ModelicaInteger
-    columnNumberEnd #= columnNumberEnd =#::ModelicaInteger
-    lastModification #= mtime in stat(2), stored as a double for increased precision on 32-bit platforms =#::ModelicaReal
+    fileName::String #= fileName where the class is defined in =#
+    isReadOnly::Bool #= isReadOnly : (true|false). Should be true for libraries =#
+    lineNumberStart::ModelicaInteger #= lineNumberStart =#
+    columnNumberStart::ModelicaInteger #= columnNumberStart =#
+    lineNumberEnd::ModelicaInteger #= lineNumberEnd =#
+    columnNumberEnd::ModelicaInteger #= columnNumberEnd =#
+    lastModification::ModelicaReal #= mtime in stat(2), stored as a double for increased precision on 32-bit platforms =#
   end
 end
 
 
-SOURCEINFO(fileName::String, isReadOnly::Bool, lineNumberStart::ModelicaInteger, columnNumberSTart::ModelicaInteger, lineNumberEnd::ModelicaInteger, columnNumberEnd::ModelicaInteger) = let
-  #=No source info=#
-  SOURCEINFO(fileName, isReadOnly, lineNumberStart, columnNumberSTart, lineNumberEnd, columnNumberEnd, 0.0)
-end
+SOURCEINFO(fileName::String, isReadOnly::Bool, lineNumberStart::ModelicaInteger,
+           columnNumberSTart::ModelicaInteger, lineNumberEnd::ModelicaInteger,
+           columnNumberEnd::ModelicaInteger) =
+  let
+    #=No source info=#
+    SOURCEINFO(fileName, isReadOnly, lineNumberStart, columnNumberSTart, lineNumberEnd,
+               columnNumberEnd, 0.0)
+  end
 
 function sourceInfo()::SourceInfo
   local info::SourceInfo
@@ -762,9 +773,10 @@ function sourceInfo()::SourceInfo
   SOURCEINFO("", true, 1, 2, 3, 4, 0.0)
 end
 
-Base.:+(x::String, y::String) = let
-  x * y
-end
+Base.:+(x::String, y::String) =
+  let
+    x * y
+  end
 
 """ Imports and prints if the import is sucessful """
 macro importDBG(moduleName)
@@ -772,7 +784,7 @@ macro importDBG(moduleName)
     import $moduleName
     x = string(@__MODULE__)
     y = string($(esc(moduleName)))
-    println("Importing " * y  * " in " * x)
+    println("Importing " * y * " in " * x)
   end
 end
 

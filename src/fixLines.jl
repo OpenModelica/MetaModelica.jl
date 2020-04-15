@@ -12,5 +12,4 @@ function replaceLineNum(a::Expr, file::String, lines::LineNumberNode)
     replaceLineNum(n, file, lines)
   end
 end
-function replaceLineNum(a::Any, file::String, lines::LineNumberNode)
-end
+function replaceLineNum(a::Any, file::String, lines::LineNumberNode) end

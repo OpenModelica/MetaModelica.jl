@@ -11,11 +11,11 @@ end
 
 @test callA1() == 1
 
-function callOneArgNoDefault2(a,b)
+function callOneArgNoDefault2(a, b)
   a + b
 end
-  
-@ExtendedFunction callA1 callOneArgNoDefault2(a=1, b =1)
+
+@ExtendedFunction callA1 callOneArgNoDefault2(a=1, b=1)
 
 @test callA1() == 2
 
@@ -31,22 +31,22 @@ end
 
 @test pathStringNoQualInv() == pathString()
 
-function foo(a,b=1,c=2,d=3,e=4)
-  (a,b,c,d,e)
+function foo(a, b=1, c=2, d=3, e=4)
+  (a, b, c, d, e)
 end
-  
+
 @ExtendedFunction foo3 foo(d=2000)
 
 @test sum(foo3(1)) > 2000
 
-@ExtendedFunction foo2 foo(a = 1, c=4, d=6)
+@ExtendedFunction foo2 foo(a=1, c=4, d=6)
 
-@test sum(foo2()) == sum((1, 1, 4, 6 ,4))
+@test sum(foo2()) == sum((1, 1, 4, 6, 4))
 
 # = Testing inheritance in several steps #=
-  
+
 function fooBar(a=1)
- a
+  a
 end
 
 @ExtendedFunction fooBar1 fooBar(a=4)
@@ -55,7 +55,7 @@ end
 
 @test fooBar1() == 4
 
-@test fooBar2() == 100 
+@test fooBar2() == 100
 
 #= Testing anon functions =#
 
@@ -84,7 +84,8 @@ end
 
 @test takeFoo(@ExtendedAnonFunction fooBar1()) == 4
 
-function pathString(path::String, delimiter::String=".", usefq::Bool=true, reverse::Bool=false)::String
+function pathString(path::String, delimiter::String=".", usefq::Bool=true,
+                    reverse::Bool=false)::String
   usefq
 end
 

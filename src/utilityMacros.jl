@@ -5,7 +5,7 @@ import Setfield
   If it is not a primitive we assign to a subcomponent of that structure. We then clone the structure with that particular field changed.
 """
 function assignFunc(expr)
-  res = if @capture(expr, lhs_._= rhs_)
+  res = if @capture(expr, lhs_._ = rhs_)
     if !isprimitivetype(typeof(lhs))
       Setfield.setmacro(identity, expr, overwrite=true)
     else

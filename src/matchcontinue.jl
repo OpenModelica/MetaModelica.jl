@@ -29,15 +29,15 @@ macro splice(iterator, body)
 end
 
 struct MatchFailure <: MetaModelicaException
-  msg
-  value
+  msg::Any
+  value::Any
 end
 
 """
   Statically get the fieldcount of a type. Useful to avoid runtime calls to
   fieldcount.
 """
-@generated function evaluated_fieldcount(t::Type{T}) where T
+@generated function evaluated_fieldcount(t::Type{T}) where {T}
   res = T != NONE ? fieldcount(T) : 0
 end
 
@@ -45,24 +45,25 @@ end
   Statically get the fieldnames of a type. Useful to avoid runtime calls to
   fieldnames (which includes many allocations).
 """
-@generated function evaluated_fieldnames(t::Type{T}) where T
+@generated function evaluated_fieldnames(t::Type{T}) where {T}
   fieldnames(T)
 end
 """
   Handles the deconstruction of fields
 """
-function handle_destruct_fields(value::Symbol, pattern, subpatterns, len, get::Symbol, bound::Set{Symbol}, asserts::Vector{Expr}; allow_splat=true)
+function handle_destruct_fields(value::Symbol, pattern, subpatterns, len, get::Symbol,
+                                bound::Set{Symbol}, asserts::Vector{Expr}; allow_splat=true)
   # NOTE we assume `len` is cheap
   fields = []
   seen_splat = false
-  for (i,subpattern) in enumerate(subpatterns)
+  for (i, subpattern) in enumerate(subpatterns)
     if (subpattern isa Expr) && (subpattern.head == :(...))
       @assert allow_splat && !seen_splat "Too many ... in pattern $pattern"
       @assert length(subpattern.args) == 1
       seen_splat = true
-      push!(fields, (:($i:($len-$(length(subpatterns)-i))), subpattern.args[1]))
+      push!(fields, (:($i:($len-$(length(subpatterns) - i))), subpattern.args[1]))
     elseif seen_splat
-      push!(fields, (:($len-$(length(subpatterns)-i)), subpattern))
+      push!(fields, (:($len - $(length(subpatterns) - i)), subpattern))
     elseif (subpattern isa Expr) && (subpattern.head == :kw)
       T_sym = Meta.quot(subpattern.args[1])
       push!(fields, (:($T_sym), subpattern.args[2]))
@@ -70,15 +71,13 @@ function handle_destruct_fields(value::Symbol, pattern, subpatterns, len, get::S
       push!(fields, (i, subpattern))
     end
   end
-  Expr(:&&,
-       if seen_splat
-       :($len >= $(length(subpatterns)-1))
+  Expr(:&&, if seen_splat
+         :($len >= $(length(subpatterns) - 1))
        else
-       :($len == $(length(subpatterns)))
-       end,
-       @splice (i, (field, subpattern)) in enumerate(fields) quote
-       $(Symbol("$(value)_$i")) = $get($value, $field)
-       $(handle_destruct(Symbol("$(value)_$i"), subpattern, bound, asserts))
+         :($len == $(length(subpatterns)))
+       end, @splice (i, (field, subpattern)) in enumerate(fields) quote
+         $(Symbol("$(value)_$i")) = $get($value, $field)
+         $(handle_destruct(Symbol("$(value)_$i"), subpattern, bound, asserts))
        end)
 end
 """
@@ -90,9 +89,9 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
     # wildcard
     true
   elseif !(pattern isa Expr || pattern isa Symbol) ||
-    pattern == :nothing ||
-    @capture(pattern, _quote_macrocall) ||
-    @capture(pattern, Symbol(_))
+         pattern == :nothing ||
+         @capture(pattern, _quote_macrocall) ||
+         @capture(pattern, Symbol(_))
     # constant
     # TODO do we have to be careful about QuoteNode etc?
     quote
@@ -112,11 +111,12 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
       # bind
       push!(bound, pattern)
       quote
-        $our_sym = $value;
+        $our_sym = $value
         true
       end
     end
-  elseif @capture(pattern, subpattern1_ || subpattern2_) || (@capture(pattern, f_(subpattern1_, subpattern2_)) && f == :|)
+  elseif @capture(pattern, subpattern1_ || subpattern2_) ||
+         (@capture(pattern, f_(subpattern1_, subpattern2_)) && f == :|)
     # disjunction
     # need to only bind variables which exist in both branches
     bound1 = copy(bound)
@@ -127,7 +127,8 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
     quote
       $body1 || $body2
     end
-  elseif @capture(pattern, subpattern1_ && subpattern2_) || (@capture(pattern, f_(subpattern1_, subpattern2_)) && f == :&)
+  elseif @capture(pattern, subpattern1_ && subpattern2_) ||
+         (@capture(pattern, f_(subpattern1_, subpattern2_)) && f == :&)
     # conjunction
     body1 = handle_destruct(value, subpattern1, bound, asserts)
     body2 = handle_destruct(value, subpattern2, bound, asserts)
@@ -140,14 +141,13 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
     subpattern = pattern.args[1]
     guard = pattern.args[2]
     quote
-      $(handle_destruct(value, subpattern, bound, asserts)) &&
-        let $(bound...)
-          # bind variables locally so they can be used in the guard
-          $(@splice variable in bound quote
+      $(handle_destruct(value, subpattern, bound, asserts)) && let $(bound...)
+        # bind variables locally so they can be used in the guard
+        $(@splice variable in bound quote
             $(esc(variable)) = $(Symbol("variable_$variable"))
-            end)
-          $(esc(guard))
-        end
+          end)
+        $(esc(guard))
+      end
     end
   elseif @capture(pattern, T_(subpatterns__)) #= All wild =#
     if length(subpatterns) == 1 && subpatterns[1] == :(__)
@@ -161,29 +161,34 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
     else
       T = handleSugar(T)
       len = length(subpatterns)
-      named_fields = [pat.args[1] for pat in subpatterns if (pat isa Expr) && pat.head == :(kw)]
+      named_fields = [pat.args[1]
+                      for pat in subpatterns if (pat isa Expr) && pat.head == :(kw)]
       nNamed = length(named_fields)
-      @assert length(named_fields)==length(unique(named_fields)) "Pattern $pattern has duplicate named arguments: $(named_fields)"
+      @assert length(named_fields) == length(unique(named_fields)) "Pattern $pattern has duplicate named arguments: $(named_fields)"
       @assert nNamed == 0 || len == nNamed "Pattern $pattern mixes named and positional arguments"
       # struct
       if false
       elseif nNamed == 0
-        push!(asserts, quote
-              a = typeof($(esc(T)))
-              #= NONE is a function. However, we treat it a bit special=#
-              if $(esc(T)) != NONE && typeof($(esc(T))) <: Function
-                func = $(esc(T))
-                throw(LoadError("Attempted to match on a function", @__LINE__, AssertionError("Incorrect match usage attempted to match on: $func")))
-              end
-              if !(isstructtype(typeof($(esc(T)))) || issabstracttype(typeof($(esc(T)))))
-                throw(LoadError("Attempted to match on a pattern that is not a struct", @__LINE__, AssertionError("Incorrect match usage. Attempted to match on a pattern that is not a struct")))
-              end
-              pattern = $(esc(T))
-              if $(esc(T)) != NONE
-                if evaluated_fieldcount($(esc(T))) < $(esc(len))
-                  error("Field count for pattern of type: $pattern is $($(esc(len))) expected $(evaluated_fieldcount($(esc(T))))")
+        push!(asserts,
+              quote
+                a = typeof($(esc(T)))
+                #= NONE is a function. However, we treat it a bit special=#
+                if $(esc(T)) != NONE && typeof($(esc(T))) <: Function
+                  func = $(esc(T))
+                  throw(LoadError("Attempted to match on a function", @__LINE__,
+                                  AssertionError("Incorrect match usage attempted to match on: $func")))
                 end
-              end
+                if !(isstructtype(typeof($(esc(T)))) || issabstracttype(typeof($(esc(T)))))
+                  throw(LoadError("Attempted to match on a pattern that is not a struct",
+                                  @__LINE__,
+                                  AssertionError("Incorrect match usage. Attempted to match on a pattern that is not a struct")))
+                end
+                pattern = $(esc(T))
+                if $(esc(T)) != NONE
+                  if evaluated_fieldcount($(esc(T))) < $(esc(len))
+                    error("Field count for pattern of type: $pattern is $($(esc(len))) expected $(evaluated_fieldcount($(esc(T))))")
+                  end
+                end
               end)
       else # Uses keyword arguments
         struct_name = gensym("$(T)_match")
@@ -191,51 +196,52 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
         assertcond = true
         for field in named_fields
           local tmp
-          tmp = quote $(Meta.quot(field)) in $struct_name end
+          tmp = quote
+            $(Meta.quot(field)) in $struct_name
+          end
           assertcond = Expr(:&&, tmp, assertcond)
         end
         push!(asserts, quote
                 if !(let
-                   $struct_name = evaluated_fieldnames($(esc(T)))
-                   $assertcond
-                 end)
-                error("Pattern contains named argument not in the type at: ")
+                       $struct_name = evaluated_fieldnames($(esc(T)))
+                       $assertcond
+                     end)
+                  error("Pattern contains named argument not in the type at: ")
                 end
               end)
       end
       quote
-          $value == nothing &&
-          $(esc(T)) == Nothing ||
-          $value isa $(esc(T)) &&
-          $(handle_destruct_fields(value, pattern, subpatterns,
-                                   length(subpatterns), :getfield, bound,
-                                 asserts; allow_splat=false))
+        $value == nothing && $(esc(T)) == Nothing ||
+        $value isa $(esc(T)) &&
+        $(handle_destruct_fields(value, pattern, subpatterns, length(subpatterns),
+                                 :getfield, bound, asserts; allow_splat=false))
       end
     end
   elseif @capture(pattern, (subpatterns__,)) # Tuple
     quote
       ($value isa Tuple) &&
-        $(handle_destruct_fields(value, pattern, subpatterns, :(length($value)), :getindex, bound, asserts; allow_splat=true))
+      $(handle_destruct_fields(value, pattern, subpatterns, :(length($value)), :getindex,
+                               bound, asserts; allow_splat=true))
     end
   elseif @capture(pattern, [subpatterns__]) # Array
     quote
       ($value isa AbstractArray) &&
-        $(handle_destruct_fields(value, pattern, subpatterns, :(length($value)), :getindex, bound, asserts; allow_splat=true))
+      $(handle_destruct_fields(value, pattern, subpatterns, :(length($value)), :getindex,
+                               bound, asserts; allow_splat=true))
     end
-elseif @capture(pattern, subpattern_::T_) #ImmutableList
-  quote
-  # typeassert
-  ($value isa $(esc(T))) &&
-    $(handle_destruct(value, subpattern, bound, asserts))
+  elseif @capture(pattern, subpattern_::T_) #ImmutableList
+    quote
+      # typeassert
+      ($value isa $(esc(T))) && $(handle_destruct(value, subpattern, bound, asserts))
+    end
+  elseif @capture(pattern, _.__) #Sub member of a variable
+    quote
+      $value == $(esc(pattern))
+    end
+  else
+    println(pattern)
+    error("Unrecognized pattern syntax: $pattern")
   end
-elseif @capture(pattern, _.__) #Sub member of a variable
-  quote
-    $value == $(esc(pattern))
-  end
-else
-  println(pattern)
-  error("Unrecognized pattern syntax: $pattern")
-end
 end
 
 """
@@ -244,22 +250,21 @@ end
   Parenthesis for these expressions are skipped
 """
 function handleSugar(T)
-  T =
-    if string(T) == "<|"
-      # Syntactic sugar cons.
-      :Cons
-    elseif string(T) == "_cons"
-      #= This is legacy for the code generator. For match equation we need to allow this as well =#
-      :Cons
-    elseif string(T) == "nil"
-      # Syntactic sugar for Nil
-      :Nil
-    elseif string(T) == "NONE"
-      # Syntactic sugar for Nothing
-      :Nothing
-    else
-      T
-    end
+  T = if string(T) == "<|"
+    # Syntactic sugar cons.
+    :Cons
+  elseif string(T) == "_cons"
+    #= This is legacy for the code generator. For match equation we need to allow this as well =#
+    :Cons
+  elseif string(T) == "nil"
+    # Syntactic sugar for Nil
+    :Nil
+  elseif string(T) == "NONE"
+    # Syntactic sugar for Nothing
+    :Nothing
+  else
+    T
+  end
 end
 
 """
@@ -277,7 +282,7 @@ function handle_match_eq(expr)
       __omc_match_done = false
       $body || throw(MatchFailure("no match", value))
       $(@splice variable in bound quote
-        $(esc(variable)) = $(Symbol("variable_$variable"))
+          $(esc(variable)) = $(Symbol("variable_$variable"))
         end)
       value
     end
@@ -301,7 +306,7 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
             res = let $(bound...)
               # export bindings
               $(@splice variable in bound quote
-                $(esc(variable)) = $(Symbol("variable_$variable"))
+                  $(esc(variable)) = $(Symbol("variable_$variable"))
                 end)
               $(esc(result))
             end
@@ -335,7 +340,7 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
           res = let $(bound...)
             # export bindings
             $(@splice variable in bound quote
-              $(esc(variable)) = $(Symbol("variable_$variable"))
+                $(esc(variable)) = $(Symbol("variable_$variable"))
               end)
             $(esc(result))
           end
@@ -354,7 +359,7 @@ end
 Top level function for all match macros except
 the match equation macro.
 """
-function handle_match_cases(value, match :: Expr ; mathcontinue::Bool = false)
+function handle_match_cases(value, match::Expr; mathcontinue::Bool=false)
   tail = nothing
   if match.head != :block
     error("Unrecognized match syntax: Expected begin block $match")
@@ -409,7 +414,7 @@ end
   Return `result` for the first matching `pattern`. If there are no matches, throw `MatchFailure`.
 """
 macro matchcontinue(value, cases)
-  res = handle_match_cases(value, cases ; mathcontinue = true)
+  res = handle_match_cases(value, cases; mathcontinue=true)
   replaceLineNum(res, @__FILE__, __source__)
   res
 end
@@ -424,7 +429,7 @@ end
   Return `result` for the first matching `pattern`. If there are no matches, throw `MatchFailure`.
 """
 macro match(value, cases)
-  res = handle_match_cases(value, cases ; mathcontinue = false)
+  res = handle_match_cases(value, cases; mathcontinue=false)
   replaceLineNum(res, @__FILE__, __source__)
   res
 end

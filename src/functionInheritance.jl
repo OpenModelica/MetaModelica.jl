@@ -38,7 +38,7 @@ function getSignatureAsArrayFor(func::Function)::Array
   local signatureArray::Array = []
   local nDefaultValues::Integer = size(defaultValues, 1)
   local nArgumentSymbols::Integer = size(argumentSymbols, 1)
-  for i in 1:nArgumentSymbols
+  for i = 1:nArgumentSymbols
     #=
       If no default value is present. We add nothing instead place.
       This case occurs if i is larger then the ammount of default values.
@@ -65,18 +65,18 @@ function getNewFunctionArgs(functionToExtend, func::Function)::Array{Tuple}
     pair = Tuple(t.args)
     @assert(size(pair, 1) >= 2, "Incorrect parameter passed to @ExtendFunction")
     push!(functionToExtendArgsAsTuples, (first(pair), last(pair)))
-    end
+  end
   local numberOfArguments::Integer = size(functionToExtendArgsAsTuples, 1)
   #= Create arguments for the new function.
      Generally the new functions have more symbols then the old =#
   newArgsAsString::Array = []
-  for i in 1:numberOfArguments
-      symToFind = first(functionToExtendArgsAsTuples[i])
-      findFunc(x) = first(x) == symToFind
-      #= We will get an array with one index! Functions must have unique symbols as arguments=#
-      indexOfSym = first(findall(findFunc, oldFunctionSig))
-      oldFunctionSig[indexOfSym] = functionToExtendArgsAsTuples[i]
-    end
+  for i = 1:numberOfArguments
+    symToFind = first(functionToExtendArgsAsTuples[i])
+    findFunc(x) = first(x) == symToFind
+    #= We will get an array with one index! Functions must have unique symbols as arguments=#
+    indexOfSym = first(findall(findFunc, oldFunctionSig))
+    oldFunctionSig[indexOfSym] = functionToExtendArgsAsTuples[i]
+  end
   newFuncSig = oldFunctionSig
 end
 
@@ -108,7 +108,8 @@ function makeFunctionHelper(functionToExtend::Expr, __module__::Module)::Tuple
   (func, newFuncArgs, argSymArr)
 end
 
-function makeExtendedFunction(nameOfNewFunc::Symbol, functionToExtend::Expr, __module__::Module)
+function makeExtendedFunction(nameOfNewFunc::Symbol, functionToExtend::Expr,
+                              __module__::Module)
   (func, newFuncArgs, argSymArr) = makeFunctionHelper(functionToExtend, __module__)
   quote
     function $nameOfNewFunc($(newFuncArgs...))
@@ -120,7 +121,7 @@ end
 #= Creates a lambda that extends an existing function =#
 function makeExtendedLambdaFunction(functionToExtend::Expr, __module__::Module)
   (func, newFuncArgs, argSymArr) = makeFunctionHelper(functionToExtend, __module__)
-  if size(newFuncArgs,1) == 0
+  if size(newFuncArgs, 1) == 0
     :(() -> $func($(argSymArr...))) |> esc
   else
     quote

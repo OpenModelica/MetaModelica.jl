@@ -4,13 +4,13 @@ using MetaModelica
 using Test
 
 function f(a::ModelicaReal, b::ModelicaReal)::ModelicaReal
-    return a + b
+  return a + b
 end
 
 function f2(a::ModelicaInteger)::ModelicaInteger
-    return a
-end        
-    
+  return a
+end
+
 @test_throws MethodError f(true, true)
 
 @test_throws MethodError f(true, 1)

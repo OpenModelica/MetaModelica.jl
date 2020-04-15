@@ -6,7 +6,7 @@ using Test
 @Uniontype number begin
   @Record REAL begin
     r
-  end    
+  end
   @Record IMG begin
     r
     #We can ofcourse have comments here :D#  
@@ -14,22 +14,22 @@ using Test
   end
 end
 
-someIMG = IMG(1,2)
-    
+someIMG = IMG(1, 2)
+
 @test someIMG.r == 1
 
 @test someIMG.i == 2
 
 function realOrIMG(a::number)
   @match a begin
-    IMG(x,y) => (x,y)
+    IMG(x, y) => (x, y)
     REAL(x) => x
-  end    
+  end
 end
 
 @test realOrIMG(REAL(1)) == 1
 
-@test realOrIMG(IMG(1,2)) == (1,2)
+@test realOrIMG(IMG(1, 2)) == (1, 2)
 
 #Check that uniontypes work with match..
 
@@ -46,24 +46,24 @@ function forgotWales(x::uK)
   end
 end
 
-@test_throws MatchFailure forgotWales(WALES()) 
+@test_throws MatchFailure forgotWales(WALES())
 #= Tests mutally recursive Uniontypes =#
 #= N.B: We have to inform Julia through forward declarations as a workaround for now=, see the following issue, as of 2019 Julia does not support this. MM does however: https://github.com/JuliaLang/julia/issues/269#    
 =#
 
 @UniontypeDecl NICE_NUMBER
 @UniontypeDecl NUMBER
-    
+
 @Uniontype NICE_NUMBER begin
-    @Record CONCRETE_NICE_NUMBER begin
+  @Record CONCRETE_NICE_NUMBER begin
     r::NUMBER
-    end
+  end
 end
-  
+
 @Uniontype NUMBER begin
   @Record REAL1 begin
     r::NICE_NUMBER
-  end    
+  end
   @Record IMG1 begin
     r::NICE_NUMBER
     i
