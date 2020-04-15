@@ -7,6 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - uses: julia-actions/git@github.com:JKRT/julia-format.git
+    - uses: julia-actions/JKRT/julia-format.git
       with:
         args: -i 2 -v .
