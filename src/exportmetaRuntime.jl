@@ -106,6 +106,7 @@ export stringLength
 export stringListStringChar
 export stringReal
 export stringUpdateStringChar
+export String
 export substring
 export tick
 export valueCompare
