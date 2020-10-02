@@ -26,6 +26,7 @@ export intAbs
 export intAdd
 export intBitLShift
 export intBitNot
+export intBitAnd
 export intBitOr
 export intBitRShift
 export intBitXor
