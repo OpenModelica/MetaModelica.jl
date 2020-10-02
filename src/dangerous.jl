@@ -64,8 +64,7 @@ end
 
 """ O(n) """
 function listArrayLiteral(lst::List{A})::Array{A} where {A<:Any}
-  local arr::Array{A}
-  #= Defined in the runtime =#
+  local arr::Array{A} = listArray(lst)
   arr
 end
 
