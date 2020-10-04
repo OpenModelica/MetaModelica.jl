@@ -197,7 +197,7 @@ end
 
 """ Returns bitwise left shift of Integer i by s bits """
 function intBitLShift(i::ModelicaInteger, s::ModelicaInteger)::ModelicaInteger
-  local o::ModelicaInteger = i << i
+  local o::ModelicaInteger = i << s
   o
 end
 
