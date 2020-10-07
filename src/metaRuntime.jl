@@ -319,8 +319,8 @@ function realInt(r::ModelicaReal)::ModelicaInteger
 end
 
 function realString(r::ModelicaReal)::String
-  local str::String
-  string(str)
+  local str::String = "$r"
+  str
 end
 
 function stringCharInt(ch::String)::ModelicaInteger
