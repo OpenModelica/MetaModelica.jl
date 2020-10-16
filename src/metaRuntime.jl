@@ -495,7 +495,7 @@ function substring(str::String, start::ModelicaInteger, stop::ModelicaInteger)::
   out
 end
 
-""" O(1) ? """
+""" O(1) """
 function arrayLength(arr::Array{T})::ModelicaInteger where {T}
   length(arr)
 end
@@ -519,7 +519,7 @@ function arrayCreate(size::ModelicaInteger, initialValue::A)::Array{A} where {A}
   fill(initialValue, size)
 end
 
-""" Better """
+""" Creates an array out of a List """
 function arrayList(arr::Array{T})::List{T} where {T}
   local lst::List{T} = nil
   for i = length(arr):-1:1
@@ -657,7 +657,7 @@ function valueEq(a1::A, a2::B)::Bool where {A,B}
   b
 end
 
-""" a1 > a2? """
+""" a1 > a2 """
 function valueCompare(a1::A, a2::A)::ModelicaInteger where {A}
   local i::ModelicaInteger = if valueConstructor(a1) < valueConstructor(a2)
     -1
