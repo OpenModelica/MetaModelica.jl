@@ -110,6 +110,7 @@ export stringUpdateStringChar
 export String
 export substring
 export tick
+export resetTick
 export valueCompare
 export valueConstructor
 export valueEq

@@ -587,9 +587,13 @@ function debug_print(str::String, a::A) where {A}
   @show a
 end
 
-global tickCounter = 0
-function tick()::ModelicaInteger
-  global tickCounter = tickCounter + 1
+let tickCounter = 0
+  global function tick()
+    tickCounter += 1
+  end
+  global function resetTick()
+    tickCounter = 0
+  end
 end
 
 function equality(a1::A1, a2::A2) where {A1,A2}
