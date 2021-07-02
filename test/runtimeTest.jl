@@ -53,18 +53,18 @@ end
 
 @testset "Complex structure test" begin
   @testset "Testing list of complex types" begin
-    local lst::List{Complex} = list(COMPLEX(0, 0), COMPLEX(0, 0), COMPLEX(0, 0))
+    local lst::List{Complex} = list(COMPLEX(0., 0.), COMPLEX(0., 0.), COMPLEX(0., 0.))
     @test length(lst) == 3
-    @test listHead(lst) == COMPLEX(0, 0)
+    @test listHead(lst) == COMPLEX(0., 0.)
     @test listLength(listReverse(lst)) == 3
-    local lst2::List{Complex} = COMPLEX(0, 0) <| lst
+    local lst2::List{Complex} = COMPLEX(0., 0.) <| lst
     @test length(lst2) == 4
     local lst3::List{Complex} = listAppend(lst, lst2)
     @test length(lst3) == 7
   end
   @testset "Testing arrays of complex types" begin
     #=Array of Complex elements to a List of Complex elements=#
-    local A::Array{Complex} = arrayCreate(5, COMPLEX(0, 0))
+    local A::Array{Complex} = arrayCreate(5, COMPLEX(0., 0.))
     @test length(A) == 5
     local L::List{Complex} = arrayList(A)
     @test length(L) == 5
@@ -78,6 +78,7 @@ end
 
 @testset "Testing tick()" begin
   #= Testing tick =#
+  @test resetTick() == 0
   @test tick() == 1
   @test tick() == 2
   @test tick() == 3

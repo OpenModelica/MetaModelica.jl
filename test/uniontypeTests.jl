@@ -32,11 +32,15 @@ end
 @test realOrIMG(IMG(1, 2)) == (1, 2)
 
 #Check that uniontypes work with match..
-
 @Uniontype uK begin
-  @Record SCOTLAND "Haggis"
-  @Record WALES "Cawl"
-  @Record ENGLAND "Tea"
+  @Record SCOTLAND begin
+  end
+  @Record WALES begin
+  end
+  @Record ENGLAND begin
+  end
+  @Record NorthIreland begin
+  end
 end
 
 function forgotWales(x::uK)
