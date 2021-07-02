@@ -28,13 +28,15 @@ They can be used in that way with match.jl
 #   i
 #  end
 =#
+
 #=
-  TODO: Sometimes when people use type aliasing @Uniontype will not know about the specific type during compilation time
+TODO: Sometimes when people use type aliasing @Uniontype will not know about the specific type during compilation time
 =#
 module UniontypeDef
 
 include("metaModelicaTypes.jl")
 import .MetaModelicaTypes
+using MacroTools
 
 function makeRecord(recordExpr::Expr)
   local arr = []
@@ -69,6 +71,7 @@ function replaceLineNum(a::Expr, lines::LineNumberNode)
     replaceLineNum(n, lines)
   end
 end
+
 function replaceLineNum(a::Any, lines::LineNumberNode) end
 
 function makeUniontypes(name, records, lineNode::LineNumberNode)
@@ -76,8 +79,29 @@ function makeUniontypes(name, records, lineNode::LineNumberNode)
   recordsArray2 = recordsArray1[1]
   constructedRecords = []
   for r in recordsArray2
+    local block = r[2] #= Get the block. That is r[2]=#
+    blckExprs = block.args
+    varToDecl = Dict()
+    local i::Int = 0
+    local exprCounter::Int = 1
+    for expr in blckExprs
+      if typeof(expr) === LineNumberNode #= Ignore comment lines =#
+        continue
+      end
+      #= Check if we have a uniontype type declaration. =#
+      if (@capture(expr, T_::TYPE_))
+        parametricType::Symbol = Symbol("T", i)
+        varToDecl[T] = [parametricType, TYPE]
+        i += 1
+        newExpr = expr
+        newExpr.args[2] = parametricType
+      end
+      exprCounter += 1
+    end
+    local structName = r[1]
+    parametricTypes::Vector{Expr} = [ :($(varToDecl[i][1]) <: $(varToDecl[i][2])) for i in keys(varToDecl)]
     recordNode = quote
-      struct $(r[1]) <: $name
+      struct $(structName){$(parametricTypes...)} <: $name
         $(r[2])
       end
     end
