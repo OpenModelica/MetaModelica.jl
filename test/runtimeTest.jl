@@ -44,11 +44,69 @@ end
   @test length(arr) == 6
 end
 
+using MetaModelica
+using Test
+using Revise
 @Uniontype Complex begin
   @Record COMPLEX begin
     r::ModelicaReal
     i::ModelicaReal
   end
+  @Record COMPLEX_INT begin
+    r::ModelicaInteger
+    i::ModelicaInteger
+  end
+end
+
+@Uniontype EvenMoreComplex begin
+  @Record EVENMORECOMPLEX begin
+    lst::List{Complex}
+  end
+end
+
+@Uniontype EvenMoreComplexVector begin
+  @Record EVENMORECOMPLEXVECTOR begin
+    lst::Vector{Complex}
+  end
+end
+
+
+@Uniontype InnerLists begin
+  @Record INNERLISTS begin
+    a::String
+    lst0::List{String}
+    lst1::List{String}
+    lst2::List{String}
+  end
+end
+
+@Uniontype InnerVectors begin
+  @Record INNERVECTORS begin
+    a::String
+    lst0::Vector{String}
+    lst1::Vector{String}
+    lst2::Vector{String}
+  end
+end
+
+@Uniontype Comment begin
+  @Record COMMENT begin
+    annotation_::Option{String}
+    comment::Option{String}
+  end
+end
+
+struct TEST2{T0 <: String}
+  lst0::Vector{T0}
+  lst1::Vector{T0}
+  lst2::Vector{T0}
+end
+
+struct TEST4{T0 <: String, T1 <: String, T2 <: String, T3 <: String}
+  a::T0
+  lst0::List{T1}
+  lst1::List{T2}
+  lst2::List{T3}
 end
 
 @testset "Complex structure test" begin
@@ -68,6 +126,18 @@ end
     @test length(A) == 5
     local L::List{Complex} = arrayList(A)
     @test length(L) == 5
+  end
+  @testset "Test even more complex (Uniontype with abstract containers)" begin
+    a = COMPLEX(1., 2.)
+    tst = EVENMORECOMPLEX(list(a))    
+    @test length(tst.lst) == 1
+    tst = EVENMORECOMPLEX(list(COMPLEX(1., 2.), COMPLEX_INT(1,1)))
+    @test length(tst.lst) == 2
+    tst = EVENMORECOMPLEXVECTOR([COMPLEX(1., 2.), COMPLEX(1., 2.)])
+    @test length(tst.lst) == 2
+    tst = INNERVECTORS("foo", ["FOO"], String[], String[])
+    tst = INNERLISTS("foo", list("FOO"), Nil{String}(), Nil{String}())
+    tst = COMMENT(NONE(), NONE())
   end
 end
 
