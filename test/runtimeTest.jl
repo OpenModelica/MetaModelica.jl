@@ -44,9 +44,7 @@ end
   @test length(arr) == 6
 end
 
-using MetaModelica
-using Test
-using Revise
+
 @Uniontype Complex begin
   @Record COMPLEX begin
     r::ModelicaReal
