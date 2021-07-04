@@ -78,55 +78,10 @@ function makeUniontypes(name, records, lineNode::LineNumberNode)
   recordsArray1 = Array.(records)
   recordsArray2 = recordsArray1[1]
   constructedRecords = []
-  for r in recordsArray2
-    local block = r[2] #= Get the block. That is r[2]=#
-    blckExprs = block.args
-    varToDecl = Dict()
-    varToContainerDecl = Dict()
-    local i = 0
-    local cti = 0
-    for expr in blckExprs
-      #= Skip comments =#
-      if typeof(expr) === LineNumberNode 
-        continue
-      end
-      #= Ignore option types=#
-      if @capture(expr, T_::Option{TYPE_})
-        continue
-      end
-      #= Below is some better code for better type stability in uniontypes... =#
-      #= Check if we have a container type =# 
-      if @capture(expr, T_::F_{TYPE_})
-        #= Keep abstract type as is=#
-        @assert expr.head === :(::)
-        containerType = expr.args[2]
-        #= Write to <Container>{<InnerType>} =#
-        res = @capture(containerType, OUTER_{INNER_})
-        #= Assert that the type is on this format =#
-        @assert res == true
-        #= containerType.args[2] = <:Any =#
-        local parametricType = Symbol("CT", cti)
-        varToContainerDecl[T] = [parametricType, INNER]
-        containerType.args[2] = parametricType
-        #= Write to the innermost type =#
-        cti += 1
-        continue
-      end
-      if (@capture(expr, T_::TYPE_))
-        local parametricType = Symbol("T", i)
-        i += 1
-        varToDecl[T] = [parametricType, TYPE]
-        newExpr = expr
-        newExpr.args[2] = parametricType
-      end
-    end
-    local structName = r[1]
-    parametricTypes::Vector = [ :($(varToDecl[i][1]))
-                                      for i in keys(varToDecl)]
-    parametricContainerTypes::Vector = [ :($(varToContainerDecl[i][1]))
-                                         for i in keys(varToContainerDecl)]
+  for r in recordsArray2   
+    structName = r[1]
     recordNode = quote
-      struct $(structName){$(parametricTypes...)} <: $name
+      struct $(structName) <: $name
         $(r[2])
       end
     end
