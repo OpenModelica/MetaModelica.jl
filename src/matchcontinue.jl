@@ -15,8 +15,8 @@
   limitations under the License.
 
   The code is based on https://github.com/RelationalAI-oss/Rematch.jl with
-  changed to allow keyword argument matching on a struct, matching on the immutable list construct
-  accompanying MetaModelica.
+  changes to allow keyword argument matching on structs along with  
+  matching on the immutable list construct accompanying MetaModelica + some other improvements and bug fixes.
   It also provides  @matchcontinue macro (try the next case when any exception is thrown).
 """
 
@@ -48,6 +48,7 @@ end
 @generated function evaluated_fieldnames(t::Type{T}) where {T}
   fieldnames(T)
 end
+
 """
   Handles the deconstruction of fields
 """
@@ -80,6 +81,7 @@ function handle_destruct_fields(value::Symbol, pattern, subpatterns, len, get::S
          $(handle_destruct(Symbol("$(value)_$i"), subpattern, bound, asserts))
        end)
 end
+
 """
  Top level utility function.
  Handles deconstruction of patterns together with the value symbol.
@@ -89,7 +91,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
     # wildcard
     true
   elseif !(pattern isa Expr || pattern isa Symbol) ||
-         pattern == :nothing ||
+         pattern === :nothing ||
          @capture(pattern, _quote_macrocall) ||
          @capture(pattern, Symbol(_))
     # constant
@@ -211,7 +213,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
               end)
       end
       quote
-        $value == nothing && $(esc(T)) == Nothing ||
+        $value === nothing && $(esc(T)) == Nothing ||
         $value isa $(esc(T)) &&
         $(handle_destruct_fields(value, pattern, subpatterns, length(subpatterns),
                                  :getfield, bound, asserts; allow_splat=false))
@@ -377,7 +379,7 @@ function handle_match_cases(value, match::Expr; mathcontinue::Bool=false)
   end
   for case in reverse(cases)
     tail = handle_match_case(:value, case, tail, asserts, mathcontinue)
-    if line != nothing
+    if line !== nothing
       replaceLineNum(tail, @__FILE__, line)
     end
   end

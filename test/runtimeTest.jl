@@ -31,7 +31,10 @@ end
   lstB = list(1, 2, 3)
   lstC = listAppend(lstA, lstB)
   @test listLength(lstC) == 6
-  @test listAppend(list(1, 2, 3), list(4.0, 5)) == list(1, 2, 3, 4, 5)
+  @test listAppend(list(1, 2, 3), list(4.0, 5)) ==  begin
+    #= Should be common abstract type in this case =#
+    Cons{Real}(1, Cons{Real}(2, Cons{Real}(3, Cons{Real}(4.0, Cons{Real}(5, Nil{Any}())))))
+  end
   lstD = listReverse(lstC)
   @test listHead(lstD) == 3
   @test listMember(6, lstD) == false
