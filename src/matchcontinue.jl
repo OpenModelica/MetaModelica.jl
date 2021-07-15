@@ -23,8 +23,8 @@
 include("fixLines.jl")
 
 macro splice(iterator, body)
-  @assert iterator.head == :call
-  @assert iterator.args[1] == :in
+  @assert iterator.head === :call
+  @assert iterator.args[1] === :in
   Expr(:..., :(($(esc(body)) for $(esc(iterator.args[2])) in $(esc(iterator.args[3])))))
 end
 
@@ -38,7 +38,7 @@ end
   fieldcount.
 """
 @generated function evaluated_fieldcount(t::Type{T}) where {T}
-  res = T != NONE ? fieldcount(T) : 0
+  res = T !== NONE ? fieldcount(T) : 0
 end
 
 """
@@ -58,14 +58,14 @@ function handle_destruct_fields(value::Symbol, pattern, subpatterns, len, get::S
   fields = []
   seen_splat = false
   for (i, subpattern) in enumerate(subpatterns)
-    if (subpattern isa Expr) && (subpattern.head == :(...))
+    if (subpattern isa Expr) && (subpattern.head === :(...))
       @assert allow_splat && !seen_splat "Too many ... in pattern $pattern"
       @assert length(subpattern.args) == 1
       seen_splat = true
       push!(fields, (:($i:($len-$(length(subpatterns) - i))), subpattern.args[1]))
     elseif seen_splat
       push!(fields, (:($len - $(length(subpatterns) - i)), subpattern))
-    elseif (subpattern isa Expr) && (subpattern.head == :kw)
+    elseif (subpattern isa Expr) && (subpattern.head === :kw)
       T_sym = Meta.quot(subpattern.args[1])
       push!(fields, (:($T_sym), subpattern.args[2]))
     else
@@ -87,7 +87,7 @@ end
  Handles deconstruction of patterns together with the value symbol.
 """
 function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Vector{Expr})
-  if pattern == :(_)
+  if pattern === :(_)
     # wildcard
     true
   elseif !(pattern isa Expr || pattern isa Symbol) ||
@@ -96,14 +96,15 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
          @capture(pattern, Symbol(_))
     # constant
     # TODO do we have to be careful about QuoteNode etc?
+    #Probably not //John
     quote
-      $value == $pattern
+      $value === $pattern
     end
   elseif @capture(pattern, subpattern_Symbol)
     # variable
     # if the pattern doesn't match, we don't want to set the variable
     # so for now just set a temp variable
-    our_sym = Symbol("variable_$pattern")
+    our_sym = Symbol("variable_", pattern)
     if pattern in bound
       # already bound, check that this value matches
       quote
@@ -118,7 +119,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
       end
     end
   elseif @capture(pattern, subpattern1_ || subpattern2_) ||
-         (@capture(pattern, f_(subpattern1_, subpattern2_)) && f == :|)
+         (@capture(pattern, f_(subpattern1_, subpattern2_)) && f === :|)
     # disjunction
     # need to only bind variables which exist in both branches
     bound1 = copy(bound)
@@ -130,7 +131,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
       $body1 || $body2
     end
   elseif @capture(pattern, subpattern1_ && subpattern2_) ||
-         (@capture(pattern, f_(subpattern1_, subpattern2_)) && f == :&)
+         (@capture(pattern, f_(subpattern1_, subpattern2_)) && f === :&)
     # conjunction
     body1 = handle_destruct(value, subpattern1, bound, asserts)
     body2 = handle_destruct(value, subpattern2, bound, asserts)
@@ -146,13 +147,13 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
       $(handle_destruct(value, subpattern, bound, asserts)) && let $(bound...)
         # bind variables locally so they can be used in the guard
         $(@splice variable in bound quote
-            $(esc(variable)) = $(Symbol("variable_$variable"))
+            $(esc(variable)) = $(Symbol("variable_", variable))
           end)
         $(esc(guard))
       end
     end
   elseif @capture(pattern, T_(subpatterns__)) #= All wild =#
-    if length(subpatterns) == 1 && subpatterns[1] == :(__)
+    if length(subpatterns) == 1 && subpatterns[1] === :(__)
       #=
         Fields not interesting when matching against a wildcard.
         NONE() matched against a wildcard is also true
@@ -164,7 +165,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
       T = handleSugar(T)
       len = length(subpatterns)
       named_fields = [pat.args[1]
-                      for pat in subpatterns if (pat isa Expr) && pat.head == :(kw)]
+                      for pat in subpatterns if (pat isa Expr) && pat.head === :(kw)]
       nNamed = length(named_fields)
       @assert length(named_fields) == length(unique(named_fields)) "Pattern $pattern has duplicate named arguments: $(named_fields)"
       @assert nNamed == 0 || len == nNamed "Pattern $pattern mixes named and positional arguments"
@@ -175,7 +176,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
               quote
                 a = typeof($(esc(T)))
                 #= NONE is a function. However, we treat it a bit special=#
-                if $(esc(T)) != NONE && typeof($(esc(T))) <: Function
+                if $(esc(T)) !== NONE && typeof($(esc(T))) <: Function
                   func = $(esc(T))
                   throw(LoadError("Attempted to match on a function", @__LINE__,
                                   AssertionError("Incorrect match usage attempted to match on: $func")))
@@ -186,7 +187,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
                                   AssertionError("Incorrect match usage. Attempted to match on a pattern that is not a struct")))
                 end
                 pattern = $(esc(T))
-                if $(esc(T)) != NONE
+                if $(esc(T)) !== NONE
                   if evaluated_fieldcount($(esc(T))) < $(esc(len))
                     error("Field count for pattern of type: $pattern is $($(esc(len))) expected $(evaluated_fieldcount($(esc(T))))")
                   end
@@ -213,7 +214,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
               end)
       end
       quote
-        $value === nothing && $(esc(T)) == Nothing ||
+        $value === nothing && $(esc(T)) === Nothing ||
         $value isa $(esc(T)) &&
         $(handle_destruct_fields(value, pattern, subpatterns, length(subpatterns),
                                  :getfield, bound, asserts; allow_splat=false))
@@ -252,16 +253,16 @@ end
   Parenthesis for these expressions are skipped
 """
 function handleSugar(T)
-  T = if string(T) == "<|"
+  T = if T === :(<|)
     # Syntactic sugar cons.
     :Cons
-  elseif string(T) == "_cons"
+  elseif T === :_cons
     #= This is legacy for the code generator. For match equation we need to allow this as well =#
     :Cons
-  elseif string(T) == "nil"
+  elseif T === :nil
     # Syntactic sugar for Nil
     :Nil
-  elseif string(T) == "NONE"
+  elseif T === :NONE
     # Syntactic sugar for Nothing
     :Nothing
   else
@@ -308,7 +309,7 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
             res = let $(bound...)
               # export bindings
               $(@splice variable in bound quote
-                  $(esc(variable)) = $(Symbol("variable_$variable"))
+                  $(esc(variable)) = $(Symbol("variable_", variable))
                 end)
               $(esc(result))
             end
@@ -342,7 +343,7 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
           res = let $(bound...)
             # export bindings
             $(@splice variable in bound quote
-                $(esc(variable)) = $(Symbol("variable_$variable"))
+                $(esc(variable)) = $(Symbol("variable_", variable))
               end)
             $(esc(result))
           end

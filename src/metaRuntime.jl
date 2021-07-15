@@ -20,7 +20,7 @@ end
 const Option{T} = Union{SOME{T},Nothing}
 
 """ NONE is defined as nothing. """
-NONE() = Nothing()
+const NONE() = Nothing()
 
 Base.convert(::Type{Option{S}}, x::SOME{T}) where {S,T<:S} =
   let
@@ -60,7 +60,7 @@ end
 
 """ Compares two Booleans """
 function boolEq(b1::Bool, b2::Bool)::Bool
-  b = b1 == b2
+  b1 === b2
 end
 
 """ Returns \\\"true\\\" or \\\"false\\\" string """
@@ -208,7 +208,7 @@ function intBitRShift(i::ModelicaInteger, s::ModelicaInteger)::ModelicaInteger
 end
 
 """ Converts Integer to Real """
-function intReal(i::ModelicaInteger)::ModelicaReal
+function intReal(i::ModelicaInteger)::Float64
   Float64(i)
 end
 
@@ -217,14 +217,14 @@ function intString(i::ModelicaInteger)::String
   string(i)
 end
 
-function realAdd(r1::ModelicaReal, r2::ModelicaReal)::ModelicaReal
+function realAdd(r1::ModelicaReal, r2::ModelicaReal)::Float64
   local r::ModelicaReal
 
   r = r1 + r2
   r
 end
 
-function realSub(r1::ModelicaReal, r2::ModelicaReal)::ModelicaReal
+function realSub(r1::ModelicaReal, r2::ModelicaReal)::Float64
   local r::ModelicaReal
 
   r = r1 - r2
@@ -319,7 +319,7 @@ function realInt(r::ModelicaReal)::ModelicaInteger
 end
 
 function realString(r::ModelicaReal)::String
-  local str::String = "$r"
+  local str::String = string(r)
   str
 end
 
@@ -405,10 +405,6 @@ end
 
 """ O(1) """
 function stringGet(str::String, index::ModelicaInteger)::ModelicaInteger
-  if index < 0
-    println("stringGet: index < 0!")
-    fail()
-  end
   str[index]
 end
 
@@ -519,7 +515,7 @@ function arrayCreate(size::ModelicaInteger, initialValue::A)::Array{A} where {A}
   fill(initialValue, size)
 end
 
-""" Better """
+""" O(N) """
 function arrayList(arr::Array{T})::List{T} where {T}
   local lst::List{T} = nil
   for i = length(arr):-1:1
@@ -529,8 +525,8 @@ function arrayList(arr::Array{T})::List{T} where {T}
 end
 
 """ O(n) """
-function listArray(lst::List{T})::Array{T} where {T}
-  local arr::Array{T} = []
+function listArray(lst::Cons{T})::Array{T} where {T}
+  local arr::Vector{T} = T[]
   for i in lst
     push!(arr, i)
   end
@@ -538,21 +534,17 @@ function listArray(lst::List{T})::Array{T} where {T}
 end
 
 """ O(1) """
+function listArray(lst::Nil)
+  []
+end
+
+""" O(1) """
 function arrayUpdate(arr::Array{A}, index::ModelicaInteger,
                      newValue::B)::Array{A} where {A,B}
-  local newArray::Array{A} = arr #= same as the input array; used for folding =#
-  #if !(A <: B)
-  #  println("!(A<:B)")
-  #  @show A
-  #  @show B
-  #end
-  if index < 0
-    println("arrayUpdate: index < 0!")
-    fail()
-  end
-  newArray[index] = newValue
+  #local newArray::Array{A} = arr #= same as the input array; used for folding =#
+  arr[index] = newValue
   #= Defined in the runtime =#
-  newArray #= same as the input array; used for folding =#
+  arr #= same as the input array; used for folding =#
 end
 
 """ O(n) """
@@ -701,7 +693,7 @@ end
 
 """ Returns true if the input is NONE() """
 function isNone(opt::Option{A})::Bool where {A}
-  (opt == nothing) # isa(opt, NONE))
+  (opt === nothing) # isa(opt, NONE))
 end
 
 """ Returns true if the input is SOME() """
