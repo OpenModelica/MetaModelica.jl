@@ -380,7 +380,7 @@ function stringDelimitList(strs::List{String}, delimiter::String)::String
   str
 end
 
-function stringDelimitList(strs::List{Any}, delimiter::String)::String
+function stringDelimitList(strs::List, delimiter::String)::String
   local str::String = ""
   for n in strs
     if isempty(str)
