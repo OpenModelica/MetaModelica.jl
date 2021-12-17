@@ -14,7 +14,8 @@ function arrayGetNoBoundsChecking(arr::Vector{A}, index::ModelicaInteger) where 
 end
 
 """ O(1) """
-function arrayUpdateNoBoundsChecking(arr::Vector{A}, index::ModelicaInteger,
+function arrayUpdateNoBoundsChecking(arr::Vector{A},
+                                     index::ModelicaInteger,
                                      newValue::A) where {A}
   local newArray = arr
   @inbounds newArray[index] = newValue
@@ -59,6 +60,6 @@ function listArrayLiteral(lst::List{A})::Array{A} where {A}
   arr
 end
 
-ExportAll.@exportAll()
+@exportAll()
 
 end #=End dangerous =#
