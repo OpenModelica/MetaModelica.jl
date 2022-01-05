@@ -1,12 +1,1 @@
-name: Format
-
-on: [push, pull_request]
-#sdsdsd
-jobs:
-  format:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - uses: julia-actions/julia-format@master
-      with:
-        args: -i 2 -v .
+# Actions to be added here.
