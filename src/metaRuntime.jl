@@ -392,6 +392,8 @@ function stringDelimitList(strs::List{Any}, delimiter::String)::String
   str
 end
 
+stringDelimitList(lst::Nil, delim::String) = "{}"
+
 """ O(1) """
 function stringLength(str::String)::ModelicaInteger
   length(str)
@@ -502,7 +504,7 @@ function arrayEmpty(arr::Array{A})::Bool where {A}
 end
 
 """ O(1) """
-function arrayGet(arr::Array{A}, index::ModelicaInteger)::A where {A}
+function arrayGet(arr::Array{A}, index::ModelicaInteger) where {A}
   if index < 0
     println("arrayGet: index < 0!")
     fail()
@@ -511,12 +513,12 @@ function arrayGet(arr::Array{A}, index::ModelicaInteger)::A where {A}
 end
 
 """ O(size) """
-function arrayCreate(size::ModelicaInteger, initialValue::A)::Array{A} where {A}
+function arrayCreate(size::ModelicaInteger, initialValue::A) where {A}
   fill(initialValue, size)
 end
 
 """ O(N) """
-function arrayList(arr::Array{T})::List{T} where {T}
+function arrayList(arr::Array{T}) where {T}
   local lst::List{T} = nil
   for i = length(arr):-1:1
     lst = Cons{T}(arr[i], lst)
@@ -525,7 +527,7 @@ function arrayList(arr::Array{T})::List{T} where {T}
 end
 
 """ O(n) """
-function listArray(lst::Cons{T})::Array{T} where {T}
+function listArray(lst::Cons{T}) where {T}
   local arr::Vector{T} = T[]
   for i in lst
     push!(arr, i)
@@ -737,7 +739,6 @@ end
 function isPresent(ident::T)::Bool where {T}
   local b::Bool
   b = true
-  b
 end
 
 #= The Info attribute provides location information for elements and classes. =#
@@ -752,7 +753,6 @@ end
     lastModification::ModelicaReal #= mtime in stat(2), stored as a double for increased precision on 32-bit platforms =#
   end
 end
-
 
 SOURCEINFO(fileName::String, isReadOnly::Bool, lineNumberStart::ModelicaInteger,
            columnNumberSTart::ModelicaInteger, lineNumberEnd::ModelicaInteger,
