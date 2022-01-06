@@ -178,11 +178,12 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
                 #= NONE is a function. However, we treat it a bit special=#
                 if $(esc(T)) !== NONE && typeof($(esc(T))) <: Function
                   func = $(esc(T))
-                  throw(LoadError("Attempted to match on a function", @__LINE__,
+                  file = @__FILE__
+                  throw(LoadError("Attempted to match on a function at $(file)", @__LINE__,
                                   AssertionError("Incorrect match usage attempted to match on: $func")))
                 end
                 if !(isstructtype(typeof($(esc(T)))) || issabstracttype(typeof($(esc(T)))))
-                  throw(LoadError("Attempted to match on a pattern that is not a struct",
+                  throw(LoadError("Attempted to match on a pattern that is not a struct at $(file)",
                                   @__LINE__,
                                   AssertionError("Incorrect match usage. Attempted to match on a pattern that is not a struct")))
                 end
