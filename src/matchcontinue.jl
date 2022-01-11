@@ -325,14 +325,7 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
             #else
             #  showerror(stderr, e, catch_backtrace())
             #end
-            if !isa(e, MetaModelicaException) && !isa(e, ImmutableListException)
-              if isa(e, MatchFailure)
-                println("MatchFailure:" + e.msg)
-              else
-                showerror(stderr, e, catch_backtrace())
-              end
-              rethrow(e)
-            end
+            filterMetaModelicaExceptionAndThrow(e)
             __omc_match_done = false
           end
         end
