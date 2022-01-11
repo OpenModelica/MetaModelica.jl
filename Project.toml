@@ -1,7 +1,7 @@
 name = "MetaModelica"
 uuid = "9d7f2a79-07b5-5542-8b19-c0100dda6b06"
 authors = ["Martin Sjölund <martin.sjolund@liu.se>", "John Tinnerholm <john.tinnerholm@liu.se>"]
-version = "0.0.2"
+version = "0.0.3"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
