@@ -795,3 +795,7 @@ end
 function StringFunction(r::Float64)::String
   realString(r)
 end
+
+function String(arg)::String
+  return string(arg)
+end
