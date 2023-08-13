@@ -14,8 +14,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-  The code is based on https://github.com/RelationalAI-oss/Rematch.jl with
-  changes to allow keyword argument matching on structs along with  
+  The code is originally based on https://github.com/RelationalAI-oss/Rematch.jl with
+  changes to allow keyword argument matching on structs along with
   matching on the immutable list construct accompanying MetaModelica + some other improvements and bug fixes.
   It also provides  @matchcontinue macro (try the next case when any exception is thrown).
 """
