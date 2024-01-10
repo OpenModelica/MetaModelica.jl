@@ -3,7 +3,7 @@ pipeline {
     docker {
       // Large image with full OpenModelica build dependencies; lacks omc and OMPython
       label 'linux'
-      image 'julia:1.1-buster'
+      image '1.10.0-bookworm'
       alwaysPull  true
       args '--privileged'
     }
