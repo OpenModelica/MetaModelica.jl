@@ -44,7 +44,6 @@ function listReverseInPlace(inList::List{T})::List{T} where {T}
   MetaModelica.listReverse(inList)
 end
 
-
 function listReverseInPlace2(inList::Nil)
   return inList#MetaModelica.listReverse(inList)
 end
@@ -76,15 +75,15 @@ function listReverseInPlace2(lst::Cons{T}) where {T}
 end
 
 
-"""
-O(1). A destructive operation changing the \"first\" part of a cons-cell.
-TODO: Not implemented
-"""
-function listSetFirst(inConsCell::Cons{A}, inNewContent::A) where {A} #= A non-empty list =#
-  firstPtr::Ptr{A} = unsafe_getListAsPtr(inConsCell)
-  #local newHead = Cons{T}(inNewContent, inConsCell.tail)
-  # unsafe_store!(firstPtr, inNewContent)
-end
+# """
+# O(1). A destructive operation changing the \"first\" part of a cons-cell.
+# TODO: Not implemented
+# """
+# function listSetFirst(inConsCell::Cons{A}, inNewContent::A) where {A} #= A non-empty list =#
+#   firstPtr::Ptr{A} = unsafe_getListAsPtr(inConsCell)
+#   #local newHead = Cons{T}(inNewContent, inConsCell.tail)
+#   # unsafe_store!(firstPtr, inNewContent)
+# end
 
 """ O(1). A destructive operation changing the rest part of a cons-cell """
 #= NOTE: Make sure you do NOT create cycles as infinite lists are not handled well in the compiler. =#
@@ -105,15 +104,15 @@ function listSetRest(inConsCell::Cons{A}, inNewRest::Nil) where {A} #= A non-emp
   GC.@preserve unsafe_store!(lstPtr, Cons{A}(inConsCell.head, inNewRest))
   return inConsCell
 end
-  
+
 """ O(1). A destructive operation changing the \"first\" part of a cons-cell. """
 function listSetFirst(inConsCell::Cons{A}, inNewContent::A) where {A} #= A non-empty list =#
   @assign inConsCell.head = inNewConent
 end
 
-""" 
-O(1). A destructive operation changing the rest part of a cons-cell 
-NOTE: Make sure you do NOT create cycles as infinite lists are not handled well in the compiler. 
+"""
+O(1). A destructive operation changing the rest part of a cons-cell
+NOTE: Make sure you do NOT create cycles as infinite lists are not handled well in the compiler.
 """
 function listSetRest(inConsCell::Cons{T}, inNewRest::List{T}) where {T} #= A non-empty list =#
   @assign inConsCell.tail = inNewRest
