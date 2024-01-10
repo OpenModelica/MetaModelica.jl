@@ -104,7 +104,8 @@ function listSetRest(inConsCell::Cons{A}, inNewRest::Nil) where {A} #= A non-emp
   local val = inConsCell.head
   GC.@preserve unsafe_store!(lstPtr, Cons{A}(inConsCell.head, inNewRest))
   return inConsCell
-=======
+end
+  
 function listReverseInPlace(inList::List{T}) where {T}
   MetaModelica.listReverse(inList)
 end
