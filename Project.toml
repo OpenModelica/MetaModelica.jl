@@ -1,14 +1,16 @@
 name = "MetaModelica"
 uuid = "9d7f2a79-07b5-5542-8b19-c0100dda6b06"
 authors = ["Martin Sjölund <martin.sjolund@liu.se>", "John Tinnerholm <john.tinnerholm@liu.se>"]
-version = "0.0.3"
+version = "0.0.4"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 ExportAll = "ad2082ca-a69e-11e9-38fa-e96309a31fe4"
+FastClosures = "9aa1b823-49e4-5ca5-8b0f-3971ec8bab6a"
 ImmutableList = "4a558cac-c1ed-11e9-20da-3584bcd8709a"
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 Setfield = "efcf1570-3423-57d1-acb7-fd33fddbac46"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
-julia = "1.1"
+julia = "1.7"

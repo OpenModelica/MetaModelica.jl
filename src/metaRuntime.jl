@@ -369,18 +369,20 @@ end
   Example: stringDelimitList({\"x\",\"y\",\"z\"}, \", \") => \"x, y, z\"
 """
 function stringDelimitList(strs::List{String}, delimiter::String)::String
-  local str::String = ""
-  for n in strs
-    if isempty(str)
-      str = n
+  buffer = IOBuffer()
+  for (i,n) in enumerate(strs)
+    if i == 1
+      print(buffer, n)
     else
-      str = str + delimiter + n
+      print(buffer, delimiter)
+      print(buffer, n)
+      #str = str + delimiter + n
     end
   end
-  str
+  return String(take!(buffer))#str
 end
 
-function stringDelimitList(strs::List{Any}, delimiter::String)::String
+function stringDelimitList(strs::List, delimiter::String)::String
   local str::String = ""
   for n in strs
     if isempty(str)
@@ -528,16 +530,40 @@ end
 
 """ O(n) """
 function listArray(lst::Cons{T}) where {T}
-  local arr::Vector{T} = T[]
-  for i in lst
-    push!(arr, i)
+  local N = length(lst)
+  local arr::Vector{T} = Vector{T}(undef, N)
+  i = 1
+  while lst !== nil
+    arr[i] = lst.head
+    i += 1
+    lst = lst.tail
   end
-  arr
+  return arr
 end
 
 """ O(1) """
 function listArray(lst::Nil)
   []
+end
+
+"""
+O(n)
+
+Same as listArray but with a dummy argument to specify the type.
+"""
+function listArray(lst::Cons{T}, ty) where {T}
+  local arr = Vector{ty}(undef, length(lst))
+  for i in lst
+    arr[i]
+  end
+  return arr
+end
+
+"""
+Same as listArray but with a dummy argument to specify the type.
+"""
+function listArray(lst::Nil, ty)
+  ty[]
 end
 
 """ O(1) """
@@ -558,9 +584,8 @@ end
 Note that this operation is *not* destructive, i.e. a new array is created. """
 function arrayAppend(arr1::Array{A}, arr2::Array{A})::Array{A} where {A}
   local arr::Array{A}
-
-  #= Defined in the runtime =#
-  arr
+  @error "Defined in the runtime"
+  fail()
 end
 
 """ Returns the string representation of any value.
@@ -605,7 +630,7 @@ end
 This is a global mutable value and should be used sparingly.
 You are recommended not to use "missing" the runtime system treats this values as uninitialized and fail getGlobalRoot later on.
 """
-global globalRoots = Array{Any,1}(missing, 1024)
+const global globalRoots::Vector{Any} = Vector{Any}(missing, 1024)
 
 function setGlobalRoot(index::ModelicaInteger, value::T) where {T}
   if index > 1023 || index < 0
@@ -735,7 +760,8 @@ function referenceDebugString(functionSymbol::A)::String where {A}
   name
 end
 
-""" TODO: I am far from sure that this will fly.. in Julia. The code generated from the transpiler is correct however"""
+""" TODO: I am far from sure that this will fly.. in Julia.
+The code generated from the transpiler is correct however"""
 function isPresent(ident::T)::Bool where {T}
   local b::Bool
   b = true

@@ -74,15 +74,23 @@ end
 
 function replaceLineNum(a::Any, lines::LineNumberNode) end
 
-function makeUniontypes(name, records, lineNode::LineNumberNode)
+function makeUniontypes(name, records, lineNode::LineNumberNode; mutable = false)
   recordsArray1 = Array.(records)
   recordsArray2 = recordsArray1[1]
   constructedRecords = []
-  for r in recordsArray2   
+  for r in recordsArray2
     structName = r[1]
-    recordNode = quote
-      struct $(structName) <: $name
-        $(r[2])
+    recordNode = if ! mutable
+      quote
+        struct $(structName) <: $name
+          $(r[2])
+        end
+      end
+    else
+      quote
+        mutable struct $(structName) <: $name
+          $(r[2])
+        end
       end
     end
     replaceLineNum(recordNode, isa(r[3], Nothing) ? lineNode : r[3])
@@ -99,13 +107,21 @@ function makeUniontypes(name, records, lineNode::LineNumberNode)
   return res
 end
 
-#= Creates a uniontype consisting of 0...N records =#
+""" Creates a uniontype consisting of 0...N records """
 macro Uniontype(name, records...)
   recordCollection = [makeRecord(r) for r in records]
   esc(makeUniontypes(name, recordCollection, __source__))
 end
 
-#= Creates a record belonging to a Uniontype =#
+"""
+  Creates a mutable uniontype constisting of 0...N records
+"""
+macro Mutable_Uniontype(name, records...)
+  recordCollection = [makeRecord(r) for r in records]
+  esc(makeUniontypes(name, recordCollection, __source__; mutable = true))
+end
+
+""" Creates a record belonging to a Uniontype """
 macro Record(name, fields...)
   makeTuple(name, fields)
 end
@@ -117,6 +133,6 @@ macro UniontypeDecl(uDecl)
       end)
 end
 
-export @Uniontype, @Record, @UniontypeDecl
+export @Uniontype, @Record, @UniontypeDecl, @Mutable_Uniontype
 
 end
