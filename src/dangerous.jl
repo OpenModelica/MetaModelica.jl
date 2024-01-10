@@ -104,6 +104,22 @@ function listSetRest(inConsCell::Cons{A}, inNewRest::Nil) where {A} #= A non-emp
   local val = inConsCell.head
   GC.@preserve unsafe_store!(lstPtr, Cons{A}(inConsCell.head, inNewRest))
   return inConsCell
+=======
+function listReverseInPlace(inList::List{T}) where {T}
+  MetaModelica.listReverse(inList)
+end
+
+""" O(1). A destructive operation changing the \"first\" part of a cons-cell. """
+function listSetFirst(inConsCell::Cons{A}, inNewContent::A) where {A} #= A non-empty list =#
+  @assign inConsCell.head = inNewConent
+end
+
+""" 
+O(1). A destructive operation changing the rest part of a cons-cell 
+NOTE: Make sure you do NOT create cycles as infinite lists are not handled well in the compiler. 
+"""
+function listSetRest(inConsCell::Cons{T}, inNewRest::List{T}) where {T} #= A non-empty list =#
+  @assign inConsCell.tail = inNewRest
 end
 
 
@@ -159,9 +175,6 @@ function unsafe_getListAsPtr(lst::List{T}) where {T}
     convert(Ptr{Cons{T}}, unsafe_pointer_from_objref(lst))
   end
 end
-
-
-
 
 """
   Unsafe function to get pointers from immutable struct.

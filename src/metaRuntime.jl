@@ -394,6 +394,8 @@ function stringDelimitList(strs::List, delimiter::String)::String
   str
 end
 
+stringDelimitList(lst::Nil, delim::String) = "{}"
+
 """ O(1) """
 function stringLength(str::String)::ModelicaInteger
   length(str)
@@ -504,7 +506,7 @@ function arrayEmpty(arr::Array{A})::Bool where {A}
 end
 
 """ O(1) """
-function arrayGet(arr::Array{A}, index::ModelicaInteger)::A where {A}
+function arrayGet(arr::Array{A}, index::ModelicaInteger) where {A}
   if index < 0
     println("arrayGet: index < 0!")
     fail()
@@ -513,7 +515,7 @@ function arrayGet(arr::Array{A}, index::ModelicaInteger)::A where {A}
 end
 
 """ O(size) """
-function arrayCreate(size::ModelicaInteger, initialValue::A)::Array{A} where {A}
+function arrayCreate(size::ModelicaInteger, initialValue::A) where {A}
   fill(initialValue, size)
 end
 
@@ -763,7 +765,6 @@ The code generated from the transpiler is correct however"""
 function isPresent(ident::T)::Bool where {T}
   local b::Bool
   b = true
-  b
 end
 
 #= The Info attribute provides location information for elements and classes. =#
@@ -778,7 +779,6 @@ end
     lastModification::ModelicaReal #= mtime in stat(2), stored as a double for increased precision on 32-bit platforms =#
   end
 end
-
 
 SOURCEINFO(fileName::String, isReadOnly::Bool, lineNumberStart::ModelicaInteger,
            columnNumberSTart::ModelicaInteger, lineNumberEnd::ModelicaInteger,
@@ -822,6 +822,6 @@ function StringFunction(r::Float64)::String
   realString(r)
 end
 
-function String(a)::String
-  string(a)
+function String(arg)::String
+  return string(arg)
 end
