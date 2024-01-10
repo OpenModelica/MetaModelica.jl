@@ -1,5 +1,3 @@
-module TestMetaModelica
-
 using MetaModelica
 using Test
 
@@ -41,5 +39,3 @@ using Test
   end
 
 end #= End MetaModelica testset =#
-
-end #= End of TestMetaModelica =#

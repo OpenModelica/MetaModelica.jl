@@ -10,6 +10,7 @@ FastClosures = "9aa1b823-49e4-5ca5-8b0f-3971ec8bab6a"
 ImmutableList = "4a558cac-c1ed-11e9-20da-3584bcd8709a"
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 Setfield = "efcf1570-3423-57d1-acb7-fd33fddbac46"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 julia = "1.7"
