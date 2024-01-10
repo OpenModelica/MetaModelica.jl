@@ -106,10 +106,6 @@ function listSetRest(inConsCell::Cons{A}, inNewRest::Nil) where {A} #= A non-emp
   return inConsCell
 end
   
-function listReverseInPlace(inList::List{T}) where {T}
-  MetaModelica.listReverse(inList)
-end
-
 """ O(1). A destructive operation changing the \"first\" part of a cons-cell. """
 function listSetFirst(inConsCell::Cons{A}, inNewContent::A) where {A} #= A non-empty list =#
   @assign inConsCell.head = inNewConent
