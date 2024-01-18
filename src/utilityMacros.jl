@@ -1,5 +1,6 @@
-import Setfield
+#import Setfield
 import FastClosures
+import Accessors
 """
   Helper function for the assignmacro, see @assign
   We have one case where we assign a immutable structure to an immutable structure or something to a primitive variable.
@@ -9,7 +10,7 @@ function assignFunc(expr)
   res =
     if @capture(expr, lhs_._ = rhs_)
       if !isprimitivetype(typeof(lhs))
-        Setfield.setmacro(identity, expr, overwrite=true)
+        Accessors.setmacro(identity, expr, overwrite=true)
       else
         quote
           $(esc(expr))
