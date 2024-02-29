@@ -20,7 +20,7 @@ include("metaRuntime.jl")
 include("shouldFail.jl")
 include("utilityMacros.jl")
 
-export @match, @matchcontinue, MatchFailure, ModelicaReal, ModelicaInteger
+export @match, @matchcontinue, @unsafematch, MatchFailure, ModelicaReal, ModelicaInteger
 export @Uniontype, @Record, @UniontypeDecl, @ExtendedFunction, @ExtendedAnonFunction
 export List, list, Nil, nil, Cons, cons, =>, Option, SOME, NONE, SourceInfo, SOURCEINFO
 export @do_threaded_for, <|, @shouldFail, sourceInfo, _cons, @importDBG
