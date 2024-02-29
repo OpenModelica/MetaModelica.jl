@@ -175,7 +175,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
         push!(asserts,
               quote
                 a = typeof($(esc(T)))
-                #= NONE is a function. However, we treat it a bit special=#
+                #= NONE is a function. However, we treat it as a special case =#
                 if $(esc(T)) !== NONE && typeof($(esc(T))) <: Function
                   func = $(esc(T))
                   file = @__FILE__
@@ -360,10 +360,62 @@ end
 
 
 """
-Top level function for all match macros except
-the match equation macro.
+Top level function for all match macros except for the match equation macro.
 """
 function handle_match_cases(value, match::Expr; mathcontinue::Bool=false)
+  tail = nothing
+  if match.head != :block
+    error("Unrecognized match syntax: Expected begin block $match")
+  end
+  line = nothing
+  local neverFails = false
+  cases = Expr[]
+  asserts = Expr[]
+  for arg in match.args
+    if isa(arg, LineNumberNode)
+      line = arg
+      continue
+    elseif isa(arg, Expr)
+      push!(cases, arg)
+    end
+  end
+  for case in reverse(cases)
+    tail = handle_match_case(:value, case, tail, asserts, mathcontinue)
+    if line !== nothing
+      replaceLineNum(tail, @__FILE__, line)
+    end
+    #= If one case contains a _ we know this match never fails. =#
+    pat = case.args[2]
+    if pat === :_
+      neverFails = true
+    end
+  end
+  if neverFails == false || mathcontinue
+    quote
+      $(asserts...)
+      local value = $(esc(value))
+      local __omc_match_done::Bool = false
+      local res
+      $tail
+      if !__omc_match_done
+        throw(MatchFailure("unfinished", value))
+      end
+      res
+    end
+  else
+    quote
+      $(asserts...)
+      local value = $(esc(value))
+      local __omc_match_done::Bool = false
+      local res
+      $tail
+      res
+    end
+  end
+end
+
+
+function unsafe_handle_match_cases(value, match::Expr; mathcontinue::Bool=false)
   tail = nothing
   if match.head != :block
     error("Unrecognized match syntax: Expected begin block $match")
@@ -392,9 +444,10 @@ function handle_match_cases(value, match::Expr; mathcontinue::Bool=false)
     local res
     $tail
     if !__omc_match_done
-      throw(MatchFailure("unfinished", value))
+      value
+    else
+      res
     end
-    res
   end
 end
 
@@ -434,6 +487,20 @@ end
 """
 macro match(value, cases)
   res = handle_match_cases(value, cases; mathcontinue=false)
+  replaceLineNum(res, @__FILE__, __source__)
+  res
+end
+
+"""
+      @unsafematch value begin
+          pattern1 => result1
+          pattern2 => result2
+          ...
+      end
+  Return `result` for the first matching `pattern`. If there are no matches, returns `value`.
+"""
+macro unsafematch(value, cases)
+  res = unsafe_handle_match_cases(value, cases; mathcontinue=false)
   replaceLineNum(res, @__FILE__, __source__)
   res
 end

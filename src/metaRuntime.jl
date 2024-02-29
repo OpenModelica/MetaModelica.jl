@@ -73,55 +73,55 @@ function boolString(b::Bool)::String
 end
 
 """ Adds two Integer values """
-function intAdd(i1::ModelicaInteger, i2::ModelicaInteger)::ModelicaInteger
+function intAdd(i1::ModelicaInteger, i2::ModelicaInteger)
   local i::ModelicaInteger
   i = i1 + i2
 end
 
 """ Subtracts two Integer values """
-function intSub(i1::ModelicaInteger, i2::ModelicaInteger)::ModelicaInteger
+function intSub(i1::ModelicaInteger, i2::ModelicaInteger)
   local i::ModelicaInteger
   i = i1 - i2
 end
 
 """ Multiplies two Integer values """
-function intMul(i1::ModelicaInteger, i2::ModelicaInteger)::ModelicaInteger
+function intMul(i1::ModelicaInteger, i2::ModelicaInteger)
   local i::ModelicaInteger
   i = i1 * i2
 end
 
 """ Divides two Integer values """
-function intDiv(i1::ModelicaInteger, i2::ModelicaInteger)::ModelicaInteger
+function intDiv(i1::ModelicaInteger, i2::ModelicaInteger)
   local i::ModelicaInteger
   i = div(i1, i2)
 end
 
 """ Calculates remainder of Integer division i1/i2 """
-function intMod(i1::ModelicaInteger, i2::ModelicaInteger)::ModelicaInteger
+function intMod(i1::ModelicaInteger, i2::ModelicaInteger)
   local i::ModelicaInteger
   i = mod(i1, i2)
 end
 
 """ Returns the bigger one of two Integer values """
-function intMax(i1::ModelicaInteger, i2::ModelicaInteger)::ModelicaInteger
+function intMax(i1::ModelicaInteger, i2::ModelicaInteger)
   local i::ModelicaInteger
   i = max(i1, i2)
 end
 
 """ Returns the smaller one of two Integer values """
-function intMin(i1::ModelicaInteger, i2::ModelicaInteger)::ModelicaInteger
+function intMin(i1::ModelicaInteger, i2::ModelicaInteger)
   local i::ModelicaInteger
   i = min(i1, i2)
 end
 
 """ Returns the absolute value of Integer i """
-function intAbs(i::ModelicaInteger)::ModelicaInteger
+function intAbs(i::ModelicaInteger)
   local oi::ModelicaInteger
   oi = abs(i)
 end
 
 """ Returns negative value of Integer i """
-function intNeg(i::ModelicaInteger)::ModelicaInteger
+function intNeg(i::ModelicaInteger)
   local oi::ModelicaInteger
   oi = -i
 end
@@ -172,37 +172,37 @@ function intGt(i1::ModelicaInteger, i2::ModelicaInteger)::Bool
 end
 
 """ Returns bitwise inverted Integer number of i """
-function intBitNot(i::ModelicaInteger)::ModelicaInteger
+function intBitNot(i::ModelicaInteger)
   local o::ModelicaInteger = ~i
   o
 end
 
 """ Returns bitwise \'and\' of Integers i1 and i2 """
-function intBitAnd(i1::ModelicaInteger, i2::ModelicaInteger)::ModelicaInteger
+function intBitAnd(i1::ModelicaInteger, i2::ModelicaInteger)
   local o::ModelicaInteger = i1 & i2
   o
 end
 
 """ Returns bitwise 'or' of Integers i1 and i2 """
-function intBitOr(i1::ModelicaInteger, i2::ModelicaInteger)::ModelicaInteger
+function intBitOr(i1::ModelicaInteger, i2::ModelicaInteger)
   local o::ModelicaInteger = i1 | i2
   o
 end
 
 """ Returns bitwise 'xor' of Integers i1 and i2 """
-function intBitXor(i1::ModelicaInteger, i2::ModelicaInteger)::ModelicaInteger
+function intBitXor(i1::ModelicaInteger, i2::ModelicaInteger)
   local o::ModelicaInteger = i1 ⊻ i2
   o
 end
 
 """ Returns bitwise left shift of Integer i by s bits """
-function intBitLShift(i::ModelicaInteger, s::ModelicaInteger)::ModelicaInteger
+function intBitLShift(i::ModelicaInteger, s::ModelicaInteger)
   local o::ModelicaInteger = i << s
   o
 end
 
 """ Returns bitwise right shift of Integer i by s bits """
-function intBitRShift(i::ModelicaInteger, s::ModelicaInteger)::ModelicaInteger
+function intBitRShift(i::ModelicaInteger, s::ModelicaInteger)
   local o::ModelicaInteger = i >> s
   o
 end
@@ -313,7 +313,7 @@ function realGt(x1::ModelicaReal, x2::ModelicaReal)::Bool
   b
 end
 
-function realInt(r::ModelicaReal)::ModelicaInteger
+function realInt(r::ModelicaReal)
   local i::ModelicaInteger
   i = Integer(trunc(r))
 end
@@ -323,7 +323,7 @@ function realString(r::ModelicaReal)::String
   str
 end
 
-function stringCharInt(ch::String)::ModelicaInteger
+function stringCharInt(ch::String)
   local i::ModelicaInteger = Int64(ch[1])
   i
 end
@@ -333,7 +333,7 @@ function intStringChar(i::ModelicaInteger)::String
   ch
 end
 
-function stringInt(str::String)::ModelicaInteger
+function stringInt(str::String)
   local i::ModelicaInteger = Int64(str)
   i
 end
@@ -368,7 +368,7 @@ end
   list elements with the string delimiter inserted between elements.
   Example: stringDelimitList({\"x\",\"y\",\"z\"}, \", \") => \"x, y, z\"
 """
-function stringDelimitList(strs::List{String}, delimiter::String)::String
+function stringDelimitList(strs::List, delimiter::String)::String
   buffer = IOBuffer()
   for (i,n) in enumerate(strs)
     if i == 1
@@ -376,28 +376,15 @@ function stringDelimitList(strs::List{String}, delimiter::String)::String
     else
       print(buffer, delimiter)
       print(buffer, n)
-      #str = str + delimiter + n
     end
   end
   return String(take!(buffer))#str
 end
 
-function stringDelimitList(strs::List, delimiter::String)::String
-  local str::String = ""
-  for n in strs
-    if isempty(str)
-      str = n
-    else
-      str = str + delimiter + n
-    end
-  end
-  str
-end
-
-stringDelimitList(lst::Nil, delim::String) = "{}"
+stringDelimitList(lst::Nil, delim::String) = ""
 
 """ O(1) """
-function stringLength(str::String)::ModelicaInteger
+function stringLength(str::String)
   length(str)
 end
 
@@ -408,7 +395,7 @@ function stringEmpty(str::String)::Bool
 end
 
 """ O(1) """
-function stringGet(str::String, index::ModelicaInteger)::ModelicaInteger
+function stringGet(str::String, index::ModelicaInteger)
   str[index]
 end
 
@@ -448,40 +435,34 @@ function stringEqual(s1::String, s2::String)::Bool
   s1 == s2
 end
 
-function stringCompare(s1::String, s2::String)::ModelicaInteger
-  res = cmp(s1, s2)
-  if res < 0
-    return -1
-  end
-  if res > 0
-    return 1
-  end
-  return 0
+function stringCompare(s1::String, s2::String)
+  local res = cmp(s1, s2)
+  return res
 end
 
-function myhash(s::String)::ModelicaInteger
+function myhash(s::String)
   local h::ModelicaInteger = mod(hash(s), typemax(ModelicaInteger))
   h
 end
 
-function stringHash(str::String)::ModelicaInteger
+function stringHash(str::String)
   local h::ModelicaInteger = ModelicaInteger(myhash(str))
   h
 end
 
 #= TODO: Defined in the runtime =#
-function stringHashDjb2(str::String)::ModelicaInteger
+function stringHashDjb2(str::String)
   local h::ModelicaInteger = ModelicaInteger(myhash(str))
   h
 end
 
 """ Does hashing+modulo without intermediate results. """
-function stringHashDjb2Mod(str::String, m::ModelicaInteger)::ModelicaInteger
+function stringHashDjb2Mod(str::String, m::ModelicaInteger)
   local h::ModelicaInteger = mod(ModelicaInteger(myhash(str)), m)
   h
 end
 
-function stringHashSdbm(str::String)::ModelicaInteger
+function stringHashSdbm(str::String)
   local h::ModelicaInteger = ModelicaInteger(myhash(str))
   h
 end
@@ -496,7 +477,7 @@ function substring(str::String, start::ModelicaInteger, stop::ModelicaInteger)::
 end
 
 """ O(1) ? """
-function arrayLength(arr::Array{T})::ModelicaInteger where {T}
+function arrayLength(arr::Array{T}) where {T}
   length(arr)
 end
 
@@ -588,10 +569,12 @@ function arrayAppend(arr1::Array{A}, arr2::Array{A})::Array{A} where {A}
   fail()
 end
 
-""" Returns the string representation of any value.
-Rather slow; only use this for debugging! """
-function anyString(a::A)::String where {A}
-  dump(a)
+"""
+Returns the string representation of any value.
+Rather slow; only use this for debugging!
+"""
+function anyString(a::A) where {A}
+  string(dump(a))
 end
 
 """ print(anyString(a)), but to stderr """
@@ -653,7 +636,7 @@ end
 """ The return-value is compiler-dependent on the runtime implementation of
 boxed values. The number of bits reserved for the constructor is generally
 between 6 and 8 bits. """
-function valueConstructor(value::A)::ModelicaInteger where {A}
+function valueConstructor(value::A) where {A}
   # hack! hack! hack!
   local ctor::ModelicaInteger = myhash(string(typeof(value)))
   ctor
@@ -661,7 +644,7 @@ end
 
 """ The number of slots a boxed value has. This is dependent on sizeof(void*)
 on the architecture in question. """
-function valueSlots(value::A)::ModelicaInteger where {A}
+function valueSlots(value::A) where {A}
   local slots::ModelicaInteger = 0
   try
     slots = nfields(value)
@@ -681,7 +664,7 @@ function valueEq(a1::A, a2::B)::Bool where {A,B}
 end
 
 """ a1 > a2? """
-function valueCompare(a1::A, a2::A)::ModelicaInteger where {A}
+function valueCompare(a1::A, a2::A) where {A}
   local i::ModelicaInteger = if valueConstructor(a1) < valueConstructor(a2)
     -1
   elseif valueConstructor(a1) > valueConstructor(a2)
@@ -692,7 +675,7 @@ function valueCompare(a1::A, a2::A)::ModelicaInteger where {A}
   i #= -1, 0, 1 =#
 end
 
-function valueHashMod(value::A, mod::ModelicaInteger)::ModelicaInteger where {A}
+function valueHashMod(value::A, mod::ModelicaInteger) where {A}
   local h::ModelicaInteger = mod(ModelicaInteger(myhash(string(value))), m)
   h
 end
@@ -744,6 +727,10 @@ end
 
 function fail()
   throw(MetaModelicaGeneralException("Runtime defined generic Meta Modelica failure"))
+end
+
+function fail(msg::String)
+  throw(MetaModelicaGeneralException(msg))
 end
 
 """ Sets the stack overflow signal to the given value and returns the old one """
@@ -810,8 +797,9 @@ macro importDBG(moduleName)
   end
 end
 
+const NOT_IMPLEMENTED_MSG::String =   "__NOT_IMPLEMENTED__"
 function getInstanceName()::String
-  "__NOT_IMPLEMENTED__"
+  return NOT_IMPLEMENTED_MSG
 end
 
 function StringFunction(i::Int64)::String
