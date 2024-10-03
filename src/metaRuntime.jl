@@ -742,8 +742,10 @@ function stringCharListString(strs::List{String})::String
   str
 end
 
+const genericFailure = MetaModelicaGeneralException("Runtime defined generic Meta Modelica failure")
+
 function fail()
-  throw(MetaModelicaGeneralException("Runtime defined generic Meta Modelica failure"))
+  throw(genericFailure)
 end
 
 """ Sets the stack overflow signal to the given value and returns the old one """
@@ -760,8 +762,10 @@ function referenceDebugString(functionSymbol::A)::String where {A}
   name
 end
 
-""" TODO: I am far from sure that this will fly.. in Julia.
-The code generated from the transpiler is correct however"""
+"""
+TODO: I am far from sure that this will fly.. in Julia.
+The code generated from the transpiler is correct however
+"""
 function isPresent(ident::T)::Bool where {T}
   local b::Bool
   b = true

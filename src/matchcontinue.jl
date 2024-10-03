@@ -28,8 +28,12 @@ macro splice(iterator, body)
   Expr(:..., :(($(esc(body)) for $(esc(iterator.args[2])) in $(esc(iterator.args[3])))))
 end
 
+#=
+TODO: make this as a mutable struct and change the msg and value instead
+Should have some impact on the exception heavy control flow used in the frontend.
+=#
 struct MatchFailure <: MetaModelicaException
-  msg::Any
+  msg::String
   value::Any
 end
 
@@ -284,7 +288,7 @@ function handle_match_eq(expr)
       $(asserts...)
       value = $(esc(value))
       __omc_match_done = false
-      $body || throw(MatchFailure("no match", value))
+      $body || throw(MatchFailure("no match", typeof(value)))
       $(@splice variable in bound quote
           $(esc(variable)) = $(Symbol("variable_$variable"))
         end)
@@ -317,14 +321,16 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
             __omc_match_done = true
           catch e
             #=
-              We only rethrow for two kinds of exceptions currently.
-              One for list, and one for generic MetaModelicaExceptions.
+            We only rethrow for two kinds of exceptions currently.
+            One for list, and one for generic MetaModelicaExceptions.
+            (Thinking about it I think this might be a performance sink.
+            TODO: Removing this? -John March 2024)
             =#
-            #if isa(e, MetaModelicaException) || isa(e, ImmutableListException)
-            #  println(e.msg)
-            #else
-            #  showerror(stderr, e, catch_backtrace())
-            #end
+            # if isa(e, MetaModelicaException) || isa(e, ImmutableListException)
+            #   println(e.msg)
+            # else
+            #   showerror(stderr, e, catch_backtrace())
+            # end
             if !isa(e, MetaModelicaException) && !isa(e, ImmutableListException)
               if isa(e, MatchFailure)
                 println("MatchFailure:" + e.msg)
@@ -364,6 +370,59 @@ Top level function for all match macros except
 the match equation macro.
 """
 function handle_match_cases(value, match::Expr; mathcontinue::Bool=false)
+  tail = nothing
+  if match.head != :block
+    error("Unrecognized match syntax: Expected begin block $match")
+  end
+  line = nothing
+
+  local neverFails = false
+  cases = Expr[]
+  asserts = Expr[]
+  for arg in match.args
+    if isa(arg, LineNumberNode)
+      line = arg
+      continue
+    elseif isa(arg, Expr)
+      push!(cases, arg)
+    end
+  end
+  for case in reverse(cases)
+    tail = handle_match_case(:value, case, tail, asserts, mathcontinue)
+    if line !== nothing
+      replaceLineNum(tail, @__FILE__, line)
+    end
+    #= If one case contains a _ we know this match never fails. =#
+    pat = case.args[2]
+    if pat === :_
+      neverFails = true
+    end
+  end
+  if neverFails == false || mathcontinue
+    quote
+      $(asserts...)
+      local value = $(esc(value))
+      local __omc_match_done::Bool = false
+      local res
+      $tail
+      if !__omc_match_done
+        throw(MatchFailure("unfinished match for type", typeof(value)))
+      end
+      res
+    end
+  else
+    quote
+      $(asserts...)
+      local value = $(esc(value))
+      local __omc_match_done::Bool = false
+      local res
+      $tail
+      res
+    end
+  end
+end
+
+function unsafe_handle_match_cases(value, match::Expr; mathcontinue::Bool=false)
   tail = nothing
   if match.head != :block
     error("Unrecognized match syntax: Expected begin block $match")
