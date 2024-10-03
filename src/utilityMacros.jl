@@ -15,6 +15,9 @@ function assignFunc(expr)
         quote
           $(esc(expr))
       end
+    elseif @capture(expr, lhs_.sub__= rhs_)
+      quote
+        $tmp
       end
     else
       quote
@@ -34,7 +37,9 @@ E.g.:
   Where a is a nested immutable struct
 """
 macro assign(expr)
-  assignFunc(expr)
+  res = assignFunc(expr)
+  replaceLineNum(res, @__FILE__, __source__)
+  res
 end
 
 """
