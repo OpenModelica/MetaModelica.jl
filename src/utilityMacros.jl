@@ -14,6 +14,7 @@ function assignFunc(expr)
       else
         quote
           $(esc(expr))
+        end
       end
     elseif @capture(expr, lhs_.sub__= rhs_)
       quote
