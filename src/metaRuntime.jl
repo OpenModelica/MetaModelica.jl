@@ -441,7 +441,7 @@ function stringCompare(s1::String, s2::String)
 end
 
 function myhash(s::String)
-  local h::ModelicaInteger = mod(hash(s), typemax(ModelicaInteger))
+  local h::Int = mod(hash(s), typemax(Int))
   h
 end
 
@@ -636,9 +636,10 @@ end
 """ The return-value is compiler-dependent on the runtime implementation of
 boxed values. The number of bits reserved for the constructor is generally
 between 6 and 8 bits. """
-function valueConstructor(value::A) where {A}
+function valueConstructor(value)
   # hack! hack! hack!
-  local ctor::ModelicaInteger = myhash(string(typeof(value)))
+  local h::Int = mod(hash(typeof(value)), typemax(Int))
+  local ctor::Int = h #myhash(string(typeof(value)))
   ctor
 end
 
@@ -727,7 +728,7 @@ end
 
 const genericFailure = MetaModelicaGeneralException("Runtime defined generic Meta Modelica failure")
 
-function fail()
+@noinline function fail()
   throw(genericFailure)
 end
 
