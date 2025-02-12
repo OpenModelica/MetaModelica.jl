@@ -381,6 +381,20 @@ function stringDelimitList(strs::List, delimiter::String)::String
   return String(take!(buffer))#str
 end
 
+
+function stringDelimitList(strs::Vector, delimiter::String)::String
+  buffer = IOBuffer()
+  for (i,n) in enumerate(strs)
+    if i == 1
+      print(buffer, n)
+    else
+      print(buffer, delimiter)
+      print(buffer, n)
+    end
+  end
+  return String(take!(buffer))#str
+end
+
 stringDelimitList(lst::Nil, delim::String) = ""
 
 """ O(1) """
