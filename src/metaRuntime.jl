@@ -774,7 +774,7 @@ function isPresent(ident::T)::Bool where {T}
 end
 
 #= The Info attribute provides location information for elements and classes. =#
-@Uniontype SourceInfo begin
+@Mutable_Uniontype SourceInfo begin
   @Record SOURCEINFO begin
     fileName::String #= fileName where the class is defined in =#
     isReadOnly::Bool #= isReadOnly : (true|false). Should be true for libraries =#
@@ -795,10 +795,15 @@ SOURCEINFO(fileName::String, isReadOnly::Bool, lineNumberStart::ModelicaInteger,
                columnNumberEnd, 0.0)
   end
 
+const DEFAULT_INFO = SOURCEINFO("", true, 1, 2, 3, 4, 0.0)
+
+"""
+Returns the default source info.
+"""
 function sourceInfo()::SourceInfo
   local info::SourceInfo
   #= Defined in the runtime =#
-  SOURCEINFO("", true, 1, 2, 3, 4, 0.0)
+  return DEFAULT_INFO
 end
 
 Base.:+(x::String, y::String) =
