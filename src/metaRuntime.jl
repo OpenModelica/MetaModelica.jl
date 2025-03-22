@@ -73,67 +73,67 @@ function boolString(b::Bool)::String
 end
 
 """ Adds two Integer values """
-function intAdd(i1::ModelicaInteger, i2::ModelicaInteger)
-  local i::ModelicaInteger
+function intAdd(i1::T, i2::T) where {T <: Integer}
+  local i::Int
   i = i1 + i2
 end
 
 """ Subtracts two Integer values """
-function intSub(i1::ModelicaInteger, i2::ModelicaInteger)
-  local i::ModelicaInteger
+function intSub(i1::T, i2::T) where {T <: Integer}
+  local i::Int
   i = i1 - i2
 end
 
 """ Multiplies two Integer values """
-function intMul(i1::ModelicaInteger, i2::ModelicaInteger)
-  local i::ModelicaInteger
+function intMul(i1::T, i2::T) where {T <: Integer}
+  local i::Int
   i = i1 * i2
 end
 
 """ Divides two Integer values """
-function intDiv(i1::ModelicaInteger, i2::ModelicaInteger)
-  local i::ModelicaInteger
+function intDiv(i1::T, i2::T) where {T <: Integer}
+  local i::Int
   i = div(i1, i2)
 end
 
 """ Calculates remainder of Integer division i1/i2 """
-function intMod(i1::ModelicaInteger, i2::ModelicaInteger)
-  local i::ModelicaInteger
+function intMod(i1::T, i2::T) where {T <: Integer}
+  local i::Int
   i = mod(i1, i2)
 end
 
 """ Returns the bigger one of two Integer values """
-function intMax(i1::ModelicaInteger, i2::ModelicaInteger)
-  local i::ModelicaInteger
+function intMax(i1::T, i2::T) where {T <: Integer}
+  local i::Int
   i = max(i1, i2)
 end
 
 """ Returns the smaller one of two Integer values """
-function intMin(i1::ModelicaInteger, i2::ModelicaInteger)
-  local i::ModelicaInteger
+function intMin(i1::T, i2::T) where {T <: Integer}
+  local i::Int
   i = min(i1, i2)
 end
 
 """ Returns the absolute value of Integer i """
-function intAbs(i::ModelicaInteger)
-  local oi::ModelicaInteger
+function intAbs(i::Int)
+  local oi::Int
   oi = abs(i)
 end
 
 """ Returns negative value of Integer i """
-function intNeg(i::ModelicaInteger)
-  local oi::ModelicaInteger
+function intNeg(i::Int)
+  local oi::Int
   oi = -i
 end
 
 """ Returns whether Integer i1 is smaller than Integer i2 """
-function intLt(i1::ModelicaInteger, i2::ModelicaInteger)::Bool
+function intLt(i1::T, i2::T)::Bool where {T <: Integer}
   local b::Bool
   b = i1 < i2
 end
 
 """ Returns whether Integer i1 is smaller than or equal to Integer i2 """
-function intLe(i1::ModelicaInteger, i2::ModelicaInteger)::Bool
+function intLe(i1::T, i2::T)::Bool where {T <: Integer}
   local b::Bool
 
   b = i1 <= i2
@@ -141,7 +141,7 @@ function intLe(i1::ModelicaInteger, i2::ModelicaInteger)::Bool
 end
 
 """ Returns whether Integer i1 is equal to Integer i2 """
-function intEq(i1::ModelicaInteger, i2::ModelicaInteger)::Bool
+function intEq(i1::T, i2::T)::Bool where {T <: Integer}
   local b::Bool
 
   b = i1 == i2
@@ -149,7 +149,7 @@ function intEq(i1::ModelicaInteger, i2::ModelicaInteger)::Bool
 end
 
 """ Returns whether Integer i1 is not equal to Integer i2 """
-function intNe(i1::ModelicaInteger, i2::ModelicaInteger)::Bool
+function intNe(i1::T, i2::T)::Bool where {T <: Integer}
   local b::Bool
 
   b = i1 != i2
@@ -157,7 +157,7 @@ function intNe(i1::ModelicaInteger, i2::ModelicaInteger)::Bool
 end
 
 """ Returns whether Integer i1 is greater than or equal to Integer i2 """
-function intGe(i1::ModelicaInteger, i2::ModelicaInteger)::Bool
+function intGe(i1::T, i2::T)::Bool where {T <: Integer}
   local b::Bool
 
   b = i1 >= i2
@@ -165,183 +165,183 @@ function intGe(i1::ModelicaInteger, i2::ModelicaInteger)::Bool
 end
 
 """ Returns whether Integer i1 is greater than Integer i2 """
-function intGt(i1::ModelicaInteger, i2::ModelicaInteger)::Bool
+function intGt(i1::T, i2::T)::Bool where {T <: Integer}
   local b::Bool
   b = i1 > i2
   b
 end
 
 """ Returns bitwise inverted Integer number of i """
-function intBitNot(i::ModelicaInteger)
-  local o::ModelicaInteger = ~i
+function intBitNot(i::T) where {T <: Integer}
+  local o::T = ~i
   o
 end
 
 """ Returns bitwise \'and\' of Integers i1 and i2 """
-function intBitAnd(i1::ModelicaInteger, i2::ModelicaInteger)
-  local o::ModelicaInteger = i1 & i2
+function intBitAnd(i1::T, i2::T) where {T <: Integer}
+  local o::T = i1 & i2
   o
 end
 
 """ Returns bitwise 'or' of Integers i1 and i2 """
-function intBitOr(i1::ModelicaInteger, i2::ModelicaInteger)
-  local o::ModelicaInteger = i1 | i2
-  o
+function intBitOr(i1::T, i2::T) where {T <: Integer}
+  local o::T = i1 | i2
+  return o
 end
 
 """ Returns bitwise 'xor' of Integers i1 and i2 """
-function intBitXor(i1::ModelicaInteger, i2::ModelicaInteger)
-  local o::ModelicaInteger = i1 ⊻ i2
+function intBitXor(i1::T, i2::T) where {T <: Integer}
+  local o::T = i1 ⊻ i2
   o
 end
 
 """ Returns bitwise left shift of Integer i by s bits """
-function intBitLShift(i::ModelicaInteger, s::ModelicaInteger)
-  local o::ModelicaInteger = i << s
+function intBitLShift(i::Int, s::Int)
+  local o::Int = i << s
   o
 end
 
 """ Returns bitwise right shift of Integer i by s bits """
-function intBitRShift(i::ModelicaInteger, s::ModelicaInteger)
-  local o::ModelicaInteger = i >> s
+function intBitRShift(i::Int, s::Int)
+  local o::Int = i >> s
   o
 end
 
 """ Converts Integer to Real """
-function intReal(i::ModelicaInteger)::Float64
+function intReal(i::Int)::Float64
   Float64(i)
 end
 
 """ Converts Integer to String """
-function intString(i::ModelicaInteger)::String
+function intString(i::Int)::String
   string(i)
 end
 
-function realAdd(r1::ModelicaReal, r2::ModelicaReal)::Float64
-  local r::ModelicaReal
+function realAdd(r1::Float64, r2::Float64)::Float64
+  local r::Float64
 
   r = r1 + r2
   r
 end
 
-function realSub(r1::ModelicaReal, r2::ModelicaReal)::Float64
-  local r::ModelicaReal
+function realSub(r1::Float64, r2::Float64)::Float64
+  local r::Float64
 
   r = r1 - r2
   r
 end
 
-function realMul(r1::ModelicaReal, r2::ModelicaReal)::ModelicaReal
-  local r::ModelicaReal
+function realMul(r1::Float64, r2::Float64)::Float64
+  local r::Float64
 
   r = r1 * r2
   r
 end
 
-function realDiv(r1::ModelicaReal, r2::ModelicaReal)::ModelicaReal
-  local r::ModelicaReal
+function realDiv(r1::Float64, r2::Float64)::Float64
+  local r::Float64
 
   r = r1 / r2
   r
 end
 
-function realMod(r1::ModelicaReal, r2::ModelicaReal)::ModelicaReal
-  local r::ModelicaReal
+function realMod(r1::Float64, r2::Float64)::Float64
+  local r::Float64
 
   r = mod(r1, r2)
   r
 end
 
-function realPow(r1::ModelicaReal, r2::ModelicaReal)::ModelicaReal
-  local r::ModelicaReal
+function realPow(r1::Float64, r2::Float64)::Float64
+  local r::Float64
 
   r = r1^r2
   r
 end
 
-function realMax(r1::ModelicaReal, r2::ModelicaReal)::ModelicaReal
-  local r::ModelicaReal
+function realMax(r1::Float64, r2::Float64)::Float64
+  local r::Float64
   r = max(r1, r2)
 end
 
-function realMin(r1::ModelicaReal, r2::ModelicaReal)::ModelicaReal
-  local r::ModelicaReal
+function realMin(r1::Float64, r2::Float64)::Float64
+  local r::Float64
   r = min(r1, r2)
 end
 
-function realAbs(x::ModelicaReal)::ModelicaReal
-  local y::ModelicaReal
+function realAbs(x::Float64)::Float64
+  local y::Float64
   y = abs(x)
 end
 
-function realNeg(x::ModelicaReal)::ModelicaReal
-  local y::ModelicaReal
+function realNeg(x::Float64)::Float64
+  local y::Float64
   y = -x
 end
 
-function realLt(x1::ModelicaReal, x2::ModelicaReal)::Bool
+function realLt(x1::Float64, x2::Float64)::Bool
   local b::Bool
   b = x1 < x2
 end
 
-function realLe(x1::ModelicaReal, x2::ModelicaReal)::Bool
+function realLe(x1::Float64, x2::Float64)::Bool
   local b::Bool
   b = x1 <= x2
 end
 
-function realEq(x1::ModelicaReal, x2::ModelicaReal)::Bool
+function realEq(x1::Float64, x2::Float64)::Bool
   local b::Bool
   b = x1 == x2
 end
 
-function realNe(x1::ModelicaReal, x2::ModelicaReal)::Bool
+function realNe(x1::Float64, x2::Float64)::Bool
   local b::Bool
   b = x1 != x2
 end
 
-function realGe(x1::ModelicaReal, x2::ModelicaReal)::Bool
+function realGe(x1::Float64, x2::Float64)::Bool
   local b::Bool
 
   b = x1 >= x2
   b
 end
 
-function realGt(x1::ModelicaReal, x2::ModelicaReal)::Bool
+function realGt(x1::Float64, x2::Float64)::Bool
   local b::Bool
 
   b = x1 > x2
   b
 end
 
-function realInt(r::ModelicaReal)
-  local i::ModelicaInteger
+function realInt(r::Float64)
+  local i::Int
   i = Integer(trunc(r))
 end
 
-function realString(r::ModelicaReal)::String
+function realString(r::Float64)::String
   local str::String = string(r)
   str
 end
 
 function stringCharInt(ch::String)
-  local i::ModelicaInteger = Int64(ch[1])
+  local i::Int = Int64(ch[1])
   i
 end
 
-function intStringChar(i::ModelicaInteger)::String
+function intStringChar(i::Int)::String
   local ch::String = string(Char(i))
   ch
 end
 
 function stringInt(str::String)
-  local i::ModelicaInteger = Int64(str)
+  local i::Int = Int64(str)
   i
 end
 
 """ This function fails unless the whole string can be consumed by strtod without
 setting errno. For more details, see man 3 strtod """
-function stringReal(str::String)::ModelicaReal
-  local r::ModelicaReal = parse(Float64, str)
+function stringReal(str::String)::Float64
+  local r::Float64 = parse(Float64, str)
   r
 end
 
@@ -409,12 +409,12 @@ function stringEmpty(str::String)::Bool
 end
 
 """ O(1) """
-function stringGet(str::String, index::ModelicaInteger)
+function stringGet(str::String, index::Int)
   str[index]
 end
 
 """ O(1) """
-function stringGetStringChar(str::String, index::ModelicaInteger)::String
+function stringGetStringChar(str::String, index::Int)::String
   if index < 0
     println("stringGetStringChar: index < 0!")
     fail()
@@ -424,7 +424,7 @@ function stringGetStringChar(str::String, index::ModelicaInteger)::String
 end
 
 """ O(n) """
-function stringUpdateStringChar(str::String, newch::String, index::ModelicaInteger)::String
+function stringUpdateStringChar(str::String, newch::String, index::Int)::String
   local news::String = str
   if index < 0
     println("stringUpdateStringChar: index < 0!")
@@ -460,28 +460,28 @@ function myhash(s::String)
 end
 
 function stringHash(str::String)
-  local h::ModelicaInteger = ModelicaInteger(myhash(str))
+  local h::Int = Int(myhash(str))
   h
 end
 
 #= TODO: Defined in the runtime =#
 function stringHashDjb2(str::String)
-  local h::ModelicaInteger = ModelicaInteger(myhash(str))
+  local h::Int = Int(myhash(str))
   h
 end
 
 """ Does hashing+modulo without intermediate results. """
-function stringHashDjb2Mod(str::String, m::ModelicaInteger)
-  local h::ModelicaInteger = mod(ModelicaInteger(myhash(str)), m)
+function stringHashDjb2Mod(str::String, m::Int)
+  local h::Int = mod(Int(myhash(str)), m)
   h
 end
 
 function stringHashSdbm(str::String)
-  local h::ModelicaInteger = ModelicaInteger(myhash(str))
+  local h::Int = Int(myhash(str))
   h
 end
 
-function substring(str::String, start::ModelicaInteger, stop::ModelicaInteger)::String #= stop index, first character is 1 =#
+function substring(str::String, start::Int, stop::Int)::String #= stop index, first character is 1 =#
   if start < 0
     println("substring: start < 0!")
     fail()
@@ -501,7 +501,7 @@ function arrayEmpty(arr::Array{A})::Bool where {A}
 end
 
 """ O(1) """
-function arrayGet(arr::Array{A}, index::ModelicaInteger) where {A}
+function arrayGet(arr::Array{A}, index::Int) where {A}
   if index < 0
     println("arrayGet: index < 0!")
     fail()
@@ -510,7 +510,7 @@ function arrayGet(arr::Array{A}, index::ModelicaInteger) where {A}
 end
 
 """ O(size) """
-function arrayCreate(size::ModelicaInteger, initialValue::A) where {A}
+function arrayCreate(size::Int, initialValue::A) where {A}
   fill(initialValue, size)
 end
 
@@ -562,7 +562,7 @@ function listArray(lst::Nil, ty)
 end
 
 """ O(1) """
-function arrayUpdate(arr::Array{A}, index::ModelicaInteger,
+function arrayUpdate(arr::Array{A}, index::Int,
                      newValue::B)::Array{A} where {A,B}
   #local newArray::Array{A} = arr #= same as the input array; used for folding =#
   arr[index] = newValue
@@ -629,14 +629,14 @@ You are recommended not to use "missing" the runtime system treats this values a
 """
 const global globalRoots::Vector{Any} = Vector{Any}(missing, 1024)
 
-function setGlobalRoot(index::ModelicaInteger, value::T) where {T}
+function setGlobalRoot(index::Int, value::T) where {T}
   if index > 1023 || index < 0
     fail()
   end
   globalRoots[index+1] = value
 end
 
-function getGlobalRoot(index::ModelicaInteger)
+function getGlobalRoot(index::Int)
   if index > 1023 || index < 0
     fail()
   end
@@ -660,7 +660,7 @@ end
 """ The number of slots a boxed value has. This is dependent on sizeof(void*)
 on the architecture in question. """
 function valueSlots(value::A) where {A}
-  local slots::ModelicaInteger = 0
+  local slots::Int = 0
   try
     slots = nfields(value)
   catch ex
@@ -680,7 +680,7 @@ end
 
 """ a1 > a2? """
 function valueCompare(a1::A, a2::A) where {A}
-  local i::ModelicaInteger = if valueConstructor(a1) < valueConstructor(a2)
+  local i::Int = if valueConstructor(a1) < valueConstructor(a2)
     -1
   elseif valueConstructor(a1) > valueConstructor(a2)
     1
@@ -690,8 +690,8 @@ function valueCompare(a1::A, a2::A) where {A}
   i #= -1, 0, 1 =#
 end
 
-function valueHashMod(value::A, mod::ModelicaInteger) where {A}
-  local h::ModelicaInteger = mod(ModelicaInteger(myhash(string(value))), m)
+function valueHashMod(value::A, mod::Int) where {A}
+  local h::Int = mod(Int(myhash(string(value))), m)
   h
 end
 
@@ -710,8 +710,8 @@ function referencePointerString(ref::A)::String where {A}
 end
 
 """ Use the diff to compare two time samples to each other. Not very accurate. """
-function clock()::ModelicaReal
-  local t::ModelicaReal
+function clock()::Float64
+  local t::Float64
   @assert false "not implemented"
   t
 end
@@ -778,17 +778,17 @@ end
   @Record SOURCEINFO begin
     fileName::String #= fileName where the class is defined in =#
     isReadOnly::Bool #= isReadOnly : (true|false). Should be true for libraries =#
-    lineNumberStart::ModelicaInteger #= lineNumberStart =#
-    columnNumberStart::ModelicaInteger #= columnNumberStart =#
-    lineNumberEnd::ModelicaInteger #= lineNumberEnd =#
-    columnNumberEnd::ModelicaInteger #= columnNumberEnd =#
-    lastModification::ModelicaReal #= mtime in stat(2), stored as a double for increased precision on 32-bit platforms =#
+    lineNumberStart::Int #= lineNumberStart =#
+    columnNumberStart::Int #= columnNumberStart =#
+    lineNumberEnd::Int #= lineNumberEnd =#
+    columnNumberEnd::Int #= columnNumberEnd =#
+    lastModification::Float64 #= mtime in stat(2), stored as a double for increased precision on 32-bit platforms =#
   end
 end
 
-SOURCEINFO(fileName::String, isReadOnly::Bool, lineNumberStart::ModelicaInteger,
-           columnNumberSTart::ModelicaInteger, lineNumberEnd::ModelicaInteger,
-           columnNumberEnd::ModelicaInteger) =
+SOURCEINFO(fileName::String, isReadOnly::Bool, lineNumberStart::Int,
+           columnNumberSTart::Int, lineNumberEnd::Int,
+           columnNumberEnd::Int) =
   let
     #=No source info=#
     SOURCEINFO(fileName, isReadOnly, lineNumberStart, columnNumberSTart, lineNumberEnd,
@@ -800,7 +800,7 @@ const DEFAULT_INFO = SOURCEINFO("", true, 1, 2, 3, 4, 0.0)
 """
 Returns the default source info.
 """
-function sourceInfo()::SourceInfo
+function sourceInfo()::SOURCEINFO
   local info::SourceInfo
   #= Defined in the runtime =#
   return DEFAULT_INFO

@@ -9,14 +9,14 @@ import ExportAll
 using ..MetaModelica
 
 """ O(1) """
-function arrayGetNoBoundsChecking(arr::Vector{A}, index::ModelicaInteger) where {A}
+function arrayGetNoBoundsChecking(arr::Vector{A}, index::Int)::A where {A}
   @inbounds arr[index]
 end
 
 """ O(1) """
 function arrayUpdateNoBoundsChecking(arr::Vector{A},
                                      index::ModelicaInteger,
-                                     newValue::A) where {A}
+                                     newValue::A)::Vector{A} where {A}
   local newArray = arr
   @inbounds newArray[index] = newValue
   return newArray
@@ -28,7 +28,7 @@ lucky, and pretty much anything else if you're not. Do not use unless you will
 immediately fill the whole array with data. The dummy variable is used to fix
 the type of the array.
 """
-function arrayCreateNoInit(size::ModelicaInteger, dummy::A)::Array{A} where {A}
+function arrayCreateNoInit(size::ModelicaInteger, dummy::A)::Vector{A} where {A}
   local arr::Array{A} = fill(dummy, size)
   arr
 end
