@@ -355,10 +355,10 @@ function stringListStringChar(str::String)::List{String}
 end
 
 """ O(str) """
-function stringAppendList(strs::List)::String
+function stringAppendList(strs::List{String})::String
   local str::String = ""
   for n in strs
-    str = str + n
+    str = string(str, n)
   end
   str
 end
@@ -368,15 +368,19 @@ end
   list elements with the string delimiter inserted between elements.
   Example: stringDelimitList({\"x\",\"y\",\"z\"}, \", \") => \"x, y, z\"
 """
-function stringDelimitList(strs::List, delimiter::String)::String
+function stringDelimitList(strs::List{String}, delimiter::String)::String
   buffer = IOBuffer()
-  for (i,n) in enumerate(strs)
+  local strsTmp::List{String} = strs
+  local i::Int = 1
+  while strsTmp !== nil
+    @match Cons{String}(n, strsTmp) = strsTmp
     if i == 1
       print(buffer, n)
     else
       print(buffer, delimiter)
       print(buffer, n)
     end
+    i += 1
   end
   return String(take!(buffer))#str
 end
