@@ -13,3 +13,10 @@ function replaceLineNum(a::Expr, file::String, lines::LineNumberNode)
   end
 end
 function replaceLineNum(a::Any, file::String, lines::LineNumberNode) end
+
+
+function stripBeginBlocks(e)::Expr
+  MacroTools.postwalk(e) do x
+    return MacroTools.unblock(x)
+  end
+end

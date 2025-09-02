@@ -22,6 +22,72 @@
 
 include("fixLines.jl")
 
+const DOC_STR = "Patterns:
+
+    * `_` matches anything
+
+    * `foo` matches anything, binds value to `foo`
+
+    * `foo(__)` wildcard match on all subfields of foo, binds value to `foo`
+
+    * `Foo(x,y,z)` matches structs of type `Foo` with fields matching `x,y,z`
+
+    * `Foo(x=y)` matches structs of type `Foo` with a field named `x` matching `y`
+
+    * `[x,y,z]` matches `AbstractArray`s with 3 entries matching `x,y,z`
+
+    * `(x,y,z)` matches `Tuple`s with 3 entries matching `x,y,z`
+
+    * `[x,y...,z]` matches `AbstractArray`s where `x` matches the first entry, `z` matches the last entry and `y` matches the remaining entries.
+
+    * `[x,y...]` matches `AbstractArray`s , where `x` matches the first entry, and `y` matches the remaining entries.
+
+    * `(x,y...,z)` matches `Tuple`s with at least 2 entries, where `x` matches the first entry, `z` matches the last entry and `y` matches the remaining entries.
+
+    * `_::T` matches any subtype (`isa`) of T
+
+    * `x || y` matches values which match either `x` or `y` (only variables which exist in both branches will be bound)
+
+    * `x && y` matches values which match both `x` and `y`
+
+    * `x where condition` matches only if `condition` is true (`condition` may use any variables that occur earlier in the pattern eg `(x, y, z where x + y > z)`)
+
+    * `x <| y` is syntactic sugar for `cons(x,y)` (See the ImmutableList package)
+
+    * Anything else is treated as a constant and tested for equality
+
+  Patterns can be nested arbitrarily.
+
+  Repeated variables only match if they are `==` eg `(x,x)` matches `(1,1)` but not `(1,2)`."
+
+"""
+```
+@splice(iterator, body)
+```
+
+Utility macro given a body on the format
+@splice <tuple> in <collection> <body>
+Generates:
+```
+Expr(:..., :((\$(esc(body)) for \$(esc(iterator.args[2])) in \$(esc(iterator.args[3])))))
+```
+
+Example:
+
+```
+bound = [:x, :y, :z]
+julia> quote \$(MetaModelica.@splice variable in bound :(
+            \$(esc(variable)) = \$(Symbol("variable_\$variable"))
+          )) end
+
+quote
+    #= REPL[32]:1 =#
+    $(Expr(:escape, :x)) = variable_x
+    $(Expr(:escape, :y)) = variable_y
+    $(Expr(:escape, :z)) = variable_z
+end
+```
+"""
 macro splice(iterator, body)
   @assert iterator.head === :call
   @assert iterator.args[1] === :in
@@ -51,6 +117,13 @@ end
 """
 @generated function evaluated_fieldnames(t::Type{T}) where {T}
   fieldnames(T)
+end
+
+"""
+Experimental
+"""
+@generated function evaluated_fieldtypes(t::Type{T}) where {T}
+  fieldtypes(T)
 end
 
 """
@@ -111,16 +184,14 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
     our_sym = Symbol("variable_", pattern)
     if pattern in bound
       # already bound, check that this value matches
-      quote
-        $our_sym == $value
-      end
+      :($our_sym == $value)
     else
       # bind
       push!(bound, pattern)
-      quote
-        $our_sym = $value
+      :(
+        $our_sym = $value;
         true
-      end
+      )
     end
   elseif @capture(pattern, subpattern1_ || subpattern2_) ||
          (@capture(pattern, f_(subpattern1_, subpattern2_)) && f === :|)
@@ -218,12 +289,10 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
                 end
               end)
       end
-      quote
-        $value === nothing && $(esc(T)) === Nothing ||
+      :($value === nothing && $(esc(T)) === Nothing ||
         $value isa $(esc(T)) &&
         $(handle_destruct_fields(value, pattern, subpatterns, length(subpatterns),
-                                 :getfield, bound, asserts; allow_splat=false))
-      end
+                                 :getfield, bound, asserts; allow_splat=false)))
     end
   elseif @capture(pattern, (subpatterns__,)) # Tuple
     quote
@@ -232,11 +301,9 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
                                bound, asserts; allow_splat=true))
     end
   elseif @capture(pattern, [subpatterns__]) # Array
-    quote
-      ($value isa AbstractArray) &&
+    :(($value isa AbstractArray) &&
       $(handle_destruct_fields(value, pattern, subpatterns, :(length($value)), :getindex,
-                               bound, asserts; allow_splat=true))
-    end
+                               bound, asserts; allow_splat=true)))
   elseif @capture(pattern, subpattern_::T_) #ImmutableList
     quote
       # typeassert
@@ -289,6 +356,30 @@ function handle_match_eq(expr)
       value = $(esc(value))
       __omc_match_done = false
       $body || throw(MatchFailure("no match", typeof(value)))
+      $(@splice variable in bound :(
+          $(esc(variable)) = $(Symbol("variable_$variable"))
+        ))
+      value
+    end
+  else
+    error("Unrecognized match syntax: $expr")
+  end
+end
+
+
+"""
+Handles match equations such as
+@unsafematch x = 4
+"""
+function unsafe_handle_match_eq(expr)
+  if @capture(expr, pattern_ = value_)
+    asserts = Expr[]
+    bound = Set{Symbol}()
+    body = handle_destruct(:value, pattern, bound, asserts)
+    quote
+      #$(asserts...)
+      value = $(esc(value))
+      $body
       $(@splice variable in bound quote
           $(esc(variable)) = $(Symbol("variable_$variable"))
         end)
@@ -443,7 +534,7 @@ function unsafe_handle_match_cases(value, match::Expr; mathcontinue::Bool=false)
     end
   end
   quote
-    $(asserts...)
+    #$(asserts...)
     local value = $(esc(value))
     local __omc_match_done::Bool = false
     local res
@@ -462,6 +553,17 @@ end
 """
 macro match(expr)
   res = handle_match_eq(expr)
+  replaceLineNum(res, @__FILE__, __source__)
+  res
+end
+
+
+"""
+  @match pattern = value
+  If `value` matches `pattern`, bind variables and return `value`.
+"""
+macro unsafematch(expr)
+  res = unsafe_handle_match_eq(expr)
   replaceLineNum(res, @__FILE__, __source__)
   res
 end
@@ -488,7 +590,8 @@ end
           ...
       end
 
-  Return `result` for the first matching `pattern`. If there are no matches, throw `MatchFailure`.
+  Return `result` for the first matching `pattern`. If there are no matches, throw `MatchFailure`
+
 """
 macro match(value, cases)
   res = handle_match_cases(value, cases; mathcontinue=false)
@@ -511,26 +614,164 @@ macro unsafematch(value, cases)
 end
 
 """
-  Patterns:
+Helper function for @fastmatch
+"""
+function handle_fast_match(value, arg_cases, caleeModule)
+  local methods = Expr[]
+  local cases = Tuple{Symbol,Union{Symbol,Expr}, Expr, Set{Symbol}, Union{Symbol, Expr, Any}}[]
+  for arg in arg_cases.args
+    if isa(arg, LineNumberNode)
+      line = arg
+      continue
+    elseif isa(arg, Expr)
+      capture = @capture(arg, pattern_ => rhs_)
+      @assert capture "Pattern was not on the form pattern => body/expr"
+      type_name = first(pattern.args)
+      asserts = Expr[]
+      bound = Set{Symbol}()
+      destruct_body = handle_destruct(value, pattern, bound, asserts)
+      push!(cases, (value, type_name, destruct_body, bound, rhs))
+    end
+  end
+  local funcName = Symbol(string(value, "Func"))
+  local i = 1
+  for case in cases
+    local func_name = case[1]
+    local type_name = case[2]
+    local dbody = case[3]
+    local bound = case[4]
+    local rhs = case[5]
+    local fixedBody = :($dbody)
+    #= HACK Fix me. Remove various redudant checks... =#
+    println(fixedBody)
+    #= Idea is to do some things different below depending on if we should expand our helper or not=#
+    local iterate = true
+    try
+      fixedBody = dbody.args[2].args[2].args
+    catch
+      iterate = false
+    end
 
-    * `_` matches anything
-    * `foo` matches anything, binds value to `foo`
-    * `foo(__)` wildcard match on all subfields of foo, binds value to `foo`
-    * `Foo(x,y,z)` matches structs of type `Foo` with fields matching `x,y,z`
-    * `Foo(x=y)` matches structs of type `Foo` with a field named `x` matching `y`
-    * `[x,y,z]` matches `AbstractArray`s with 3 entries matching `x,y,z`
-    * `(x,y,z)` matches `Tuple`s with 3 entries matching `x,y,z`
-    * `[x,y...,z]` matches `AbstractArray`s with at least 2 entries, where `x` matches the first entry, `z` matches the last entry and `y` matches the remaining entries.
-    * `(x,y...,z)` matches `Tuple`s with at least 2 entries, where `x` matches the first entry, `z` matches the last entry and `y` matches the remaining entries.
-    * `_::T` matches any subtype (`isa`) of T
-    * `x || y` matches values which match either `x` or `y` (only variables which exist in both branches will be bound)
-    * `x && y` matches values which match both `x` and `y`
-    * `x where condition` matches only if `condition` is true (`condition` may use any variables that occur earlier in the pattern eg `(x, y, z where x + y > z)`)
-    * `x => y` is syntactic sugar for `cons(x,y)` [Preliminary]
-    * Anything else is treated as a constant and tested for equality
+    # local method  = :(
+    #   function $(esc(funcName))($(esc(value))::$(esc(type_name)))
+    #     $(esc.(fixedBody)...)
+    #     $(@splice variable in bound :(
+    #       $(esc(variable)) = $(esc(Symbol("variable_$variable")))
+    #     ))
+    #     $(esc(rhs))
+    #   end)
+    #= Static evaluation...=#
+    T = quote T = MetaModelica.evaluated_fieldtypes($(type_name)) end
+    T2 = quote
+      @eval $(caleeModule)  begin
+        fieldtypes($(type_name))
+      end
+    end
+    T3 = quote
+      @eval $(caleeModule)  begin
+        fieldnames($(type_name))
+      end
+    end
+    T2 = Core.eval(caleeModule, T2)
+    T3 = Core.eval(caleeModule, T3)
+    # T4 = (T2..., T3...)
+    # println(T4)
+    # bodyDest = quote
+    #   $(@splice (i, variable) in enumerate(T2) :(
+    #     $(fieldname(value,i)) = $(Symbol("variable_$variable"))::$(T2[i])))
+    # end
 
-  Patterns can be nested arbitrarily.
+    #println(T)
 
-  Repeated variables only match if they are `==` eg `(x,x)` matches `(1,1)` but not `(1,2)`.
-  """
+
+    #println("T2:", T2)
+    #println("T3:", T3)
+    #    println("bodyDest:", bodyDest)
+    local method  = :(
+      function $(funcName)($(value)::$(type_name))
+        $(fixedBody...)
+        $(@splice (i, variable) in enumerate(bound) :(
+          $variable =$(Symbol("variable_$variable"))::$(T2[i])
+        ))
+        $rhs
+      end)
+    #push!(methods,method)
+    println(method)
+    #= Define the function as a global function in the scope of the caller =#
+    Core.eval(caleeModule, MacroTools.flatten(method))
+    i += 1
+  end
+  res = quote
+      $(Expr(:block, methods...))
+    #= TODO: guarding statements etc can be constructed here later... =#
+      @inline($(esc(funcName))($(esc(value))))
+  end
+  res = MacroTools.flatten(res)
+  MacroTools.postwalk(res) do x
+    MacroTools.flatten(x)
+  end
+end
+
+"""
+Similar to match but more limited.
+Instead of handling everything within one function we generate a new function for each case.
+Hence, we limit the possible objects we can match on to structs.
+
+Here we generate a function for each type with <function_name>
+Example:
+
+
+```
+@fastmatch <type-we-match-on> begin
+             FOO(v) => v
+             BAR(l, r) => l + r
+             FOOO() => v
+           end
+```
+This will result in the generation of the following functions:
+
+```
+function <type-we-match-on>Func(case::FOO)
+  Foo.v
+end
+
+function <type-we-match-on>Func(case::BAR)
+  l + r
+end
+
+function <type-we-match-on>Func(case::FOOO)
+   v
+end
+```
+
+"""
+macro fastmatch(value, cases)
+  res = handle_fast_match(value, cases, __module__)
+  replaceLineNum(res, @__FILE__, __source__)
+  res
+end
+
+export @fastmatch
+
+"""
+$DOC_STR
+"""
 :(@matchcontinue)
+
+"""
+$DOC_STR
+"""
+:(@match)
+
+"""
+Patterns:
+
+* ```FOO(a,b)```
+
+* ```BAR()```
+
+When using @fastmatch we limit the usage and only allow match on structs.
+
+Here, the use variables that are not bound to the structs will result in errors, therefore, use this match option carefully.
+"""
+:(@fastmatch)
