@@ -1,4 +1,4 @@
-"""
+""""
   Copyright 2019-CurrentYear: Open Source Modelica Consortium (OSMC)
   Copyright 2018: RelationalAI, Inc.
 
@@ -160,6 +160,28 @@ function handle_destruct_fields(value::Symbol, pattern, subpatterns, len, get::S
 end
 
 """
+Check if pattern is a nested @match or @matchcontinue macrocall.
+Returns true if it is, false otherwise.
+"""
+function is_match_macrocall(pattern)
+  if !(pattern isa Expr && pattern.head === :macrocall)
+    return false
+  end
+  if length(pattern.args) < 1
+    return false
+  end
+  mac = pattern.args[1]
+  # Check for @match or @matchcontinue (with or without module prefix)
+  if mac === Symbol("@match") || mac === Symbol("@matchcontinue")
+    return true
+  end
+  if mac isa GlobalRef
+    return mac.name === Symbol("@match") || mac.name === Symbol("@matchcontinue")
+  end
+  return false
+end
+
+"""
  Top level utility function.
  Handles deconstruction of patterns together with the value symbol.
 """
@@ -167,11 +189,38 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
   if pattern === :(_)
     # wildcard
     true
+  elseif is_match_macrocall(pattern)
+    #=
+     Nested @match or @matchcontinue in pattern position.
+     Extract the inner pattern and value, then handle recursively.
+     Structure: @match inner_pattern = inner_value
+    args[1] is the macro name, args[2] is LineNumberNode, args[3] is the assignment
+    =#
+    if length(pattern.args) >= 3 &&
+       pattern.args[3] isa Expr &&
+       pattern.args[3].head === :(=)
+      inner_assignment = pattern.args[3]
+      inner_pattern = inner_assignment.args[1]
+      inner_value_expr = inner_assignment.args[2]
+      # Generate a unique symbol for the inner value
+      inner_val_sym = Symbol("_nested_val_", hash(inner_pattern))
+      # Recursively destruct the inner pattern
+      inner_body = handle_destruct(inner_val_sym, inner_pattern, bound, asserts)
+      quote
+        $inner_val_sym = $inner_value_expr
+        $inner_body
+      end
+    else
+      # Unexpected structure, fall back to constant comparison
+      quote
+        $value === $pattern
+      end
+    end
   elseif !(pattern isa Expr || pattern isa Symbol) ||
          pattern === :nothing ||
-         @capture(pattern, _quote_macrocall) ||
+         (@capture(pattern, _quote_macrocall) && !is_match_macrocall(pattern)) ||
          @capture(pattern, Symbol(_))
-    # constant
+    # constant (but not a nested @match)
     # TODO do we have to be careful about QuoteNode etc?
     #Probably not //John
     quote
@@ -273,11 +322,13 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
         struct_name = gensym("$(T)_match")
         type_name = string(T)
         assertcond = true
+        local missing_field
         for field in named_fields
           local tmp
           tmp = quote
             $(Meta.quot(field)) in $struct_name
           end
+          missing_field = string(field)
           assertcond = Expr(:&&, tmp, assertcond)
         end
         push!(asserts, quote
@@ -285,7 +336,10 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
                        $struct_name = evaluated_fieldnames($(esc(T)))
                        $assertcond
                      end)
-                  error("Pattern contains named argument not in the type at: ")
+                  local type_name = string($(esc(T)))
+                  local ms = string($(esc(named_fields)))
+                  local errorStr = "Pattern contains named arguments $(ms) some of which was not in the type $type_name with fields $(fieldnames($(esc(T)))) at:"
+                  error(errorStr)
                 end
               end)
       end
@@ -346,7 +400,7 @@ end
 Handles match equations such as
 @match x = 4
 """
-function handle_match_eq(expr)
+function handle_match_eq(expr, calling_module::Module=Main)
   if @capture(expr, pattern_ = value_)
     asserts = Expr[]
     bound = Set{Symbol}()
@@ -371,7 +425,7 @@ end
 Handles match equations such as
 @unsafematch x = 4
 """
-function unsafe_handle_match_eq(expr)
+function unsafe_handle_match_eq(expr, calling_module::Module=Main)
   if @capture(expr, pattern_ = value_)
     asserts = Expr[]
     bound = Set{Symbol}()

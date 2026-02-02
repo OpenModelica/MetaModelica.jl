@@ -44,283 +44,215 @@ Base.convert(::Type{Union{Nothing,SOME{S}}}, x::SOME{S}) where {S} =
   end
 
 """ Logically combine two Booleans with 'and' operator """
-function boolAnd(b1::Bool, b2::Bool)::Bool
-  b = b1 && b2
+@inline function boolAnd(b1::Bool, b2::Bool)::Bool
+  b1 && b2
 end
 
 """ Logically combine two Booleans with 'or' operator """
-function boolOr(b1::Bool, b2::Bool)::Bool
-  b = b1 || b2
+@inline function boolOr(b1::Bool, b2::Bool)::Bool
+  b1 || b2
 end
 
 """ Logically invert Boolean value using 'not' operator """
-function boolNot(b::Bool)::Bool
-  nb = !b
+@inline function boolNot(b::Bool)::Bool
+  !b
 end
 
 """ Compares two Booleans """
-function boolEq(b1::Bool, b2::Bool)::Bool
+@inline function boolEq(b1::Bool, b2::Bool)::Bool
   b1 === b2
 end
 
 """ Returns \\\"true\\\" or \\\"false\\\" string """
-function boolString(b::Bool)::String
-  str = if (b)
-    "true"
-  else
-    "false"
-  end
+@inline function boolString(b::Bool)::String
+  b ? "true" : "false"
 end
 
 """ Adds two Integer values """
-function intAdd(i1::T, i2::T) where {T <: Integer}
-  local i::Int
-  i = i1 + i2
+@inline function intAdd(i1::T, i2::T) where {T <: Integer}
+  i1 + i2
 end
 
 """ Subtracts two Integer values """
-function intSub(i1::T, i2::T) where {T <: Integer}
-  local i::Int
-  i = i1 - i2
+@inline function intSub(i1::T, i2::T) where {T <: Integer}
+  i1 - i2
 end
 
 """ Multiplies two Integer values """
-function intMul(i1::T, i2::T) where {T <: Integer}
-  local i::Int
-  i = i1 * i2
+@inline function intMul(i1::T, i2::T) where {T <: Integer}
+  i1 * i2
 end
 
 """ Divides two Integer values """
-function intDiv(i1::T, i2::T) where {T <: Integer}
-  local i::Int
-  i = div(i1, i2)
+@inline function intDiv(i1::T, i2::T) where {T <: Integer}
+  div(i1, i2)
 end
 
 """ Calculates remainder of Integer division i1/i2 """
-function intMod(i1::T, i2::T) where {T <: Integer}
-  local i::Int
-  i = mod(i1, i2)
+@inline function intMod(i1::T, i2::T) where {T <: Integer}
+  mod(i1, i2)
 end
 
 """ Returns the bigger one of two Integer values """
-function intMax(i1::T, i2::T) where {T <: Integer}
-  local i::Int
-  i = max(i1, i2)
+@inline function intMax(i1::T, i2::T) where {T <: Integer}
+  max(i1, i2)
 end
 
 """ Returns the smaller one of two Integer values """
-function intMin(i1::T, i2::T) where {T <: Integer}
-  local i::Int
-  i = min(i1, i2)
+@inline function intMin(i1::T, i2::T) where {T <: Integer}
+  min(i1, i2)
 end
 
 """ Returns the absolute value of Integer i """
-function intAbs(i::Int)
-  local oi::Int
-  oi = abs(i)
+@inline function intAbs(i::Int)
+  abs(i)
 end
 
 """ Returns negative value of Integer i """
-function intNeg(i::Int)
-  local oi::Int
-  oi = -i
+@inline function intNeg(i::Int)
+  -i
 end
 
 """ Returns whether Integer i1 is smaller than Integer i2 """
-function intLt(i1::T, i2::T)::Bool where {T <: Integer}
-  local b::Bool
-  b = i1 < i2
+@inline function intLt(i1::T, i2::T)::Bool where {T <: Integer}
+  i1 < i2
 end
 
 """ Returns whether Integer i1 is smaller than or equal to Integer i2 """
-function intLe(i1::T, i2::T)::Bool where {T <: Integer}
-  local b::Bool
-
-  b = i1 <= i2
-  b
+@inline function intLe(i1::T, i2::T)::Bool where {T <: Integer}
+  i1 <= i2
 end
 
 """ Returns whether Integer i1 is equal to Integer i2 """
-function intEq(i1::T, i2::T)::Bool where {T <: Integer}
-  local b::Bool
-
-  b = i1 == i2
-  b
+@inline function intEq(i1::T, i2::T)::Bool where {T <: Integer}
+  i1 == i2
 end
 
 """ Returns whether Integer i1 is not equal to Integer i2 """
-function intNe(i1::T, i2::T)::Bool where {T <: Integer}
-  local b::Bool
-
-  b = i1 != i2
-  b
+@inline function intNe(i1::T, i2::T)::Bool where {T <: Integer}
+  i1 != i2
 end
 
 """ Returns whether Integer i1 is greater than or equal to Integer i2 """
-function intGe(i1::T, i2::T)::Bool where {T <: Integer}
-  local b::Bool
-
-  b = i1 >= i2
-  b
+@inline function intGe(i1::T, i2::T)::Bool where {T <: Integer}
+  i1 >= i2
 end
 
 """ Returns whether Integer i1 is greater than Integer i2 """
-function intGt(i1::T, i2::T)::Bool where {T <: Integer}
-  local b::Bool
-  b = i1 > i2
-  b
+@inline function intGt(i1::T, i2::T)::Bool where {T <: Integer}
+  i1 > i2
 end
 
 """ Returns bitwise inverted Integer number of i """
-function intBitNot(i::T) where {T <: Integer}
-  local o::T = ~i
-  o
+@inline function intBitNot(i::T) where {T <: Integer}
+  ~i
 end
 
 """ Returns bitwise \'and\' of Integers i1 and i2 """
-function intBitAnd(i1::T, i2::T) where {T <: Integer}
-  local o::T = i1 & i2
-  o
+@inline function intBitAnd(i1::T, i2::T) where {T <: Integer}
+  i1 & i2
 end
 
 """ Returns bitwise 'or' of Integers i1 and i2 """
-function intBitOr(i1::T, i2::T) where {T <: Integer}
-  local o::T = i1 | i2
-  return o
+@inline function intBitOr(i1::T, i2::T) where {T <: Integer}
+  i1 | i2
 end
 
 """ Returns bitwise 'xor' of Integers i1 and i2 """
-function intBitXor(i1::T, i2::T) where {T <: Integer}
-  local o::T = i1 ⊻ i2
-  o
+@inline function intBitXor(i1::T, i2::T) where {T <: Integer}
+  i1 ⊻ i2
 end
 
 """ Returns bitwise left shift of Integer i by s bits """
-function intBitLShift(i::Int, s::Int)
-  local o::Int = i << s
-  o
+@inline function intBitLShift(i::Int, s::Int)
+  i << s
 end
 
 """ Returns bitwise right shift of Integer i by s bits """
-function intBitRShift(i::Int, s::Int)
-  local o::Int = i >> s
-  o
+@inline function intBitRShift(i::Int, s::Int)
+  i >> s
 end
 
 """ Converts Integer to Real """
-function intReal(i::Int)::Float64
+@inline function intReal(i::Int)::Float64
   Float64(i)
 end
 
 """ Converts Integer to String """
-function intString(i::Int)::String
+@inline function intString(i::Int)::String
   string(i)
 end
 
-function realAdd(r1::Float64, r2::Float64)::Float64
-  local r::Float64
-
-  r = r1 + r2
-  r
+@inline function realAdd(r1::Float64, r2::Float64)::Float64
+  r1 + r2
 end
 
-function realSub(r1::Float64, r2::Float64)::Float64
-  local r::Float64
-
-  r = r1 - r2
-  r
+@inline function realSub(r1::Float64, r2::Float64)::Float64
+  r1 - r2
 end
 
-function realMul(r1::Float64, r2::Float64)::Float64
-  local r::Float64
-
-  r = r1 * r2
-  r
+@inline function realMul(r1::Float64, r2::Float64)::Float64
+  r1 * r2
 end
 
-function realDiv(r1::Float64, r2::Float64)::Float64
-  local r::Float64
-
-  r = r1 / r2
-  r
+@inline function realDiv(r1::Float64, r2::Float64)::Float64
+  r1 / r2
 end
 
-function realMod(r1::Float64, r2::Float64)::Float64
-  local r::Float64
-
-  r = mod(r1, r2)
-  r
+@inline function realMod(r1::Float64, r2::Float64)::Float64
+  mod(r1, r2)
 end
 
-function realPow(r1::Float64, r2::Float64)::Float64
-  local r::Float64
-
-  r = r1^r2
-  r
+@inline function realPow(r1::Float64, r2::Float64)::Float64
+  r1^r2
 end
 
-function realMax(r1::Float64, r2::Float64)::Float64
-  local r::Float64
-  r = max(r1, r2)
+@inline function realMax(r1::Float64, r2::Float64)::Float64
+  max(r1, r2)
 end
 
-function realMin(r1::Float64, r2::Float64)::Float64
-  local r::Float64
-  r = min(r1, r2)
+@inline function realMin(r1::Float64, r2::Float64)::Float64
+  min(r1, r2)
 end
 
-function realAbs(x::Float64)::Float64
-  local y::Float64
-  y = abs(x)
+@inline function realAbs(x::Float64)::Float64
+  abs(x)
 end
 
-function realNeg(x::Float64)::Float64
-  local y::Float64
-  y = -x
+@inline function realNeg(x::Float64)::Float64
+  -x
 end
 
-function realLt(x1::Float64, x2::Float64)::Bool
-  local b::Bool
-  b = x1 < x2
+@inline function realLt(x1::Float64, x2::Float64)::Bool
+  x1 < x2
 end
 
-function realLe(x1::Float64, x2::Float64)::Bool
-  local b::Bool
-  b = x1 <= x2
+@inline function realLe(x1::Float64, x2::Float64)::Bool
+  x1 <= x2
 end
 
-function realEq(x1::Float64, x2::Float64)::Bool
-  local b::Bool
-  b = x1 == x2
+@inline function realEq(x1::Float64, x2::Float64)::Bool
+  x1 == x2
 end
 
-function realNe(x1::Float64, x2::Float64)::Bool
-  local b::Bool
-  b = x1 != x2
+@inline function realNe(x1::Float64, x2::Float64)::Bool
+  x1 != x2
 end
 
-function realGe(x1::Float64, x2::Float64)::Bool
-  local b::Bool
-
-  b = x1 >= x2
-  b
+@inline function realGe(x1::Float64, x2::Float64)::Bool
+  x1 >= x2
 end
 
-function realGt(x1::Float64, x2::Float64)::Bool
-  local b::Bool
-
-  b = x1 > x2
-  b
+@inline function realGt(x1::Float64, x2::Float64)::Bool
+  x1 > x2
 end
 
-function realInt(r::Float64)
-  local i::Int
-  i = Integer(trunc(r))
+@inline function realInt(r::Float64)
+  Integer(trunc(r))
 end
 
-function realString(r::Float64)::String
-  local str::String = string(r)
-  str
+@inline function realString(r::Float64)::String
+  string(r)
 end
 
 function stringCharInt(ch::String)
@@ -348,7 +280,7 @@ end
 """ O(str) """
 function stringListStringChar(str::String)::List{String}
   local chars::List{String} = nil
-  for i = length(chars):-1:1
+  for i = length(str):-1:1
     chars = _cons(string(str[i]), chars)
   end
   chars
@@ -402,18 +334,17 @@ end
 stringDelimitList(lst::Nil, delim::String) = ""
 
 """ O(1) """
-function stringLength(str::String)
+@inline function stringLength(str::String)
   length(str)
 end
 
 """ O(1) """
-function stringEmpty(str::String)::Bool
-  local isEmpty::Bool
-  isEmpty = stringLength(str) == 0
+@inline function stringEmpty(str::String)::Bool
+  length(str) == 0
 end
 
 """ O(1) """
-function stringGet(str::String, index::Int)
+@inline function stringGet(str::String, index::Int)
   str[index]
 end
 
@@ -439,50 +370,44 @@ function stringUpdateStringChar(str::String, newch::String, index::Int)::String
 end
 
 """ O(s1+s2) """
-function stringAppend(s1::String, s2::String)::String
+@inline function stringAppend(s1::String, s2::String)::String
   s1 * s2
 end
 
 """ O(N) """
-function stringEq(s1::String, s2::String)::Bool
+@inline function stringEq(s1::String, s2::String)::Bool
   s1 == s2
 end
 
 """ O(N) """
-function stringEqual(s1::String, s2::String)::Bool
+@inline function stringEqual(s1::String, s2::String)::Bool
   s1 == s2
 end
 
-function stringCompare(s1::String, s2::String)
-  local res = cmp(s1, s2)
-  return res
+@inline function stringCompare(s1::String, s2::String)
+  cmp(s1, s2)
 end
 
-function myhash(s::String)
-  local h::Int = mod(hash(s), typemax(Int))
-  h
+@inline function myhash(s::String)
+  mod(hash(s), typemax(Int))
 end
 
-function stringHash(str::String)
-  local h::Int = Int(myhash(str))
-  h
+@inline function stringHash(str::String)
+  Int(myhash(str))
 end
 
 #= TODO: Defined in the runtime =#
-function stringHashDjb2(str::String)
-  local h::Int = Int(myhash(str))
-  h
+@inline function stringHashDjb2(str::String)
+  Int(myhash(str))
 end
 
 """ Does hashing+modulo without intermediate results. """
-function stringHashDjb2Mod(str::String, m::Int)
-  local h::Int = mod(Int(myhash(str)), m)
-  h
+@inline function stringHashDjb2Mod(str::String, m::Int)
+  mod(Int(myhash(str)), m)
 end
 
-function stringHashSdbm(str::String)
-  local h::Int = Int(myhash(str))
-  h
+@inline function stringHashSdbm(str::String)
+  Int(myhash(str))
 end
 
 function substring(str::String, start::Int, stop::Int)::String #= stop index, first character is 1 =#
@@ -495,12 +420,12 @@ function substring(str::String, start::Int, stop::Int)::String #= stop index, fi
 end
 
 """ O(1) ? """
-function arrayLength(arr::Array{T}) where {T}
+@inline function arrayLength(arr::Array{T}) where {T}
   length(arr)
 end
 
 """ O(1) """
-function arrayEmpty(arr::Array{A})::Bool where {A}
+@inline function arrayEmpty(arr::Array{A})::Bool where {A}
   length(arr) == 0
 end
 
@@ -514,7 +439,7 @@ function arrayGet(arr::Array{A}, index::Int) where {A}
 end
 
 """ O(size) """
-function arrayCreate(size::Int, initialValue::A) where {A}
+@inline function arrayCreate(size::Int, initialValue::A) where {A}
   fill(initialValue, size)
 end
 
@@ -575,7 +500,7 @@ function arrayUpdate(arr::Array{A}, index::Int,
 end
 
 """ O(n) """
-function arrayCopy(arr::Array{A})::Array{A} where {A}
+@inline function arrayCopy(arr::Array{A})::Array{A} where {A}
   copy(arr)
 end
 
@@ -694,14 +619,12 @@ function valueCompare(a1::A, a2::A) where {A}
   i #= -1, 0, 1 =#
 end
 
-function valueHashMod(value::A, mod::Int) where {A}
-  local h::Int = mod(Int(myhash(string(value))), m)
-  h
+@inline function valueHashMod(value::A, m::Int) where {A}
+  mod(Int(myhash(string(value))), m)
 end
 
 """ This is a very fast comparison of two values which only checks if the pointers are equal. """
-function referenceEq(a1::A1, a2::A2)::Bool where {A1,A2}
-  #TODO: Should be like this?
+@inline function referenceEq(a1::A1, a2::A2)::Bool where {A1,A2}
   a1 === a2
 end
 
@@ -721,12 +644,12 @@ function clock()::Float64
 end
 
 """ Returns true if the input is NONE() """
-function isNone(opt::Option{A})::Bool where {A}
-  (opt === nothing) # isa(opt, NONE))
+@inline function isNone(opt::Option{A})::Bool where {A}
+  opt === nothing
 end
 
 """ Returns true if the input is SOME() """
-function isSome(opt::Option{A})::Bool where {A}
+@inline function isSome(opt::Option{A})::Bool where {A}
   isa(opt, SOME)
 end
 
@@ -755,11 +678,8 @@ function fail(msg::String)
 end
 
 """ Sets the stack overflow signal to the given value and returns the old one """
-function setStackOverflowSignal(inSignal::Bool)::Bool
-  local outSignal::Bool
-
-  outSignal = inSignal
-  outSignal
+@inline function setStackOverflowSignal(inSignal::Bool)::Bool
+  inSignal
 end
 
 function referenceDebugString(functionSymbol::A)::String where {A}
@@ -772,9 +692,8 @@ end
 TODO: I am far from sure that this will fly.. in Julia.
 The code generated from the transpiler is correct however
 """
-function isPresent(ident::T)::Bool where {T}
-  local b::Bool
-  b = true
+@inline function isPresent(ident::T)::Bool where {T}
+  true
 end
 
 #= The Info attribute provides location information for elements and classes. =#
@@ -804,10 +723,8 @@ const DEFAULT_INFO = SOURCEINFO("", true, 1, 2, 3, 4, 0.0)
 """
 Returns the default source info.
 """
-function sourceInfo()::SOURCEINFO
-  local info::SourceInfo
-  #= Defined in the runtime =#
-  return DEFAULT_INFO
+@inline function sourceInfo()::SOURCEINFO
+  DEFAULT_INFO
 end
 
 Base.:+(x::String, y::String) =
@@ -825,16 +742,17 @@ macro importDBG(moduleName)
   end
 end
 
-const NOT_IMPLEMENTED_MSG::String =   "__NOT_IMPLEMENTED__"
-function getInstanceName()::String
-  return NOT_IMPLEMENTED_MSG
+const NOT_IMPLEMENTED_MSG::String = "__NOT_IMPLEMENTED__"
+
+@inline function getInstanceName()::String
+  NOT_IMPLEMENTED_MSG
 end
 
-function StringFunction(i::Int64)::String
+@inline function StringFunction(i::Int64)::String
   intString(i)
 end
 
-function StringFunction(r::Float64)::String
+@inline function StringFunction(r::Float64)::String
   realString(r)
 end
 
