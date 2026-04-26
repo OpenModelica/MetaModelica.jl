@@ -60,11 +60,6 @@ function genNoSpecializedFunction(expr)
         body = expr.args[2]
         funcName = funcCall.args[1]
         args = funcCall.args[2:end]
-        # Convert function name and arguments to strings for printing
-        funcNameStr = string(funcName)
-        argsStr = join(string.(args), ", ")
-        println("Function name: ", funcNameStr)
-        println("Arguments: ", argsStr)
         local newArgs = Expr[]
         global ARGS = args
         for arg in args

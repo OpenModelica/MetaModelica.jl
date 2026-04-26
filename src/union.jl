@@ -74,21 +74,74 @@ end
 
 function replaceLineNum(a::Any, lines::LineNumberNode) end
 
+#=
+Parametric support.
+
+Two opt-in shapes, both additive and backward compatible:
+
+(A) Parametric outer uniontype:
+      @Uniontype Container{T} begin
+        @Record BOX begin x::T end
+      end
+    expands to
+      abstract type Container{T} end
+      struct BOX{T} <: Container{T} x::T end
+    Every variant inherits the uniontype's parameters so that
+    BOX{Int} <: Container{Int}.
+
+(B) Parametric per-record variant:
+      @Uniontype Value begin
+        @Record WRAP{T} begin x::T end
+      end
+    expands to
+      abstract type Value end
+      struct WRAP{T} <: Value x::T end
+    The record explicitly names its own parameters.
+
+A record may combine both. When the outer is parametric and the record
+is written without a curly, the outer parameters are propagated.
+=#
 function makeUniontypes(name, records, lineNode::LineNumberNode; mutable = false)
+  local outerParams::Vector{Any} = Any[]
+  local abstractHead = name
+  local superExpr = name
+  if isa(name, Expr) && name.head === :curly
+    outerParams = name.args[2:end]
+    abstractHead = name
+    superExpr = name
+  end
   recordsArray1 = Array.(records)
   recordsArray2 = recordsArray1[1]
   constructedRecords = []
   for r in recordsArray2
     structName = r[1]
+    if !isempty(outerParams)
+      if isa(structName, Symbol)
+        structName = Expr(:curly, structName, outerParams...)
+      elseif isa(structName, Expr) && structName.head === :curly
+        # Outer params come first, record's own params follow.
+        baseSym = structName.args[1]
+        recordParams = structName.args[2:end]
+        existingSet = Set(recordParams)
+        merged = Any[baseSym]
+        for p in outerParams
+          if !(p in existingSet)
+            push!(merged, p)
+          end
+        end
+        append!(merged, recordParams)
+        structName = Expr(:curly, merged...)
+      end
+    end
     recordNode = if ! mutable
       quote
-        struct $(structName) <: $name
+        struct $(structName) <: $superExpr
           $(r[2])
         end
       end
     else
       quote
-        mutable struct $(structName) <: $name
+        mutable struct $(structName) <: $superExpr
           $(r[2])
         end
       end
@@ -98,7 +151,7 @@ function makeUniontypes(name, records, lineNode::LineNumberNode; mutable = false
   end
   #= Construct the Union =#
   res = quote
-    abstract type $name end
+    abstract type $abstractHead end
     $(constructedRecords...)
   end
   # Make debugging and profiling easier by pretending the record was
@@ -107,18 +160,65 @@ function makeUniontypes(name, records, lineNode::LineNumberNode; mutable = false
   return res
 end
 
-""" Creates a uniontype consisting of 0...N records """
-macro Uniontype(name, records...)
+"""
+  Creates a uniontype consisting of 0...N records.
+
+  Two call forms:
+
+  - `@Uniontype Name body`             — abstract type + records, no docstring.
+  - `@Uniontype "text" Name body`      — as above, plus attach `"text"` as
+                                         the docstring on the abstract type.
+
+  The docstring-first form exists because the plain macro expands to a
+  multi-form block (one `abstract type` plus N `struct`s), which Julia's
+  docstring machinery rejects as a prefix-string target. The leading-string
+  form works around that by registering the docstring post-hoc via
+  `@doc str name` once the binding exists.
+"""
+macro Uniontype(args...)
+  if length(args) >= 2 && args[1] isa AbstractString
+    docstr = args[1]
+    name = args[2]
+    records = args[3:end]
+  else
+    docstr = nothing
+    name = args[1]
+    records = args[2:end]
+  end
   recordCollection = [makeRecord(r) for r in records]
-  esc(makeUniontypes(name, recordCollection, __source__))
+  core = makeUniontypes(name, recordCollection, __source__)
+  if docstr === nothing
+    return esc(core)
+  end
+  return esc(quote
+    $core
+    @doc $docstr $name
+  end)
 end
 
 """
-  Creates a mutable uniontype constisting of 0...N records
+  Creates a mutable uniontype consisting of 0...N records. Same call forms
+  as [`@Uniontype`](@ref): optional leading `String` becomes the docstring.
 """
-macro Mutable_Uniontype(name, records...)
+macro Mutable_Uniontype(args...)
+  if length(args) >= 2 && args[1] isa AbstractString
+    docstr = args[1]
+    name = args[2]
+    records = args[3:end]
+  else
+    docstr = nothing
+    name = args[1]
+    records = args[2:end]
+  end
   recordCollection = [makeRecord(r) for r in records]
-  esc(makeUniontypes(name, recordCollection, __source__; mutable = true))
+  core = makeUniontypes(name, recordCollection, __source__; mutable = true)
+  if docstr === nothing
+    return esc(core)
+  end
+  return esc(quote
+    $core
+    @doc $docstr $name
+  end)
 end
 
 """ Creates a record belonging to a Uniontype """

@@ -288,11 +288,11 @@ end
 
 """ O(str) """
 function stringAppendList(strs::List{String})::String
-  local str::String = ""
+  buf = IOBuffer()
   for n in strs
-    str = string(str, n)
+    print(buf, n)
   end
-  str
+  String(take!(buf))
 end
 
 """ O(str)
@@ -476,9 +476,13 @@ O(n)
 Same as listArray but with a dummy argument to specify the type.
 """
 function listArray(lst::Cons{T}, ty) where {T}
-  local arr = Vector{ty}(undef, length(lst))
-  for i in lst
-    arr[i]
+  local N = length(lst)
+  local arr = Vector{ty}(undef, N)
+  i = 1
+  while lst !== nil
+    arr[i] = lst.head
+    i += 1
+    lst = lst.tail
   end
   return arr
 end
@@ -609,14 +613,9 @@ end
 
 """ a1 > a2? """
 function valueCompare(a1::A, a2::A) where {A}
-  local i::Int = if valueConstructor(a1) < valueConstructor(a2)
-    -1
-  elseif valueConstructor(a1) > valueConstructor(a2)
-    1
-  else
-    0
-  end
-  i #= -1, 0, 1 =#
+  local c1 = valueConstructor(a1)
+  local c2 = valueConstructor(a2)
+  c1 < c2 ? -1 : c1 > c2 ? 1 : 0
 end
 
 @inline function valueHashMod(value::A, m::Int) where {A}
@@ -756,6 +755,6 @@ end
   realString(r)
 end
 
-function String(arg)::String
+function Base.String(arg)::String
   return string(arg)
 end

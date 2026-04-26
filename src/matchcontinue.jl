@@ -130,7 +130,7 @@ end
   Handles the deconstruction of fields
 """
 function handle_destruct_fields(value::Symbol, pattern, subpatterns, len, get::Symbol,
-                                bound::Set{Symbol}, asserts::Vector{Expr}; allow_splat=true)
+                                bound::Set{Symbol}, asserts::Vector{Expr}; allow_splat=true, calling_module::Union{Module,Nothing}=nothing)
   # NOTE we assume `len` is cheap
   fields = []
   seen_splat = false
@@ -155,7 +155,7 @@ function handle_destruct_fields(value::Symbol, pattern, subpatterns, len, get::S
          :($len == $(length(subpatterns)))
        end, @splice (i, (field, subpattern)) in enumerate(fields) quote
          $(Symbol("$(value)_$i")) = $get($value, $field)
-         $(handle_destruct(Symbol("$(value)_$i"), subpattern, bound, asserts))
+         $(handle_destruct(Symbol("$(value)_$i"), subpattern, bound, asserts; calling_module=calling_module))
        end)
 end
 
@@ -185,7 +185,7 @@ end
  Top level utility function.
  Handles deconstruction of patterns together with the value symbol.
 """
-function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Vector{Expr})
+function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Vector{Expr}; calling_module::Union{Module,Nothing}=nothing)
   if pattern === :(_)
     # wildcard
     true
@@ -205,7 +205,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
       # Generate a unique symbol for the inner value
       inner_val_sym = Symbol("_nested_val_", hash(inner_pattern))
       # Recursively destruct the inner pattern
-      inner_body = handle_destruct(inner_val_sym, inner_pattern, bound, asserts)
+      inner_body = handle_destruct(inner_val_sym, inner_pattern, bound, asserts; calling_module=calling_module)
       quote
         $inner_val_sym = $inner_value_expr
         $inner_body
@@ -227,20 +227,38 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
       $value === $pattern
     end
   elseif @capture(pattern, subpattern_Symbol)
-    # variable
-    # if the pattern doesn't match, we don't want to set the variable
-    # so for now just set a temp variable
-    our_sym = Symbol("variable_", pattern)
-    if pattern in bound
-      # already bound, check that this value matches
-      :($our_sym == $value)
+    # Check if the symbol is a const with a simple value (number, bool) in the
+    # calling module. If so, treat it as a constant comparison, not a variable binding.
+    # This is needed for enum-to-Int constants (Op_ADD, Variability_CONSTANT, etc.)
+    # which must be compared by value, not bound as pattern variables.
+    # We restrict to simple value types to avoid capturing function/type names
+    # from Base (e.g. cp, rm, map) that happen to be const but are not meant
+    # as match values.
+    if calling_module !== nothing &&
+       isdefined(calling_module, pattern) &&
+       isconst(calling_module, pattern) &&
+       let val = getfield(calling_module, pattern)
+         val isa Union{Integer, AbstractFloat, Bool, Char}
+       end
+      quote
+        $value === $(esc(pattern))
+      end
     else
-      # bind
-      push!(bound, pattern)
-      :(
-        $our_sym = $value;
-        true
-      )
+      # variable
+      # if the pattern doesn't match, we don't want to set the variable
+      # so for now just set a temp variable
+      our_sym = Symbol("variable_", pattern)
+      if pattern in bound
+        # already bound, check that this value matches
+        :($our_sym == $value)
+      else
+        # bind
+        push!(bound, pattern)
+        :(
+          $our_sym = $value;
+          true
+        )
+      end
     end
   elseif @capture(pattern, subpattern1_ || subpattern2_) ||
          (@capture(pattern, f_(subpattern1_, subpattern2_)) && f === :|)
@@ -248,8 +266,8 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
     # need to only bind variables which exist in both branches
     bound1 = copy(bound)
     bound2 = copy(bound)
-    body1 = handle_destruct(value, subpattern1, bound1, asserts)
-    body2 = handle_destruct(value, subpattern2, bound2, asserts)
+    body1 = handle_destruct(value, subpattern1, bound1, asserts; calling_module=calling_module)
+    body2 = handle_destruct(value, subpattern2, bound2, asserts; calling_module=calling_module)
     union!(bound, intersect(bound1, bound2))
     quote
       $body1 || $body2
@@ -257,8 +275,8 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
   elseif @capture(pattern, subpattern1_ && subpattern2_) ||
          (@capture(pattern, f_(subpattern1_, subpattern2_)) && f === :&)
     # conjunction
-    body1 = handle_destruct(value, subpattern1, bound, asserts)
-    body2 = handle_destruct(value, subpattern2, bound, asserts)
+    body1 = handle_destruct(value, subpattern1, bound, asserts; calling_module=calling_module)
+    body2 = handle_destruct(value, subpattern2, bound, asserts; calling_module=calling_module)
     quote
       $body1 && $body2
     end
@@ -268,7 +286,7 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
     subpattern = pattern.args[1]
     guard = pattern.args[2]
     quote
-      $(handle_destruct(value, subpattern, bound, asserts)) && let $(bound...)
+      $(handle_destruct(value, subpattern, bound, asserts; calling_module=calling_module)) && let $(bound...)
         # bind variables locally so they can be used in the guard
         $(@splice variable in bound quote
             $(esc(variable)) = $(Symbol("variable_", variable))
@@ -346,22 +364,22 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
       :($value === nothing && $(esc(T)) === Nothing ||
         $value isa $(esc(T)) &&
         $(handle_destruct_fields(value, pattern, subpatterns, length(subpatterns),
-                                 :getfield, bound, asserts; allow_splat=false)))
+                                 :getfield, bound, asserts; allow_splat=false, calling_module=calling_module)))
     end
   elseif @capture(pattern, (subpatterns__,)) # Tuple
     quote
       ($value isa Tuple) &&
       $(handle_destruct_fields(value, pattern, subpatterns, :(length($value)), :getindex,
-                               bound, asserts; allow_splat=true))
+                               bound, asserts; allow_splat=true, calling_module=calling_module))
     end
   elseif @capture(pattern, [subpatterns__]) # Array
     :(($value isa AbstractArray) &&
       $(handle_destruct_fields(value, pattern, subpatterns, :(length($value)), :getindex,
-                               bound, asserts; allow_splat=true)))
+                               bound, asserts; allow_splat=true, calling_module=calling_module)))
   elseif @capture(pattern, subpattern_::T_) #ImmutableList
     quote
       # typeassert
-      ($value isa $(esc(T))) && $(handle_destruct(value, subpattern, bound, asserts))
+      ($value isa $(esc(T))) && $(handle_destruct(value, subpattern, bound, asserts; calling_module=calling_module))
     end
   elseif @capture(pattern, _.__) #Sub member of a variable
     quote
@@ -400,11 +418,11 @@ end
 Handles match equations such as
 @match x = 4
 """
-function handle_match_eq(expr, calling_module::Module=Main)
+function handle_match_eq(expr; calling_module::Module=Main)
   if @capture(expr, pattern_ = value_)
     asserts = Expr[]
     bound = Set{Symbol}()
-    body = handle_destruct(:value, pattern, bound, asserts)
+    body = handle_destruct(:value, pattern, bound, asserts; calling_module=calling_module)
     quote
       $(asserts...)
       value = $(esc(value))
@@ -425,11 +443,11 @@ end
 Handles match equations such as
 @unsafematch x = 4
 """
-function unsafe_handle_match_eq(expr, calling_module::Module=Main)
+function unsafe_handle_match_eq(expr; calling_module::Module=Main)
   if @capture(expr, pattern_ = value_)
     asserts = Expr[]
     bound = Set{Symbol}()
-    body = handle_destruct(:value, pattern, bound, asserts)
+    body = handle_destruct(:value, pattern, bound, asserts; calling_module=calling_module)
     quote
       #$(asserts...)
       value = $(esc(value))
@@ -448,10 +466,10 @@ end
 Handles match cases both for the matchcontinue and regular match case
 calls handle_destruct. See handle_destruct for more details.
 """
-function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
+function handle_match_case(value, case, tail, asserts, matchcontinue::Bool; calling_module::Union{Module,Nothing}=nothing)
   if @capture(case, pattern_ => result_)
     bound = Set{Symbol}()
-    body = handle_destruct(:value, pattern, bound, asserts)
+    body = handle_destruct(:value, pattern, bound, asserts; calling_module=calling_module)
     if matchcontinue
       quote
         if (!__omc_match_done) && $body
@@ -478,7 +496,7 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool)
             # end
             if !isa(e, MetaModelicaException) && !isa(e, ImmutableListException)
               if isa(e, MatchFailure)
-                println("MatchFailure:" + e.msg)
+                println("MatchFailure:" * e.msg)
               else
                 showerror(stderr, e, catch_backtrace())
               end
@@ -513,7 +531,7 @@ end
 """
 Top level function for all match macros except for the match equation macro.
 """
-function handle_match_cases(value, match::Expr; mathcontinue::Bool=false)
+function handle_match_cases(value, match::Expr; mathcontinue::Bool=false, calling_module::Union{Module,Nothing}=nothing)
   tail = nothing
   if match.head != :block
     error("Unrecognized match syntax: Expected begin block $match")
@@ -531,7 +549,7 @@ function handle_match_cases(value, match::Expr; mathcontinue::Bool=false)
     end
   end
   for case in reverse(cases)
-    tail = handle_match_case(:value, case, tail, asserts, mathcontinue)
+    tail = handle_match_case(:value, case, tail, asserts, mathcontinue; calling_module=calling_module)
     if line !== nothing
       replaceLineNum(tail, @__FILE__, line)
     end
@@ -565,7 +583,7 @@ function handle_match_cases(value, match::Expr; mathcontinue::Bool=false)
   end
 end
 
-function unsafe_handle_match_cases(value, match::Expr; mathcontinue::Bool=false)
+function unsafe_handle_match_cases(value, match::Expr; mathcontinue::Bool=false, calling_module::Union{Module,Nothing}=nothing)
   tail = nothing
   if match.head != :block
     error("Unrecognized match syntax: Expected begin block $match")
@@ -582,7 +600,7 @@ function unsafe_handle_match_cases(value, match::Expr; mathcontinue::Bool=false)
     end
   end
   for case in reverse(cases)
-    tail = handle_match_case(:value, case, tail, asserts, mathcontinue)
+    tail = handle_match_case(:value, case, tail, asserts, mathcontinue; calling_module=calling_module)
     if line !== nothing
       replaceLineNum(tail, @__FILE__, line)
     end
@@ -606,7 +624,7 @@ end
   If `value` matches `pattern`, bind variables and return `value`. Otherwise, throw `MatchFailure`.
 """
 macro match(expr)
-  res = handle_match_eq(expr)
+  res = handle_match_eq(expr; calling_module=__module__)
   replaceLineNum(res, @__FILE__, __source__)
   res
 end
@@ -617,7 +635,7 @@ end
   If `value` matches `pattern`, bind variables and return `value`.
 """
 macro unsafematch(expr)
-  res = unsafe_handle_match_eq(expr)
+  res = unsafe_handle_match_eq(expr; calling_module=__module__)
   replaceLineNum(res, @__FILE__, __source__)
   res
 end
@@ -632,7 +650,7 @@ end
   Return `result` for the first matching `pattern`. If there are no matches, throw `MatchFailure`.
 """
 macro matchcontinue(value, cases)
-  res = handle_match_cases(value, cases; mathcontinue=true)
+  res = handle_match_cases(value, cases; mathcontinue=true, calling_module=__module__)
   replaceLineNum(res, @__FILE__, __source__)
   res
 end
@@ -648,7 +666,7 @@ end
 
 """
 macro match(value, cases)
-  res = handle_match_cases(value, cases; mathcontinue=false)
+  res = handle_match_cases(value, cases; mathcontinue=false, calling_module=__module__)
   replaceLineNum(res, @__FILE__, __source__)
   res
 end
@@ -662,7 +680,7 @@ end
   Return `result` for the first matching `pattern`. If there are no matches, returns `value`.
 """
 macro unsafematch(value, cases)
-  res = unsafe_handle_match_cases(value, cases; mathcontinue=false)
+  res = unsafe_handle_match_cases(value, cases; mathcontinue=false, calling_module=__module__)
   replaceLineNum(res, @__FILE__, __source__)
   res
 end
@@ -697,7 +715,6 @@ function handle_fast_match(value, arg_cases, caleeModule)
     local rhs = case[5]
     local fixedBody = :($dbody)
     #= HACK Fix me. Remove various redudant checks... =#
-    println(fixedBody)
     #= Idea is to do some things different below depending on if we should expand our helper or not=#
     local iterate = true
     try
@@ -750,7 +767,6 @@ function handle_fast_match(value, arg_cases, caleeModule)
         $rhs
       end)
     #push!(methods,method)
-    println(method)
     #= Define the function as a global function in the scope of the caller =#
     Core.eval(caleeModule, MacroTools.flatten(method))
     i += 1
@@ -806,6 +822,113 @@ macro fastmatch(value, cases)
 end
 
 export @fastmatch
+
+#= ================================================================
+   @matchgoto: Experimental variant of @match using @goto/@label
+   for early exit instead of a boolean __omc_match_done flag.
+
+   The idea: once a case matches, jump directly to the exit label
+   instead of checking !__omc_match_done for every subsequent case.
+   This should be faster when there are many cases and the match
+   hits early.
+   ================================================================ =#
+
+"""
+Handles a single match case for the @goto-based match.
+Returns a single Expr block (no tail chaining).
+"""
+function handle_match_case_goto(value, case, asserts, exit_label; calling_module::Union{Module,Nothing}=nothing)
+  if @capture(case, pattern_ => result_)
+    bound = Set{Symbol}()
+    body = handle_destruct(:value, pattern, bound, asserts; calling_module=calling_module)
+    quote
+      if $body
+        res = let $(bound...)
+          $(@splice variable in bound quote
+              $(esc(variable)) = $(Symbol("variable_", variable))
+            end)
+          $(esc(result))
+        end
+        $(Expr(:symbolicgoto, exit_label))
+      end
+    end
+  else
+    error("Unrecognized case syntax: $case")
+  end
+end
+
+"""
+Top level function for @matchgoto.
+Builds a flat sequence of cases, each with a @goto to the exit label.
+"""
+function handle_match_cases_goto(value, match::Expr; calling_module::Union{Module,Nothing}=nothing)
+  if match.head != :block
+    error("Unrecognized match syntax: Expected begin block $match")
+  end
+  exit_label = gensym("match_exit")
+  line = nothing
+  local neverFails = false
+  cases = Expr[]
+  asserts = Expr[]
+  case_bodies = Expr[]
+  for arg in match.args
+    if isa(arg, LineNumberNode)
+      line = arg
+      continue
+    elseif isa(arg, Expr)
+      push!(cases, arg)
+    end
+  end
+  for case in cases
+    case_body = handle_match_case_goto(:value, case, asserts, exit_label; calling_module=calling_module)
+    if line !== nothing
+      replaceLineNum(case_body, @__FILE__, line)
+    end
+    push!(case_bodies, case_body)
+    pat = case.args[2]
+    if pat === :_
+      neverFails = true
+    end
+  end
+  if neverFails
+    quote
+      $(asserts...)
+      local value = $(esc(value))
+      local res
+      $(case_bodies...)
+      $(Expr(:symboliclabel, exit_label))
+      res
+    end
+  else
+    quote
+      $(asserts...)
+      local value = $(esc(value))
+      local res
+      $(case_bodies...)
+      throw(MatchFailure("unfinished match for type", typeof(value)))
+      $(Expr(:symboliclabel, exit_label))
+      res
+    end
+  end
+end
+
+"""
+      @matchgoto value begin
+          pattern1 => result1
+          pattern2 => result2
+          ...
+      end
+
+  Experimental variant of @match that uses @goto for early exit.
+  Same semantics as @match but avoids the __omc_match_done boolean flag.
+"""
+macro matchgoto(value, cases)
+  res = handle_match_cases_goto(value, cases; calling_module=__module__)
+  replaceLineNum(res, @__FILE__, __source__)
+  res
+end
+
+export @matchgoto
 
 """
 $DOC_STR

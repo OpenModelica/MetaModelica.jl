@@ -45,7 +45,6 @@ import ImmutableList
 const listArrayLiteral = ImmutableList.Unsafe.listArrayLiteral
 const listGetFirstAsPtr = ImmutableList.Unsafe.listGetFirstAsPtr
 const listReverseInPlace = ImmutableList.Unsafe.listReverseInPlace
-const listReverseInPlace2 = ImmutableList.Unsafe.listReverseInPlace2
 const listSetFirst = ImmutableList.Unsafe.listSetFirst
 const listSetRest = ImmutableList.Unsafe.listSetRest
 
