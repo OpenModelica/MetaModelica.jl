@@ -3,7 +3,7 @@ pipeline {
     docker {
       // Large image with full OpenModelica build dependencies; lacks omc and OMPython
       label 'linux'
-      image 'julia:1.10.0-bookworm'
+      image 'julia:1.12.0-bookworm'
       alwaysPull  true
       args '--privileged'
     }
@@ -20,16 +20,14 @@ pipeline {
         dir("MetaModelica.jl") {
           checkout scm
           sh '(pwd)'
+          // ImmutableList 0.3.x ships from OpenModelicaRegistry, not General.
           sh '''
           export HOME=$PWD
-          julia -e "using Pkg;
-          Pkg.add(\\"ExportAll\\");
-          Pkg.add(\\"DataStructures\\");
-          Pkg.add(\\"MacroTools\\");
-          Pkg.add(\\"Test\\");
-          Pkg.add(PackageSpec(url=\\"https://github.com/OpenModelica/ImmutableList.jl\\"))"
+          julia -e "using Pkg
+                    Pkg.Registry.add(\\"General\\")
+                    Pkg.Registry.add(RegistrySpec(url=\\"https://github.com/OpenModelica/OpenModelicaRegistry\\"))"
           '''
-          sh 'export HOME=$PWD; julia -e "using Pkg; Pkg.REPLMode.pkgstr(\\"add $PWD\\")"'
+          sh 'export HOME=$PWD; julia -e "using Pkg; Pkg.add(PackageSpec(path=\\".\\"))"'
           sh 'export HOME=$PWD; julia -e "using Pkg; Pkg.test(\\"MetaModelica\\", coverage=true)"'
         }
       }

@@ -33,7 +33,7 @@ end
   @test listLength(lstC) == 6
   @test listAppend(list(1, 2, 3), list(4.0, 5)) ==  begin
     #= Should be common abstract type in this case =#
-    Cons{Real}(1, Cons{Real}(2, Cons{Real}(3, Cons{Real}(4.0, Cons{Real}(5, Nil{Any}())))))
+    Cons{Real}(1, Cons{Real}(2, Cons{Real}(3, Cons{Real}(4.0, Cons{Real}(5, Nil())))))
   end
   lstD = listReverse(lstC)
   @test listHead(lstD) == 3
@@ -130,14 +130,14 @@ end
   end
   @testset "Test even more complex (Uniontype with abstract containers)" begin
     a = COMPLEX(1., 2.)
-    tst = EVENMORECOMPLEX(list(a))    
+    tst = EVENMORECOMPLEX(list(a))
     @test length(tst.lst) == 1
     tst = EVENMORECOMPLEX(list(COMPLEX(1., 2.), COMPLEX_INT(1,1)))
     @test length(tst.lst) == 2
     tst = EVENMORECOMPLEXVECTOR([COMPLEX(1., 2.), COMPLEX(1., 2.)])
     @test length(tst.lst) == 2
     tst = INNERVECTORS("foo", ["FOO"], String[], String[])
-    tst = INNERLISTS("foo", list("FOO"), Nil{String}(), Nil{String}())
+    tst = INNERLISTS("foo", list("FOO"), Nil(), Nil())
     tst = COMMENT(NONE(), NONE())
   end
 end
@@ -266,12 +266,20 @@ end
     _ => 4
   end
 
-  @testset "Testing String for MetaModelica" begin
-    @test "AB" == "A" + "B"
-  end
+	  @testset "Testing String for MetaModelica" begin
+	    @test "AB" == "A" + "B"
+	  end
 
-  @testset "Testing MetaModelica assignment semantics" begin
-    struct A
+	  @testset "Testing stringHashDjb2" begin
+	    @test stringHashDjb2("") == 5381
+	    @test stringHashDjb2("a") == 177670
+	    @test stringHashDjb2("abc") == 193485963
+	    @test stringHashDjb2Mod("", 97) == mod(5381, 97)
+	    @test stringHashDjb2Mod("abc", 97) == mod(193485963, 97)
+	  end
+
+	  @testset "Testing MetaModelica assignment semantics" begin
+	    struct A
       a::Any
     end
     struct B

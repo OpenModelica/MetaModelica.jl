@@ -1,6 +1,6 @@
 #=
   This file contains all functions that should be exported for the MetaModelica runtime.
-  Add new exports here :)
+  Add new exports here.
 =#
 export anyString
 export arrayAppend
