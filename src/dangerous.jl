@@ -1,6 +1,6 @@
 #=
   The MetaModelica.Dangerous module.
-  Most things here are stubs
+  Most things here are stubs.
 =#
 
 module Dangerous
@@ -41,7 +41,7 @@ end
 
 
 import ImmutableList
-#=Wrapper function to ImmutableList.Unsafe =#
+#= Wrapper function for ImmutableList.Unsafe. =#
 const listArrayLiteral = ImmutableList.Unsafe.listArrayLiteral
 const listGetFirstAsPtr = ImmutableList.Unsafe.listGetFirstAsPtr
 const listReverseInPlace = ImmutableList.Unsafe.listReverseInPlace
@@ -59,4 +59,4 @@ end
 
 ExportAll.@exportAll()
 
-end #=End dangerous =#
+end #= End Dangerous. =#

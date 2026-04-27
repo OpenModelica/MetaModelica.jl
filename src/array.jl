@@ -1,6 +1,6 @@
-#= It seems that we can just reuse the Julia arrays straight away=#
+#= Julia arrays can be reused directly. =#
 
-#= For MetaModelica comptability =#
+#= For MetaModelica compatibility. =#
 function array(args...)
   [args...]
 end

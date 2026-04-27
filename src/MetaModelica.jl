@@ -5,8 +5,8 @@ import MacroTools: @capture
 import ExportAll
 import FunctionWrappers
 #=
-  Have to treat the types slightly different.
-  Precompilation of the types need to occur before everything else
+MetaModelicaTypes must be loaded before the rest of the package so these
+aliases and exception types are available during precompilation.
 =#
 include("metaModelicaTypes.jl")
 import .MetaModelicaTypes

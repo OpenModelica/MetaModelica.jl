@@ -1,36 +1,43 @@
 #=
-Implementation of tagged unions for MetaModelica.jl
-They can be used in that way with match.jl
-=#
-
-#= Example:
-#@Uniontype number begin
-#    @Record real begin
-#    r::Real
-#    end
-#    @Record img begin
-#    r::Real
-#    i::Real
-#    end
-#end
-# Or for short:
-#@Uniontype number begin
-#    @Record real r::Real
-#    @Record img r::Real i::Real
-#end
-# This is syntactic sugar for:
-#  abstract type number end
-#  struct real <: number
-#   r
-#  end
-#  struct img <: number
-#   r
-#   i
-#  end
+Implementation of tagged unions for MetaModelica.jl.
+These types are intended for use with the matching macros.
 =#
 
 #=
-TODO: Sometimes when people use type aliasing @Uniontype will not know about the specific type during compilation time
+Example:
+
+@Uniontype number begin
+  @Record real begin
+    r::Real
+  end
+  @Record img begin
+    r::Real
+    i::Real
+  end
+end
+
+Or for short:
+
+@Uniontype number begin
+  @Record real r::Real
+  @Record img r::Real i::Real
+end
+
+This is syntactic sugar for:
+
+abstract type number end
+struct real <: number
+  r
+end
+struct img <: number
+  r
+  i
+end
+=#
+
+#=
+TODO: Handle cases where type aliases hide the concrete type from @Uniontype
+during compilation.
 =#
 module UniontypeDef
 
@@ -119,7 +126,7 @@ function makeUniontypes(name, records, lineNode::LineNumberNode; mutable = false
       if isa(structName, Symbol)
         structName = Expr(:curly, structName, outerParams...)
       elseif isa(structName, Expr) && structName.head === :curly
-        # Outer params come first, record's own params follow.
+        #= Outer params come first, then the record's own params. =#
         baseSym = structName.args[1]
         recordParams = structName.args[2:end]
         existingSet = Set(recordParams)
@@ -149,13 +156,13 @@ function makeUniontypes(name, records, lineNode::LineNumberNode; mutable = false
     replaceLineNum(recordNode, isa(r[3], Nothing) ? lineNode : r[3])
     push!(constructedRecords, recordNode)
   end
-  #= Construct the Union =#
+  #= Construct the union type. =#
   res = quote
     abstract type $abstractHead end
     $(constructedRecords...)
   end
-  # Make debugging and profiling easier by pretending the record was
-  # allocated in the source file where the macro was invoked
+  #= Make debugging and profiling easier by pretending the record was
+     allocated in the source file where the macro was invoked. =#
   replaceLineNum(res, lineNode)
   return res
 end
@@ -226,7 +233,7 @@ macro Record(name, fields...)
   makeTuple(name, fields)
 end
 
-#= It is "possible" to manipulate the Julia ast during compilation time so that all declaration of a uniontype creates a module-top-level abstract type definition. I leave that as a exercise to the reader of this comment :D =#
+#= Declares a module-level abstract type for mutually recursive uniontypes. =#
 macro UniontypeDecl(uDecl)
   esc(quote
         abstract type $uDecl end

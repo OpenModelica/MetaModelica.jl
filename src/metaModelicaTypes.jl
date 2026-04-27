@@ -1,17 +1,14 @@
-#= !!For internal use only!! =#
+#= Internal use only. =#
 module MetaModelicaTypes
 
-#= Real numbers are a bit different in Modelica compared to Julia =#
+#= Modelica real numbers differ from Julia real numbers. =#
 const ModelicaReal = Float64
 const ModelicaInteger = Int
 #=
 TODO:
 
-#1 Ideally we would like MetaModelica Real to be defined in such a way that it
- can accept Int64, but when it returns it will return AbstractFloat
-
-#2 Furthermore, we do not wish to mix ModelicaInteger with ModelicaReal.
-   Attemped this during the 7th of July. I failed :(
+1. Ideally, MetaModelica Real would accept Int64 inputs while returning AbstractFloat.
+2. Avoid mixing ModelicaInteger and ModelicaReal.
 =#
 
 abstract type MetaModelicaException <: Exception end

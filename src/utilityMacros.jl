@@ -1,4 +1,3 @@
-#import Setfield
 import FastClosures
 import Accessors
 """
@@ -77,7 +76,7 @@ function genNoSpecializedFunction(expr)
   catch
     error("@nospecialized can only be used on functions defined as function <name>(<arguments>).")
   end
-    # Return the original expression unchanged
+    #= Return the generated no-specialization function expression. =#
   return esc(newExpr)
 end
 

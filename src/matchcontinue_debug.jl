@@ -91,7 +91,7 @@ function handle_match_case_debug(value, case, tail, asserts, case_num::Int, sour
     if @capture(case, pattern_ => result_)
         bound = Set{Symbol}()
         body = handle_destruct(:value, pattern, bound, asserts; calling_module=calling_module)
-        # Extract a short pattern hint for the log
+        #= Extract a short pattern hint for the log. =#
         pat_str = string(pattern)
         if length(pat_str) > 60
             pat_str = first(pat_str, 57) * "..."
@@ -115,7 +115,7 @@ function handle_match_case_debug(value, case, tail, asserts, case_num::Int, sour
                         end
                         rethrow(e)
                     end
-                    # DEBUG: log the swallowed exception
+                    #= Log the swallowed exception. =#
                     _mc_debug_log($case_num, e, $source_hint * " case " * $pat_str)
                     __omc_match_done = false
                 end
@@ -148,7 +148,7 @@ function handle_match_cases_debug(value, match::Expr; calling_module::Union{Modu
             push!(cases, arg)
         end
     end
-    # Build the chain in reverse (last case first, becomes innermost)
+    #= Build the chain in reverse: the last case becomes the innermost case. =#
     for (rev_idx, case) in enumerate(reverse(cases))
         case_num = length(cases) - rev_idx + 1
         tail = handle_match_case_debug(:value, case, tail, asserts, case_num, source_hint;
@@ -157,7 +157,7 @@ function handle_match_cases_debug(value, match::Expr; calling_module::Union{Modu
             replaceLineNum(tail, @__FILE__, line)
         end
     end
-    # Always include the MatchFailure check (matchcontinue semantics)
+    #= Always include the MatchFailure check for matchcontinue semantics. =#
     quote
         $(asserts...)
         local value = $(esc(value))
