@@ -1,1 +1,39 @@
-# Actions to be added here.
+name: Documentation
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.12'
+
+      - uses: julia-actions/cache@v2
+
+      - name: Install documentation dependencies
+        run: |
+          julia --project=docs -e '
+            using Pkg
+            registries = Set(reg.name for reg in Pkg.Registry.reachable_registries())
+            "General" in registries || Pkg.Registry.add(Pkg.RegistrySpec(name="General", url="https://github.com/JuliaRegistries/General.git"))
+            "OpenModelicaRegistry" in registries || Pkg.Registry.add(Pkg.RegistrySpec(name="OpenModelicaRegistry", url="https://github.com/OpenModelica/OpenModelicaRegistry"))
+            Pkg.develop(Pkg.PackageSpec(path=pwd()))
+            Pkg.instantiate()
+          '
+
+      - name: Build documentation
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: julia --project=docs docs/make.jl

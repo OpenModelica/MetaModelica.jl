@@ -1,0 +1,7 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+MetaModelica = "9d7f2a79-07b5-5542-8b19-c0100dda6b06"
+
+[compat]
+Documenter = "1"
+julia = "1.12"
