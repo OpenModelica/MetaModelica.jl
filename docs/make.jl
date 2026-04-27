@@ -3,7 +3,11 @@ using MetaModelica
 
 makedocs(
   sitename = "MetaModelica.jl",
-  modules = [MetaModelica],
+  modules = [
+    MetaModelica,
+    MetaModelica.UniontypeDef,
+    MetaModelica.Dangerous,
+  ],
   format = Documenter.HTML(
     prettyurls = get(ENV, "CI", "false") == "true",
   ),
