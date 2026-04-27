@@ -266,12 +266,20 @@ end
     _ => 4
   end
 
-  @testset "Testing String for MetaModelica" begin
-    @test "AB" == "A" + "B"
-  end
+	  @testset "Testing String for MetaModelica" begin
+	    @test "AB" == "A" + "B"
+	  end
 
-  @testset "Testing MetaModelica assignment semantics" begin
-    struct A
+	  @testset "Testing stringHashDjb2" begin
+	    @test stringHashDjb2("") == 5381
+	    @test stringHashDjb2("a") == 177670
+	    @test stringHashDjb2("abc") == 193485963
+	    @test stringHashDjb2Mod("", 97) == mod(5381, 97)
+	    @test stringHashDjb2Mod("abc", 97) == mod(193485963, 97)
+	  end
+
+	  @testset "Testing MetaModelica assignment semantics" begin
+	    struct A
       a::Any
     end
     struct B
