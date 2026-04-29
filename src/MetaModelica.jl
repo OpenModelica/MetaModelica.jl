@@ -14,6 +14,8 @@ using .MetaModelicaTypes
 include("union.jl")
 import .UniontypeDef
 using .UniontypeDef
+include("matchUtil.jl")
+import .MatchUtil
 using ImmutableList
 include("matchcontinue.jl")
 include("matchcontinue_debug.jl")
@@ -22,7 +24,7 @@ include("metaRuntime.jl")
 include("shouldFail.jl")
 include("utilityMacros.jl")
 
-export @match, @matchcontinue, @matchcontinue_debug, @unsafematch, @matchgoto, MatchFailure, ModelicaReal, ModelicaInteger
+export @match, @matchcontinue, @matchcontinue_debug, @unsafematch, MatchFailure, ModelicaReal, ModelicaInteger
 export MATCHCONTINUE_DEBUG_LOG, clear_matchcontinue_log!, summarize_matchcontinue_log, print_matchcontinue_log
 export @Uniontype, @Record, @UniontypeDecl, @ExtendedFunction, @ExtendedAnonFunction
 export List, list, Nil, nil, Cons, cons, =>, Option, SOME, NONE, SourceInfo, SOURCEINFO
