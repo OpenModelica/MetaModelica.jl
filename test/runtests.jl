@@ -8,6 +8,9 @@ using Test
     @testset "@matchcontinue" begin
       include("./matchcontinueTests.jl")
     end
+    @testset "@fastmatch" begin
+      include("./fastmatchTests.jl")
+    end
   end
 
   @testset "list" begin
