@@ -248,7 +248,7 @@ end
 end
 
 @inline function realInt(r::Float64)
-  Integer(trunc(r))
+  trunc(Int, r)
 end
 
 @inline function realString(r::Float64)::String
@@ -266,7 +266,7 @@ function intStringChar(i::Int)::String
 end
 
 function stringInt(str::String)
-  local i::Int = Int64(str)
+  local i::Int = parse(Int, str)
   i
 end
 
@@ -664,11 +664,11 @@ function listStringCharString(strs::List{String})::String
 end
 
 function stringCharListString(strs::List{String})::String
-  local str::String = ""
+  local buf = IOBuffer()
   for s in strs
-    str = str + s
+    print(buf, s)
   end
-  str
+  String(take!(buf))
 end
 
 const genericFailure = MetaModelicaGeneralException("Runtime defined generic Meta Modelica failure")

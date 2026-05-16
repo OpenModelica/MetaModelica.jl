@@ -268,6 +268,14 @@ end
 
 	  @testset "Testing String for MetaModelica" begin
 	    @test "AB" == "A" + "B"
+	    @test stringInt("42") == 42
+	    @test stringCharListString(list("A", "B", "C")) == "ABC"
+	  end
+
+	  @testset "Testing numeric runtime conversions" begin
+	    @test realInt(3.8) == 3
+	    @test realInt(-3.8) == -3
+	    @test typeof(realInt(3.8)) == Int
 	  end
 
 	  @testset "Testing stringHashDjb2" begin
