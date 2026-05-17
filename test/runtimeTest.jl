@@ -305,5 +305,67 @@ end
     @test simple == 4
   end
 
+  @testset "Testing batched @assign begin...end" begin
+    struct Big
+      a; b; c; d; e; f; g; h; i; j
+    end
+    obj = Big(1,2,3,4,5,6,7,8,9,10)
+    @assign begin
+      obj.a = 100
+      obj.c = 300
+      obj.e = 500
+      obj.g = 700
+    end
+    @test (obj.a, obj.b, obj.c, obj.d, obj.e, obj.f, obj.g, obj.h, obj.i, obj.j) ==
+          (100, 2, 300, 4, 500, 6, 700, 8, 9, 10)
+
+    struct Inner; x; y; z end
+    struct Outer; p; q; r end
+    outer = Outer(1, Inner(10, 20, 30), 2)
+    @assign begin
+      outer.p = 100
+      outer.q.x = 11
+      outer.q.y = 22
+      outer.r = 200
+    end
+    @test outer.p == 100
+    @test outer.q.x == 11
+    @test outer.q.y == 22
+    @test outer.q.z == 30
+    @test outer.r == 200
+
+    a = Big(1,2,3,4,5,6,7,8,9,10)
+    b = Big(11,12,13,14,15,16,17,18,19,20)
+    @assign begin
+      a.a = 100
+      a.b = 200
+      b.c = 300
+      b.d = 400
+    end
+    @test (a.a, a.b, a.c) == (100, 200, 3)
+    @test (b.a, b.c, b.d) == (11, 300, 400)
+
+    obj = Big(1,2,3,4,5,6,7,8,9,10)
+    @assign begin
+      obj.a = 100
+      x = 42
+      obj.b = 200
+    end
+    @test obj.a == 100
+    @test obj.b == 200
+    @test x == 42
+
+    outer = Outer(1, Inner(10, 20, 30), 2)
+    newQ = Inner(0, 0, 0)
+    @assign begin
+      outer.q.x = 999
+      outer.q = newQ
+      outer.q.y = 7
+    end
+    @test outer.q.x == 0
+    @test outer.q.y == 7
+    @test outer.q.z == 0
+  end
+
 end #=End runtime tests=#
 end #=End module=#
