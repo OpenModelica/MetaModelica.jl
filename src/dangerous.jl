@@ -29,7 +29,7 @@ immediately fill the whole array with data. The dummy variable is used to fix
 the type of the array.
 """
 function arrayCreateNoInit(size::ModelicaInteger, dummy::A)::Vector{A} where {A}
-  local arr::Array{A} = fill(dummy, size)
+  local arr::Vector{A} = Vector{A}(undef, size)
   arr
 end
 
