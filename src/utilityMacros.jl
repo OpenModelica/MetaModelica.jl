@@ -61,6 +61,50 @@ end
 const _AssignUpdate = Tuple{Vector{Symbol}, Any, Union{Nothing,LineNumberNode}}
 
 """
+  If `expr` has the form `sym.f`, `sym.f.g`, `sym.f.g.h`, ..., return the
+  top-level field (the segment immediately under `sym`). Otherwise return
+  `nothing`. The "top" is the deepest segment in the chain whose base is
+  `sym`, since `getproperty(getproperty(sym, :f), :g)` reads `sym.f` first.
+"""
+function _topFieldAccessOf(expr, sym::Symbol)
+  cur = expr
+  topField = nothing
+  while cur isa Expr && cur.head === :. && length(cur.args) == 2
+    fieldArg = cur.args[2]
+    (fieldArg isa QuoteNode && fieldArg.value isa Symbol) || return nothing
+    topField = fieldArg.value
+    cur = cur.args[1]
+  end
+  return cur === sym ? topField : nothing
+end
+
+"""
+  Return `true` when `expr` syntactically reads a field of `sym` that has
+  already been written in the pending batch. A bare `sym` reference (e.g.
+  `foo(sym)`) is treated as a read of every field, since the call may read
+  anything, so it triggers a flush whenever any write is pending. Field
+  accesses `sym.f` are matched against `writtenFields` by top-level field
+  name. `quote ... end` and `QuoteNode` contents are skipped.
+"""
+function _exprReadsWrittenFields(expr, sym::Symbol, writtenFields::Set{Symbol})
+  if expr isa Symbol
+    return expr === sym
+  elseif expr isa QuoteNode
+    return false
+  elseif expr isa Expr
+    (expr.head === :quote || expr.head === :inert) && return false
+    topField = _topFieldAccessOf(expr, sym)
+    if topField !== nothing
+      return topField in writtenFields
+    end
+    for arg in expr.args
+      _exprReadsWrittenFields(arg, sym, writtenFields) && return true
+    end
+  end
+  return false
+end
+
+"""
   Wrap `inner` in a `:block` Expr prefixed with `ln` so Julia attaches the
   source location to the synthesized code. Falls back to `inner` if `ln` is
   `nothing`.
@@ -140,6 +184,7 @@ function assignBlockFunc(blockExpr::Expr)
   out = Expr(:block)
   rootSym = Ref{Union{Nothing,Symbol}}(nothing)
   updates = _AssignUpdate[]
+  writtenFields = Set{Symbol}()
   lastLine = Ref{Union{Nothing,LineNumberNode}}(nothing)
   flush! = function ()
     if rootSym[] !== nothing
@@ -149,6 +194,7 @@ function assignBlockFunc(blockExpr::Expr)
       push!(out.args, _withLine(ln, assignExpr))
       rootSym[] = nothing
       empty!(updates)
+      empty!(writtenFields)
     end
   end
   for s in blockExpr.args
@@ -170,12 +216,17 @@ function assignBlockFunc(blockExpr::Expr)
       continue
     end
     if rootSym[] === nothing || rootSym[] === root
+      if rootSym[] === root && _exprReadsWrittenFields(rhs, root, writtenFields)
+        flush!()
+      end
       rootSym[] = root
       push!(updates, (path, rhs, lastLine[]))
+      push!(writtenFields, path[1])
     else
       flush!()
       rootSym[] = root
       push!(updates, (path, rhs, lastLine[]))
+      push!(writtenFields, path[1])
     end
   end
   flush!()
@@ -204,10 +255,16 @@ E.g.:
   end
   ```
 
-  expands to one allocation for `obj` and one for `obj.c`. RHS expressions
-  in the same group are evaluated against the pre-batch object, so a later
-  assignment that reads a field an earlier assignment wrote will see the
-  OLD value. Split the block when sequential semantics matter.
+  expands to one allocation for `obj` and one for `obj.c`. When a later
+  assignment's RHS reads a field that an earlier assignment in the batch
+  wrote (e.g. `obj.b = obj.a` after `obj.a = 1`), the macro flushes the
+  pending writes first so the read sees the updated value. Reads of *other*
+  fields of the same root (e.g. `obj.b = obj.c` while only `obj.a` has been
+  written) do not cause a flush, so chains where every line reads and writes
+  disjoint fields still collapse to a single `setproperties` call. The same
+  flush happens before a non-field statement (`x = obj.a`) or any other
+  expression in the block, so sequential read/write semantics are preserved
+  across the entire block.
 """
 macro assign(expr)
   res = if expr isa Expr && expr.head === :block

@@ -365,6 +365,57 @@ end
     @test outer.q.x == 0
     @test outer.q.y == 7
     @test outer.q.z == 0
+
+    obj = Big(1,2,3,4,5,6,7,8,9,10)
+    @assign begin
+      obj.a = 100
+      obj.b = obj.a
+      obj.c = obj.a + obj.b
+    end
+    @test (obj.a, obj.b, obj.c) == (100, 100, 200)
+
+    obj = Big(1,2,3,4,5,6,7,8,9,10)
+    @assign begin
+      obj.a = 10
+      obj.a = obj.a + 1
+      obj.a = obj.a * 5
+    end
+    @test obj.a == 55
+
+    obj = Big(1,2,3,4,5,6,7,8,9,10)
+    @assign begin
+      obj.a = 100
+      b = obj.a
+      obj.a = 8
+    end
+    @test obj.a == 8
+    @test b == 100
+
+    outer = Outer(1, Inner(10, 20, 30), 2)
+    @assign begin
+      outer.q.x = 11
+      outer.p = outer.q.x + 1
+      outer.r = outer.p * 10
+    end
+    @test outer.q.x == 11
+    @test outer.p == 12
+    @test outer.r == 120
+
+    obj = Big(1,2,3,4,5,6,7,8,9,10)
+    @assign begin
+      obj.a = obj.a + 100
+      obj.b = obj.b + 100
+      obj.c = obj.c + 100
+    end
+    @test (obj.a, obj.b, obj.c, obj.d) == (101, 102, 103, 4)
+
+    obj = Big(1,2,3,4,5,6,7,8,9,10)
+    @assign begin
+      obj.a = obj.b
+      obj.c = obj.d
+      obj.e = obj.f
+    end
+    @test (obj.a, obj.b, obj.c, obj.d, obj.e, obj.f) == (2, 2, 4, 4, 6, 6)
   end
 
 end #=End runtime tests=#
