@@ -29,7 +29,7 @@ export MATCHCONTINUE_DEBUG_LOG, clear_matchcontinue_log!, summarize_matchcontinu
 export @Uniontype, @Record, @UniontypeDecl, @ExtendedFunction, @ExtendedAnonFunction
 export List, list, Nil, nil, Cons, cons, =>, Option, SOME, NONE, SourceInfo, SOURCEINFO
 export @do_threaded_for, <|, @shouldFail, sourceInfo, _cons, @importDBG
-export @assign, @Mutable_Uniontype, @closure, @nospecialized
+export @assign, @Mutable_Uniontype, @closure, @nospecialized, @strict_nospecialized
 
 include("exportmetaRuntime.jl")
 include("dangerous.jl")

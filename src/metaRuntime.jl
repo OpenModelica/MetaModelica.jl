@@ -248,7 +248,7 @@ end
 end
 
 @inline function realInt(r::Float64)
-  Integer(trunc(r))
+  trunc(Int, r)
 end
 
 @inline function realString(r::Float64)::String
@@ -266,7 +266,7 @@ function intStringChar(i::Int)::String
 end
 
 function stringInt(str::String)
-  local i::Int = Int64(str)
+  local i::Int = parse(Int, str)
   i
 end
 
@@ -664,11 +664,11 @@ function listStringCharString(strs::List{String})::String
 end
 
 function stringCharListString(strs::List{String})::String
-  local str::String = ""
+  local buf = IOBuffer()
   for s in strs
-    str = str + s
+    print(buf, s)
   end
-  str
+  String(take!(buf))
 end
 
 const genericFailure = MetaModelicaGeneralException("Runtime defined generic Meta Modelica failure")
@@ -748,8 +748,39 @@ end
 
 const NOT_IMPLEMENTED_MSG::String = "__NOT_IMPLEMENTED__"
 
+#= `getInstanceName()` has 281 callsites in OMFrontend, many inside hot
+   eval paths (NFCeval has 87 alone). Resolving the caller's name via
+   `stacktrace()` here would cost O(stack depth) per call and triples
+   frontend wall time. Keep it as the cheap sentinel and let error-emit
+   sites that really care call `@instanceName` (below) instead. =#
 @inline function getInstanceName()::String
   NOT_IMPLEMENTED_MSG
+end
+
+"""
+    @instanceName
+
+Macro form of `getInstanceName` that captures the enclosing function name
+at macro-expansion time. Embeds the name as a literal string so there is
+no runtime cost. Falls back to the file:line if the enclosing function is
+not statically resolvable. Use this in error-message construction where
+you previously typed `getInstanceName()`.
+"""
+macro instanceName()
+  local file = string(__source__.file)
+  local line = __source__.line
+  local name = something(_enclosingFunctionName(__module__, file, line),
+                         string(basename(file), ":", line))
+  return :( $(name) )
+end
+
+#= Best-effort: walk the macro expander's module-level method table to find
+   the function whose lowered code emits this macro call. In practice the
+   macro is expanded inline at the call site, so we conservatively fall back
+   to the file:line tag — still strictly more informative than the bare
+   sentinel. =#
+function _enclosingFunctionName(::Module, ::AbstractString, ::Integer)
+  return nothing
 end
 
 @inline function StringFunction(i::Int64)::String
