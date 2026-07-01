@@ -11,6 +11,9 @@ using Test
     @testset "@fastmatch" begin
       include("./fastmatchTests.jl")
     end
+    @testset "compacted uniontype tag dispatch" begin
+      include("./compactedUniontypeTests.jl")
+    end
   end
 
   @testset "list" begin
