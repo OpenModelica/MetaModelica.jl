@@ -22,6 +22,22 @@
 
 include("fixLines.jl")
 
+"""
+    compacted_tag_info(ctor) -> (StructType, tagfield::Symbol, tagvalue, fieldorder::NTuple{N,Symbol}) | nothing
+
+Extension point for combined/tagged-union types: several conceptually distinct record
+types folded into ONE concrete struct with a tag field (needed for self- or
+mutually-recursive uniontype clusters, where every variant sharing one concrete type
+means `@match`'s normal `isa`-based struct-pattern dispatch does not apply). A generator
+targeting this representation implements one method per variant CONSTRUCTOR FUNCTION (the
+value a pattern head like `ADD` evaluates to) returning
+`(StructType, tagfield, tagvalue, fieldorder)`; `@match`/`@matchcontinue` then compile a
+`ADD(a, b) => ...` pattern into a `getfield(obj, tagfield) === tagvalue` comparison plus
+`getfield`-based destructuring of `fieldorder`, instead of `value isa ADD`. Default `nothing`
+(ordinary struct-type patterns are unaffected).
+"""
+compacted_tag_info(::Any) = nothing
+
 const DOC_STR = "Patterns:
 
     * `_` matches anything
@@ -287,7 +303,34 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
       end
     end
   elseif @capture(pattern, T_(subpatterns__)) #= All-wild struct pattern. =#
-    if length(subpatterns) == 1 && subpatterns[1] === :(__)
+    local tag_info = calling_module !== nothing && T isa Symbol && isdefined(calling_module, T) ?
+      compacted_tag_info(getfield(calling_module, T)) : nothing
+    if tag_info !== nothing
+      #= Compacted tagged-union constructor (see compacted_tag_info): T is a constructor
+         FUNCTION here, not a type, so the ordinary `value isa T` struct-pattern logic
+         below does not apply. Emit a tag comparison (plus getfield-based field
+         destructuring via the registered fieldorder, mapping positional pattern args to
+         their actual struct slot names) instead. =#
+      (StructT, tagfield, tagvalue, fieldorder) = tag_info
+      tag_cond = quote
+        $value isa $StructT && Base.getfield($value, $(QuoteNode(tagfield))) === $tagvalue
+      end
+      if length(subpatterns) == 1 && subpatterns[1] === :(__)
+        tag_cond
+      else
+        kwpatterns = if !isempty(subpatterns) && subpatterns[1] isa Expr && subpatterns[1].head === :kw
+          subpatterns
+        else
+          @assert length(subpatterns) <= length(fieldorder) "Pattern $pattern has more positional fields than $T's registered fieldorder $fieldorder"
+          [Expr(:kw, fieldorder[i], subpatterns[i]) for i in eachindex(subpatterns)]
+        end
+        quote
+          $tag_cond &&
+          $(handle_destruct_fields(value, pattern, kwpatterns, length(kwpatterns), :getfield,
+                                   bound, asserts; allow_splat=false, calling_module=calling_module, source=source))
+        end
+      end
+    elseif length(subpatterns) == 1 && subpatterns[1] === :(__)
       #=
       Fields are irrelevant when matching against a wildcard.
       NONE() also matches a wildcard.
