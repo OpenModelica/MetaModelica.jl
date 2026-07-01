@@ -3,79 +3,63 @@ module CompactedUniontypeTests
 using MetaModelica
 using Test
 
-# Mimics a translator-generated "compacted" uniontype: several conceptually distinct
-# record variants folded into ONE concrete struct with a tag field (needed for self- or
-# mutually-recursive uniontype clusters where every variant sharing one type means
-# ordinary `isa`-based struct-pattern dispatch does not apply -- see
-# MetaModelica.compacted_tag_info's docstring). Self-referential fields are placed last
-# so a partial `new(...)` can leave them genuinely #undef for variants that don't use them.
-
-@enum ExprTag ADD_TAG NEG_TAG LIT_TAG
-
-struct ExprData
-  tag::ExprTag
-  v::Int
-  a::ExprData
-  b::ExprData
-  ExprData(tag::ExprTag, v::Int) = new(tag, v)
-  ExprData(tag::ExprTag, v::Int, a::ExprData) = new(tag, v, a)
-  ExprData(tag::ExprTag, v::Int, a::ExprData, b::ExprData) = new(tag, v, a, b)
+# `@CUniontype` fixture: a self-recursive uniontype whose variants form a
+# chain of increasing detail (EMPTY/WILD have no fields, CREF adds three,
+# one of which recurses on the uniontype itself) -- the shape `@CUniontype`
+# requires (see its docstring), and the shape MetaModelica.compacted_tag_info
+# targets.
+@CUniontype Cref begin
+  EMPTY()
+  WILD()
+  CREF(name::String, subscripts::Vector{Int}, rest::Cref)
 end
 
-LIT(v::Int) = ExprData(LIT_TAG, v)
-NEG(a::ExprData) = ExprData(NEG_TAG, 0, a)
-ADD(a::ExprData, b::ExprData) = ExprData(ADD_TAG, 0, a, b)
-
-MetaModelica.compacted_tag_info(::typeof(LIT)) = (ExprData, :tag, LIT_TAG, (:v,))
-MetaModelica.compacted_tag_info(::typeof(NEG)) = (ExprData, :tag, NEG_TAG, (:a,))
-MetaModelica.compacted_tag_info(::typeof(ADD)) = (ExprData, :tag, ADD_TAG, (:a, :b))
-
-function evalExpr(e::ExprData)::Int
-  @match e begin
-    LIT(v) => v
-    NEG(a) => -evalExpr(a)
-    ADD(a, b) => evalExpr(a) + evalExpr(b)
+function depth(c::CrefData)::Int
+  @match c begin
+    EMPTY() => 0
+    WILD() => 0
+    CREF(rest=r) => 1 + depth(r)
   end
 end
 
-@test evalExpr(LIT(3)) == 3
-@test evalExpr(NEG(LIT(5))) == -5
-@test evalExpr(ADD(LIT(3), NEG(LIT(4)))) == -1
+@test depth(EMPTY()) == 0
+@test depth(WILD()) == 0
+@test depth(CREF("a", [1], CREF("b", Int[], EMPTY()))) == 2
 
 # Keyword-argument patterns resolve through the same fieldorder-based destructuring.
-@test (@match ADD(LIT(2), LIT(9)) begin
-  ADD(a=x, b=y) => evalExpr(x) + evalExpr(y)
-end) == 11
+@test (@match CREF("x", [1, 2], WILD()) begin
+  CREF(name=n, subscripts=s) => (n, s)
+end) == ("x", [1, 2])
 
 # All-wild pattern (bare constructor call, no fields) still just checks the tag.
-@test (@match LIT(7) begin
-  LIT() => true
+@test (@match EMPTY() begin
+  EMPTY() => true
   _ => false
 end) == true
-@test (@match ADD(LIT(1), LIT(1)) begin
-  LIT() => true
+@test (@match CREF("x", Int[], EMPTY()) begin
+  EMPTY() => true
   _ => false
 end) == false
 
 # No matching case still throws MatchFailure, same as an ordinary struct pattern.
-@test_throws MatchFailure (@match NEG(LIT(1)) begin
-  LIT(v) => v
+@test_throws MatchFailure (@match CREF("x", Int[], EMPTY()) begin
+  EMPTY() => :empty
 end)
 
 # @matchcontinue: a case whose BODY throws is retried against later cases, exactly like a
 # normal struct pattern -- proves handle_destruct's compacted-type path composes correctly
 # with @matchcontinue's separate catch-and-retry wrapping (handle_match_case), not just
 # @match's plain destructuring.
-function evalOrFallback(e::ExprData)::Int
-  @matchcontinue e begin
-    LIT(v) where v < 0 => throw(MatchFailure("negative literal", v))
-    LIT(v) => v
-    _ => -999
+function nameOrFallback(c::CrefData)::String
+  @matchcontinue c begin
+    CREF(name=n) where n == "bad" => throw(MatchFailure("rejected name", n))
+    CREF(name=n) => n
+    _ => "none"
   end
 end
-@test evalOrFallback(LIT(5)) == 5
-@test evalOrFallback(LIT(-1)) == -1  # guard throws -> retried -> falls to the next LIT(v) arm
-@test evalOrFallback(ADD(LIT(1), LIT(2))) == -999  # no LIT arm applies -> falls to the wildcard
+@test nameOrFallback(CREF("ok", Int[], EMPTY())) == "ok"
+@test nameOrFallback(CREF("bad", Int[], EMPTY())) == "bad"  # guard throws -> retried -> falls to the next CREF(name=n) arm
+@test nameOrFallback(WILD()) == "none"  # no CREF arm applies at all -> falls to the wildcard
 
 # Ordinary (non-compacted) struct patterns are completely unaffected by this extension --
 # regression check that the new branch in handle_destruct only fires for registered types.

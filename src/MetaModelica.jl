@@ -30,7 +30,7 @@ export @Uniontype, @Record, @UniontypeDecl, @ExtendedFunction, @ExtendedAnonFunc
 export List, list, Nil, nil, Cons, cons, =>, Option, SOME, NONE, SourceInfo, SOURCEINFO
 export @do_threaded_for, <|, @shouldFail, sourceInfo, _cons, @importDBG
 export @assign, @Mutable_Uniontype, @closure, @nospecialized, @strict_nospecialized
-export compacted_tag_info
+export compacted_tag_info, @CUniontype
 
 include("exportmetaRuntime.jl")
 include("dangerous.jl")

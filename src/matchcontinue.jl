@@ -38,6 +38,124 @@ value a pattern head like `ADD` evaluates to) returning
 """
 compacted_tag_info(::Any) = nothing
 
+"""
+    @CUniontype Name begin
+      VARIANT1(field1::Type1, field2::Type2, ...)
+      VARIANT2(...)
+      ...
+    end
+
+Declarative shorthand for the "compacted tagged struct" pattern: one concrete
+`NameData <: Name` struct with a tag `@enum`, instead of `abstract type + N
+records`, for self/mutually-recursive uniontype clusters. Expands to the
+struct, the tag enum, one constructor function per variant (positional and
+keyword forms), and the matching `compacted_tag_info` registration for each,
+so `@match`/`@matchcontinue` dispatch on `VARIANT(...)` patterns exactly as
+they would on ordinary struct-per-variant records. A field typed as `Name`
+(the uniontype's own name) is a self-reference to the predeclared abstract
+type.
+
+Field layout is computed automatically: fields are collected across variants
+in first-seen order, and each variant's OWN field set must equal the first K
+entries of that shared order for some K (the `#undef`-via-partial-`new()`
+trick used to omit fields a variant doesn't need only works when the omitted
+fields are a common trailing suffix, not an arbitrary subset). This holds
+naturally for variants that form a chain of increasing detail (e.g. `EMPTY()`,
+`WILD()`, then `CREF(name, subscripts, rest)`); it does not hold for variants
+with genuinely disjoint fields, which errors at macro-expansion time rather
+than silently degrading.
+"""
+macro CUniontype(name::Symbol, block::Expr)
+  block.head === :block || error("@CUniontype: expected a `begin ... end` block of variant(field::Type, ...) declarations")
+  variants = Tuple{Symbol,Vector{Tuple{Symbol,Any}}}[]
+  for line in block.args
+    line isa LineNumberNode && continue
+    (line isa Expr && line.head === :call) || error("@CUniontype: expected `VARIANT(field::Type, ...)`, got: $line")
+    vname = line.args[1]
+    vname isa Symbol || error("@CUniontype: variant name must be a bare identifier, got: $vname")
+    fields = Tuple{Symbol,Any}[]
+    for farg in line.args[2:end]
+      (farg isa Expr && farg.head === :(::) && length(farg.args) == 2) ||
+        error("@CUniontype: expected `field::Type` in variant $vname, got: $farg")
+      push!(fields, (farg.args[1], farg.args[2]))
+    end
+    push!(variants, (vname, fields))
+  end
+  esc(compacted_uniontype_expr(name, variants))
+end
+
+function compacted_uniontype_expr(name::Symbol, variants::Vector{Tuple{Symbol,Vector{Tuple{Symbol,Any}}}})
+  isempty(variants) && error("@CUniontype $name: needs at least one variant")
+
+  field_types = Dict{Symbol,Any}()
+  field_order = Symbol[]
+  for (vname, fields) in variants
+    for (fname, ftype) in fields
+      if haskey(field_types, fname)
+        field_types[fname] == ftype ||
+          error("@CUniontype $name: field `$fname` used with conflicting types ($(field_types[fname]) vs $ftype) across variants")
+      else
+        field_types[fname] = ftype
+        push!(field_order, fname)
+      end
+    end
+  end
+
+  for (vname, fields) in variants
+    vfield_names = Set(f for (f, _) in fields)
+    k = length(vfield_names)
+    prefix = Set(field_order[1:k])
+    vfield_names == prefix ||
+      error("@CUniontype $name: variant `$vname`'s fields must be the first $k entries of the shared field order $(field_order); got $(collect(vfield_names))")
+  end
+
+  data_name = Symbol(name, "Data")
+  tag_type = Symbol(name, "Tag")
+  tag_values = [Symbol(name, "_", vname, "_TAG") for (vname, _) in variants]
+
+  struct_fields = Any[:(tag::$tag_type)]
+  for fname in field_order
+    push!(struct_fields, :($fname::$(field_types[fname])))
+  end
+
+  ks = sort(unique(length(fields) for (_, fields) in variants))
+  inner_ctors = Expr[]
+  for k in ks
+    args = Any[:(tag::$tag_type)]
+    for i in 1:k
+      push!(args, :($(field_order[i])::$(field_types[field_order[i]])))
+    end
+    call_args = vcat(Any[:tag], field_order[1:k])
+    push!(inner_ctors, :($data_name($(args...)) = new($(call_args...))))
+  end
+
+  struct_def = :(struct $data_name <: $name
+    $(struct_fields...)
+    $(inner_ctors...)
+  end)
+
+  ctor_defs = Expr[]
+  for ((vname, fields), tag_val) in zip(variants, tag_values)
+    ctor_name = vname
+    fnames = Symbol[f for (f, _) in fields]
+    if isempty(fnames)
+      push!(ctor_defs, :($ctor_name() = $data_name($tag_val)))
+    else
+      push!(ctor_defs, :($ctor_name($(fnames...)) = $data_name($tag_val, $(fnames...))))
+      push!(ctor_defs, :($ctor_name(; $(fnames...)) = $ctor_name($(fnames...))))
+    end
+    field_order_tuple = Expr(:tuple, (QuoteNode(f) for f in fnames)...)
+    push!(ctor_defs, :(MetaModelica.compacted_tag_info(::typeof($ctor_name)) = ($data_name, :tag, $tag_val, $field_order_tuple)))
+  end
+
+  quote
+    abstract type $name end
+    @enum $tag_type $(tag_values...)
+    $struct_def
+    $(ctor_defs...)
+  end
+end
+
 const DOC_STR = "Patterns:
 
     * `_` matches anything
