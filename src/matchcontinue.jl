@@ -107,7 +107,7 @@ end
   fieldcount.
 """
 @generated function evaluated_fieldcount(t::Type{T}) where {T}
-  res = T !== NONE ? fieldcount(T) : 0
+  fieldcount(T)
 end
 
 """

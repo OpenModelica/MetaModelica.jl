@@ -60,7 +60,6 @@ export listLength
 export listMember
 export listRest
 export listReverse
-export listReverseInPlace
 export listStringCharString
 export printAny
 export realAbs
