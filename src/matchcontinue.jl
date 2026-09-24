@@ -22,140 +22,6 @@
 
 include("fixLines.jl")
 
-"""
-    compacted_tag_info(ctor) -> (StructType, tagfield::Symbol, tagvalue, fieldorder::NTuple{N,Symbol}) | nothing
-
-Extension point for combined/tagged-union types: several conceptually distinct record
-types folded into ONE concrete struct with a tag field (needed for self- or
-mutually-recursive uniontype clusters, where every variant sharing one concrete type
-means `@match`'s normal `isa`-based struct-pattern dispatch does not apply). A generator
-targeting this representation implements one method per variant CONSTRUCTOR FUNCTION (the
-value a pattern head like `ADD` evaluates to) returning
-`(StructType, tagfield, tagvalue, fieldorder)`; `@match`/`@matchcontinue` then compile a
-`ADD(a, b) => ...` pattern into a `getfield(obj, tagfield) === tagvalue` comparison plus
-`getfield`-based destructuring of `fieldorder`, instead of `value isa ADD`. Default `nothing`
-(ordinary struct-type patterns are unaffected).
-"""
-compacted_tag_info(::Any) = nothing
-
-"""
-    @CUniontype Name begin
-      VARIANT1(field1::Type1, field2::Type2, ...)
-      VARIANT2(...)
-      ...
-    end
-
-Declarative shorthand for the "compacted tagged struct" pattern: one concrete
-`NameData <: Name` struct with a tag `@enum`, instead of `abstract type + N
-records`, for self/mutually-recursive uniontype clusters. Expands to the
-struct, the tag enum, one constructor function per variant (positional and
-keyword forms), and the matching `compacted_tag_info` registration for each,
-so `@match`/`@matchcontinue` dispatch on `VARIANT(...)` patterns exactly as
-they would on ordinary struct-per-variant records. A field typed as `Name`
-(the uniontype's own name) is a self-reference to the predeclared abstract
-type.
-
-Field layout is computed automatically: fields are collected across variants
-in first-seen order, and each variant's OWN field set must equal the first K
-entries of that shared order for some K (the `#undef`-via-partial-`new()`
-trick used to omit fields a variant doesn't need only works when the omitted
-fields are a common trailing suffix, not an arbitrary subset). This holds
-naturally for variants that form a chain of increasing detail (e.g. `EMPTY()`,
-`WILD()`, then `CREF(name, subscripts, rest)`); it does not hold for variants
-with genuinely disjoint fields, which errors at macro-expansion time rather
-than silently degrading.
-"""
-macro CUniontype(name::Symbol, block::Expr)
-  block.head === :block || error("@CUniontype: expected a `begin ... end` block of variant(field::Type, ...) declarations")
-  variants = Tuple{Symbol,Vector{Tuple{Symbol,Any}}}[]
-  for line in block.args
-    line isa LineNumberNode && continue
-    (line isa Expr && line.head === :call) || error("@CUniontype: expected `VARIANT(field::Type, ...)`, got: $line")
-    vname = line.args[1]
-    vname isa Symbol || error("@CUniontype: variant name must be a bare identifier, got: $vname")
-    fields = Tuple{Symbol,Any}[]
-    for farg in line.args[2:end]
-      (farg isa Expr && farg.head === :(::) && length(farg.args) == 2) ||
-        error("@CUniontype: expected `field::Type` in variant $vname, got: $farg")
-      push!(fields, (farg.args[1], farg.args[2]))
-    end
-    push!(variants, (vname, fields))
-  end
-  esc(compacted_uniontype_expr(name, variants))
-end
-
-function compacted_uniontype_expr(name::Symbol, variants::Vector{Tuple{Symbol,Vector{Tuple{Symbol,Any}}}})
-  isempty(variants) && error("@CUniontype $name: needs at least one variant")
-
-  field_types = Dict{Symbol,Any}()
-  field_order = Symbol[]
-  for (vname, fields) in variants
-    for (fname, ftype) in fields
-      if haskey(field_types, fname)
-        field_types[fname] == ftype ||
-          error("@CUniontype $name: field `$fname` used with conflicting types ($(field_types[fname]) vs $ftype) across variants")
-      else
-        field_types[fname] = ftype
-        push!(field_order, fname)
-      end
-    end
-  end
-
-  for (vname, fields) in variants
-    vfield_names = Set(f for (f, _) in fields)
-    k = length(vfield_names)
-    prefix = Set(field_order[1:k])
-    vfield_names == prefix ||
-      error("@CUniontype $name: variant `$vname`'s fields must be the first $k entries of the shared field order $(field_order); got $(collect(vfield_names))")
-  end
-
-  data_name = Symbol(name, "Data")
-  tag_type = Symbol(name, "Tag")
-  tag_values = [Symbol(name, "_", vname, "_TAG") for (vname, _) in variants]
-
-  struct_fields = Any[:(tag::$tag_type)]
-  for fname in field_order
-    push!(struct_fields, :($fname::$(field_types[fname])))
-  end
-
-  ks = sort(unique(length(fields) for (_, fields) in variants))
-  inner_ctors = Expr[]
-  for k in ks
-    args = Any[:(tag::$tag_type)]
-    for i in 1:k
-      push!(args, :($(field_order[i])::$(field_types[field_order[i]])))
-    end
-    call_args = vcat(Any[:tag], field_order[1:k])
-    push!(inner_ctors, :($data_name($(args...)) = new($(call_args...))))
-  end
-
-  struct_def = :(struct $data_name <: $name
-    $(struct_fields...)
-    $(inner_ctors...)
-  end)
-
-  ctor_defs = Expr[]
-  for ((vname, fields), tag_val) in zip(variants, tag_values)
-    ctor_name = vname
-    fnames = Symbol[f for (f, _) in fields]
-    if isempty(fnames)
-      push!(ctor_defs, :($ctor_name() = $data_name($tag_val)))
-    else
-      push!(ctor_defs, :($ctor_name($(fnames...)) = $data_name($tag_val, $(fnames...))))
-      push!(ctor_defs, :($ctor_name(; $(fnames...)) = $ctor_name($(fnames...))))
-    end
-    field_order_tuple = Expr(:tuple, (QuoteNode(f) for f in fnames)...)
-    push!(ctor_defs, :(MetaModelica.compacted_tag_info(::typeof($ctor_name)) = ($data_name, :tag, $tag_val, $field_order_tuple)))
-  end
-
-  quote
-    abstract type $name end
-    @enum $tag_type $(tag_values...)
-    $struct_def
-    $(ctor_defs...)
-  end
-end
-
 const DOC_STR = "Patterns:
 
     * `_` matches anything
@@ -421,8 +287,9 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
       end
     end
   elseif @capture(pattern, T_(subpatterns__)) #= All-wild struct pattern. =#
-    local tag_info = calling_module !== nothing && T isa Symbol && isdefined(calling_module, T) ?
-      compacted_tag_info(getfield(calling_module, T)) : nothing
+    #= T may be qualified (`OMFrontend.Frontend.EQUATION_IF(...)`). =#
+    local tag_info = calling_module === nothing ? nothing :
+      compacted_tag_info(resolve_pattern_head(calling_module, T))
     if tag_info !== nothing
       #= Compacted tagged-union constructor (see compacted_tag_info): T is a constructor
          FUNCTION here, not a type, so the ordinary `value isa T` struct-pattern logic
@@ -436,12 +303,22 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
       if length(subpatterns) == 1 && subpatterns[1] === :(__)
         tag_cond
       else
-        kwpatterns = if !isempty(subpatterns) && subpatterns[1] isa Expr && subpatterns[1].head === :kw
-          subpatterns
-        else
-          @assert length(subpatterns) <= length(fieldorder) "Pattern $pattern has more positional fields than $T's registered fieldorder $fieldorder"
-          [Expr(:kw, fieldorder[i], subpatterns[i]) for i in eachindex(subpatterns)]
+        #= Positional fields first, then named ones, as in a call. Check the
+           names here: every slot of a @T_Uniontype struct exists, so a name the
+           variant does not have would silently bind the fill value. =#
+        local isnamed = [p isa Expr && p.head === :kw for p in subpatterns]
+        local npos = something(findfirst(isnamed), length(subpatterns) + 1) - 1
+        all(isnamed[npos+1:end]) ||
+          error("Pattern $pattern: positional field after a named one")
+        npos <= length(fieldorder) ||
+          error("Pattern $pattern has more positional fields than $T has fields $fieldorder")
+        kwpatterns = Any[i <= npos ? Expr(:kw, fieldorder[i], subpatterns[i]) : subpatterns[i]
+                         for i in eachindex(subpatterns)]
+        local names = Symbol[p.args[1] for p in kwpatterns]
+        for n in names
+          n in fieldorder || error("Pattern $pattern: $T has no field `$n` (fields: $fieldorder)")
         end
+        allunique(names) || error("Pattern $pattern binds a field twice")
         quote
           $tag_cond &&
           $(handle_destruct_fields(value, pattern, kwpatterns, length(kwpatterns), :getfield,
