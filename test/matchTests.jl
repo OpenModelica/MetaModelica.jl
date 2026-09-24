@@ -78,4 +78,23 @@ a = barBar()
   _ => 1
 end
 
+#= Positional patterns whose type is only known at run time use evaluated_fieldcount =#
+struct Pair2
+  a::Int
+  b::Int
+end
+@test MetaModelica.evaluated_fieldcount(Pair2) == 2
+@test MetaModelica.evaluated_fieldcount(foo) == 0
+sumFields(x, T) = @match x begin
+  T(a, b) => a + b
+  _ => -1
+end
+threeFields(x, T) = @match x begin
+  T(a, b, c) => a + b + c
+  _ => -1
+end
+@test sumFields(Pair2(1, 2), Pair2) == 3
+@test sumFields(foo(), Pair2) == -1
+@test_throws ErrorException threeFields(Pair2(1, 2), Pair2)
+
 end
