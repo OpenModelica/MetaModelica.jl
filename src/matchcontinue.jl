@@ -287,7 +287,45 @@ function handle_destruct(value::Symbol, pattern, bound::Set{Symbol}, asserts::Ve
       end
     end
   elseif @capture(pattern, T_(subpatterns__)) #= All-wild struct pattern. =#
-    if length(subpatterns) == 1 && subpatterns[1] === :(__)
+    #= T may be qualified (`OMFrontend.Frontend.EQUATION_IF(...)`). =#
+    local tag_info = calling_module === nothing ? nothing :
+      compacted_tag_info(resolve_pattern_head(calling_module, T))
+    if tag_info !== nothing
+      #= Compacted tagged-union constructor (see compacted_tag_info): T is a constructor
+         FUNCTION here, not a type, so the ordinary `value isa T` struct-pattern logic
+         below does not apply. Emit a tag comparison (plus getfield-based field
+         destructuring via the registered fieldorder, mapping positional pattern args to
+         their actual struct slot names) instead. =#
+      (StructT, tagfield, tagvalue, fieldorder) = tag_info
+      tag_cond = quote
+        $value isa $StructT && Base.getfield($value, $(QuoteNode(tagfield))) === $tagvalue
+      end
+      if length(subpatterns) == 1 && subpatterns[1] === :(__)
+        tag_cond
+      else
+        #= Positional fields first, then named ones, as in a call. Check the
+           names here: every slot of a @T_Uniontype struct exists, so a name the
+           variant does not have would silently bind the fill value. =#
+        local isnamed = [p isa Expr && p.head === :kw for p in subpatterns]
+        local npos = something(findfirst(isnamed), length(subpatterns) + 1) - 1
+        all(isnamed[npos+1:end]) ||
+          error("Pattern $pattern: positional field after a named one")
+        npos <= length(fieldorder) ||
+          error("Pattern $pattern has more positional fields than $T has fields $fieldorder")
+        kwpatterns = Any[i <= npos ? Expr(:kw, fieldorder[i], subpatterns[i]) : subpatterns[i]
+                         for i in eachindex(subpatterns)]
+        local names = Symbol[p.args[1] for p in kwpatterns]
+        for n in names
+          n in fieldorder || error("Pattern $pattern: $T has no field `$n` (fields: $fieldorder)")
+        end
+        allunique(names) || error("Pattern $pattern binds a field twice")
+        quote
+          $tag_cond &&
+          $(handle_destruct_fields(value, pattern, kwpatterns, length(kwpatterns), :getfield,
+                                   bound, asserts; allow_splat=false, calling_module=calling_module, source=source))
+        end
+      end
+    elseif length(subpatterns) == 1 && subpatterns[1] === :(__)
       #=
       Fields are irrelevant when matching against a wildcard.
       NONE() also matches a wildcard.

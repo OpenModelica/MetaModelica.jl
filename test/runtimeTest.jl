@@ -15,6 +15,25 @@ using Test
   @test arrayGet(arr, 3) == 3
 end
 
+@testset "Arrays of lists hold any list" begin
+  #= array<list<T>> starts from {} or a first list and later holds nil and other lists =#
+  local a = arrayCreate(3, nil)
+  arrayUpdate(a, 1, list(1, 2))
+  @test arrayGet(a, 1) == list(1, 2) && arrayGet(a, 2) === nil
+  local b = arrayCreate(2, list(1))
+  arrayUpdate(b, 1, nil)
+  arrayUpdate(b, 2, list("a"))
+  @test arrayGet(b, 1) === nil && arrayGet(b, 2) == list("a")
+  local c = listArray(list(list(1), list(2)))
+  arrayUpdate(c, 1, nil)
+  @test arrayGet(c, 1) === nil && arrayGet(c, 2) == list(2)
+  local d = MetaModelica.array(list(1), list(2))
+  arrayUpdate(d, 2, nil)
+  @test arrayGet(d, 2) === nil
+  #= other seeds keep their type =#
+  @test eltype(arrayCreate(2, 1)) == Int && eltype(listArray(list(1.0, 2.0))) == Float64
+end
+
 @testset "Common conversions betwen MetaArrays and Lists" begin
   local arr = [1, 2, 3]
   local lst = arrayList(arr)
