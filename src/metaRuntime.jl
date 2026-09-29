@@ -446,9 +446,20 @@ function arrayGet(arr::Array{A}, index::Int) where {A}
   arr[index]
 end
 
+"""
+    arrayElemType(T)
+
+The element type of an array made from values of type `T`: `T`, except that
+a list (`Cons` or `Nil`) gives `List`. An `array<list<T>>` starts from `{}`
+or a first list and later holds `nil` and other lists; typed after its seed
+(`Nil{Any}`, `Cons{Int}`) it could not store them.
+"""
+arrayElemType(::Type{T}) where {T} = T
+arrayElemType(::Type{<:Union{Cons, Nil}}) = List
+
 """ O(size) """
 @inline function arrayCreate(size::Int, initialValue::A) where {A}
-  fill(initialValue, size)
+  fill!(Vector{arrayElemType(A)}(undef, size), initialValue)
 end
 
 """ O(N) """
@@ -463,7 +474,7 @@ end
 """ O(n) """
 function listArray(lst::Cons{T}) where {T}
   local N = length(lst)
-  local arr::Vector{T} = Vector{T}(undef, N)
+  local arr = Vector{arrayElemType(T)}(undef, N)
   i = 1
   while lst !== nil
     arr[i] = lst.head
