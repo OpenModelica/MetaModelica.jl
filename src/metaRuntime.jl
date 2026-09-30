@@ -685,11 +685,11 @@ end
 const genericFailure = MetaModelicaGeneralException("Runtime defined generic Meta Modelica failure")
 
 @noinline function fail()
-  throw(genericFailure)
+  mm_throw(genericFailure)
 end
 
 function fail(msg::String)
-  throw(MetaModelicaGeneralException(msg))
+  mm_throw(MetaModelicaGeneralException(msg))
 end
 
 """ Sets the stack overflow signal to the given value and returns the old one """

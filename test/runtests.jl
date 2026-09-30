@@ -47,4 +47,8 @@ using Test
     include("shouldFailTests.jl")
   end
 
+  @testset "Cheap throws" begin
+    include("cheapThrowsTests.jl")
+  end
+
 end #= End MetaModelica testset =#

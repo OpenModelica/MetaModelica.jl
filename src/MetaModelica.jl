@@ -17,6 +17,7 @@ using .UniontypeDef
 include("matchUtil.jl")
 import .MatchUtil
 using ImmutableList
+include("cheapThrows.jl")
 include("compactedUniontype.jl")
 include("matchcontinue.jl")
 include("matchcontinue_debug.jl")
@@ -32,6 +33,12 @@ export List, list, Nil, nil, Cons, cons, =>, Option, SOME, NONE, SourceInfo, SOU
 export @do_threaded_for, <|, @shouldFail, sourceInfo, _cons, @importDBG
 export @assign, @Mutable_Uniontype, @closure, @nospecialized, @strict_nospecialized
 export compacted_tag_info, @CUniontype, @T_Uniontype, isvariant, variantof
+export mm_throw, with_cheap_throws, @cheap_throws
+
+function __init__()
+  #= Read at load, not at precompile (a const Ref's value would be baked in). =#
+  CHEAP_THROWS[] = get(ENV, "METAMODELICA_CHEAP_THROWS", "true") != "false"
+end
 
 include("exportmetaRuntime.jl")
 include("dangerous.jl")
