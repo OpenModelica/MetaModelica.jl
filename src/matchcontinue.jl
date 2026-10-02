@@ -476,7 +476,7 @@ function handle_match_eq(expr; calling_module::Module=Main, source::Union{LineNu
       $(asserts...)
       value = $(esc(value))
       __omc_match_done = false
-      $body || throw(MatchFailure("no match", typeof(value)))
+      $body || $(mm_throw)(MatchFailure("no match", typeof(value)))
       $(@splice variable in bound :(
           $(esc(variable)) = $(Symbol("variable_$variable"))
         ))
@@ -620,7 +620,7 @@ function handle_match_cases(value, match::Expr; matchcontinue::Bool=false, calli
       local res
       $tail
       if !__omc_match_done
-        throw(MatchFailure("unfinished match for type", typeof(value)))
+        $(mm_throw)(MatchFailure("unfinished match for type", typeof(value)))
       end
       res
     end
