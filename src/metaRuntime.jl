@@ -265,15 +265,19 @@ function intStringChar(i::Int)::String
   ch
 end
 
-function stringInt(str::String)
-  local i::Int = parse(Int, str)
+""" Fails unless the whole string is a base-10 integer (omc's stringInt). A
+MetaModelica failure, so a matchcontinue tries its next case. """
+function stringInt(str::String)::Int
+  local i = tryparse(Int, str)
+  i === nothing && fail()
   i
 end
 
 """ This function fails unless the whole string can be consumed by strtod without
 setting errno. For more details, see man 3 strtod """
 function stringReal(str::String)::Float64
-  local r::Float64 = parse(Float64, str)
+  local r = tryparse(Float64, str)
+  r === nothing && fail()
   r
 end
 

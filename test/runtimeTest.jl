@@ -288,6 +288,19 @@ end
 	  @testset "Testing String for MetaModelica" begin
 	    @test "AB" == "A" + "B"
 	    @test stringInt("42") == 42
+	    @test stringInt("-7") == -7
+	    @test_throws MetaModelica.MetaModelicaGeneralException stringInt("experimental")
+	    @test_throws MetaModelica.MetaModelicaGeneralException stringInt("4x")
+	    @test stringReal("2.5") == 2.5
+	    @test_throws MetaModelica.MetaModelicaGeneralException stringReal("m")
+	    #= A failing stringInt sends a matchcontinue to its next case. =#
+	    @test "the string" == @matchcontinue "e" begin
+	      s => begin
+	        stringInt(s)
+	        "the number"
+	      end
+	      _ => "the string"
+	    end
 	    @test stringCharListString(list("A", "B", "C")) == "ABC"
 	  end
 
