@@ -3,7 +3,6 @@ module MetaModelica
 import MacroTools
 import MacroTools: @capture
 import ExportAll
-import FunctionWrappers
 #=
 MetaModelicaTypes must be loaded before the rest of the package so these
 aliases and exception types are available during precompilation.
