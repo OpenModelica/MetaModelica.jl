@@ -806,6 +806,3 @@ end
   realString(r)
 end
 
-function Base.String(arg)::String
-  return string(arg)
-end
