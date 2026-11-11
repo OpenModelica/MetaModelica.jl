@@ -4,10 +4,26 @@ name: OM.jl integration
 # and runs OM.jl's test suite with it, on Julia 1.13, so that a change
 # here cannot break OM.jl unnoticed. The workflow lives in JKRT/OM.jl:
 # .github/workflows/omjl-ci.yml.
+# Changes that cannot affect the code or the tests do not start it: Markdown,
+# docs, license, citation, Jenkins files. `workflow_dispatch` runs it anyway.
 on:
   pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE*'
+      - 'CITATION.bib'
+      - '.CI/**'
+      - '.gitignore'
   push:
     branches: [master, "1.13"]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE*'
+      - 'CITATION.bib'
+      - '.CI/**'
+      - '.gitignore'
   workflow_dispatch:
 
 permissions:
