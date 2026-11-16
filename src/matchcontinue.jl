@@ -103,6 +103,24 @@ struct MatchFailure <: MetaModelicaException
 end
 
 """
+    reportUnexpectedInMatch(e, backtrace) -> Nothing
+
+Prints an exception that a matchcontinue case does not retry on (not a MetaModelica or ImmutableList failure) before
+the case rethrows it. The expanded matches call it through `invokelatest`: a direct call compiled the backtrace
+printer (`Base.show_backtrace`) into every function with a matchcontinue, and a package adding a method that the
+printer calls (ColorVectorSpace's `reduce_first`) invalidated all of them, and their callers, at each load (OMFrontend:
+973 compiled methods, 2026-11-16).
+"""
+function reportUnexpectedInMatch(@nospecialize(e), backtrace::Vector)::Nothing
+  if e isa MatchFailure
+    println("MatchFailure:" * e.msg)
+  else
+    showerror(stderr, e, backtrace)
+  end
+  return nothing
+end
+
+"""
   Statically get the fieldcount of a type. Useful to avoid runtime calls to
   fieldcount.
 """
@@ -512,13 +530,55 @@ function unsafe_handle_match_eq(expr; calling_module::Module=Main, source::Union
 end
 
 """
+    subjectNarrowing(subject::Symbol, pattern, calling_module) -> Union{Expr, Nothing}
+
+`subject isa T` for the type `T` that a case's top-level pattern proves the matched value has: a struct pattern
+`T(...)`, a compacted variant's struct, `_::T`, the pattern of a guard. `nothing` for the other patterns (wildcards,
+bindings, constants, tuples, lists, disjunctions).
+
+A `@match` case adds it to its condition. The case tests a copy of the subject (`value`), and Julia narrows only the
+variable it tests, so reads through the subject in the case's body (`iterator.current` in
+`@match iterator begin RANGE(__) => iterator.current end`) were `Any`: dynamic calls that a package adding a method
+invalidates, with their callers, at each load (OMFrontend 2026-11-16). For `@match` the test gives the pattern's
+answer, since nothing assigns the subject between the copy and the case. `@matchcontinue` gets none: a failed case's
+body may have assigned the subject before a later case is tested.
+"""
+function subjectNarrowing(subject::Symbol, pattern, calling_module::Union{Module,Nothing})::Union{Expr,Nothing}
+  pattern isa Expr || return nothing
+  if pattern.head === :where && length(pattern.args) == 2
+    return subjectNarrowing(subject, pattern.args[1], calling_module)
+  elseif pattern.head === :(::) && length(pattern.args) == 2
+    return :($(esc(subject)) isa $(esc(pattern.args[2])))
+  elseif pattern.head === :call && !isempty(pattern.args)
+    local T = pattern.args[1]
+    #= Sugar and operators: `<|`, `nil()`, `NONE()` are not the types they match; `|`, `&` are disjunctions and
+       conjunctions; `Symbol(_)` is a constant. =#
+    if T in (:(<|), :_cons, :nil, :NONE, :|, :&, :Symbol) || !(T isa Symbol || (T isa Expr && T.head === :.))
+      return nothing
+    end
+    local tag_info = calling_module === nothing ? nothing : compacted_tag_info(resolve_pattern_head(calling_module, T))
+    if tag_info !== nothing
+      return :($(esc(subject)) isa $(tag_info[1]))
+    end
+    return :($(esc(subject)) isa $(esc(T)))
+  end
+  return nothing
+end
+
+"""
 Handles match cases both for the matchcontinue and regular match case
 calls handle_destruct. See handle_destruct for more details.
+`subject`: the matched variable of a `@match` whose value is a plain variable, narrowed in each case's body
+(`subjectNarrowing`); `nothing` otherwise.
 """
-function handle_match_case(value, case, tail, asserts, matchcontinue::Bool; calling_module::Union{Module,Nothing}=nothing, source::Union{LineNumberNode,Nothing}=nothing)
+function handle_match_case(value, case, tail, asserts, matchcontinue::Bool; calling_module::Union{Module,Nothing}=nothing, source::Union{LineNumberNode,Nothing}=nothing, subject::Union{Symbol,Nothing}=nothing)
   if @capture(case, pattern_ => result_)
     bound = Set{Symbol}()
     body = handle_destruct(:value, pattern, bound, asserts; calling_module=calling_module, source=source)
+    local narrow = (matchcontinue || subject === nothing) ? nothing : subjectNarrowing(subject, pattern, calling_module)
+    if narrow !== nothing
+      body = :($body && $narrow)
+    end
     if matchcontinue
       quote
         if (!__omc_match_done) && $body
@@ -538,11 +598,7 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool; call
             John, March 2024: this may be a performance sink.
             =#
             if !isa(e, MetaModelicaException) && !isa(e, ImmutableListException)
-              if isa(e, MatchFailure)
-                println("MatchFailure:" * e.msg)
-              else
-                showerror(stderr, e, catch_backtrace())
-              end
+              $(GlobalRef(Base, :invokelatest))($(GlobalRef(@__MODULE__, :reportUnexpectedInMatch)), e, catch_backtrace())
               rethrow(e)
             end
             __omc_match_done = false
@@ -600,9 +656,10 @@ function handle_match_cases(value, match::Expr; matchcontinue::Bool=false, calli
   if !matchcontinue
     MatchUtil.check_unreachable_after_wildcard(cases; macro_name=macroName, value=value, source=source)
   end
+  local subject = value isa Symbol ? value : nothing
   for i in length(cases):-1:1
     case = cases[i]
-    tail = handle_match_case(:value, case, tail, asserts, matchcontinue; calling_module=calling_module, source=caseSources[i])
+    tail = handle_match_case(:value, case, tail, asserts, matchcontinue; calling_module=calling_module, source=caseSources[i], subject=subject)
     if line !== nothing
       replaceLineNum(tail, @__FILE__, line)
     end
@@ -656,9 +713,10 @@ function unsafe_handle_match_cases(value, match::Expr; matchcontinue::Bool=false
       push!(caseSources, curLine)
     end
   end
+  local subject = value isa Symbol ? value : nothing
   for i in length(cases):-1:1
     case = cases[i]
-    tail = handle_match_case(:value, case, tail, asserts, matchcontinue; calling_module=calling_module, source=caseSources[i])
+    tail = handle_match_case(:value, case, tail, asserts, matchcontinue; calling_module=calling_module, source=caseSources[i], subject=subject)
     if line !== nothing
       replaceLineNum(tail, @__FILE__, line)
     end

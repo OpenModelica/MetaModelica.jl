@@ -108,11 +108,7 @@ function handle_match_case_debug(value, case, tail, asserts, case_num::Int, sour
                     __omc_match_done = true
                 catch e
                     if !isa(e, MetaModelicaException) && !isa(e, ImmutableListException)
-                        if isa(e, MatchFailure)
-                            println("MatchFailure:" + e.msg)
-                        else
-                            showerror(stderr, e, catch_backtrace())
-                        end
+                        $(GlobalRef(Base, :invokelatest))($(GlobalRef(@__MODULE__, :reportUnexpectedInMatch)), e, catch_backtrace())
                         rethrow(e)
                     end
                     #= Log the swallowed exception. =#
