@@ -1,11 +1,14 @@
 #=
   The MetaModelica.Dangerous module.
-  Most things here are stubs.
+  Functions that skip checks or hand out pointers. Use with care.
 =#
 
 module Dangerous
 
-import ExportAll
+export arrayCreateNoInit, arrayGetNoBoundsChecking, arrayUpdateNoBoundsChecking
+export listArrayLiteral, listGetFirstAsPtr, listReverseInPlace, listSetFirst, listSetRest
+export stringGetNoBoundsChecking, unsafe_pointer_from_objref
+
 using ..MetaModelica
 
 """ O(1) """
@@ -57,6 +60,5 @@ function unsafe_pointer_from_objref(@nospecialize(x))
 end
 
 
-ExportAll.@exportAll()
 
 end #= End Dangerous. =#

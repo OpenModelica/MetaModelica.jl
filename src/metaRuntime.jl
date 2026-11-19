@@ -751,16 +751,6 @@ Base.:+(x::String, y::String) =
     x * y
   end
 
-""" Imports and prints if the import is successful. """
-macro importDBG(moduleName)
-  quote
-    import $moduleName
-    x = string(@__MODULE__)
-    y = string($(esc(moduleName)))
-    println("Importing " * y * " in " * x)
-  end
-end
-
 const NOT_IMPLEMENTED_MSG::String = "__NOT_IMPLEMENTED__"
 
 #= `getInstanceName()` has 281 callsites in OMFrontend, many inside hot
