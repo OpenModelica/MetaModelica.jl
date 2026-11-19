@@ -19,14 +19,12 @@ using ImmutableList
 include("cheapThrows.jl")
 include("compactedUniontype.jl")
 include("matchcontinue.jl")
-include("matchcontinue_debug.jl")
 include("functionInheritance.jl")
 include("metaRuntime.jl")
 include("shouldFail.jl")
 include("utilityMacros.jl")
 
-export @match, @matchcontinue, @matchcontinue_debug, @unsafematch, MatchFailure, ModelicaReal, ModelicaInteger
-export MATCHCONTINUE_DEBUG_LOG, clear_matchcontinue_log!, summarize_matchcontinue_log, print_matchcontinue_log
+export @match, @matchcontinue, @unsafematch, MatchFailure, ModelicaReal, ModelicaInteger
 export @Uniontype, @Record, @UniontypeDecl, @ExtendedFunction, @ExtendedAnonFunction
 export List, list, Nil, nil, Cons, cons, =>, Option, SOME, NONE, SourceInfo, SOURCEINFO
 export @do_threaded_for, <|, @shouldFail, sourceInfo, _cons, @importDBG
@@ -42,5 +40,6 @@ end
 include("exportmetaRuntime.jl")
 include("dangerous.jl")
 include("array.jl")
+include("MM_Debug.jl")
 
 end
