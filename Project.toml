@@ -9,7 +9,7 @@ ImmutableList = "4a558cac-c1ed-11e9-20da-3584bcd8709a"
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
 
 [compat]
-ImmutableList = "0.4.2, 0.5, 0.6"
+ImmutableList = "0.6"
 julia = "1.13"
 Accessors = "0.1"
 ExportAll = "0.1"
