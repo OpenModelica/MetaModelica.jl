@@ -51,4 +51,8 @@ using Test
     include("cheapThrowsTests.jl")
   end
 
+  @testset "Exported names" begin
+    include("exportTests.jl")
+  end
+
 end #= End MetaModelica testset =#

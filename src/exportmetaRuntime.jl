@@ -1,120 +1,32 @@
 #=
-  This file contains all functions that should be exported for the MetaModelica runtime.
-  Add new exports here.
+  The MetaModelica builtin functions and runtime helpers exported by `using MetaModelica`.
+  Grouped by the prefix of the name. Add new exports to the group they belong to.
+  test/exportTests.jl pins the exported names: a new export is a decision.
 =#
-export anyString
-export arrayAppend
-export arrayCopy
-export arrayCreate
-export arrayEmpty
-export arrayGet
-export arrayLength
-export arrayList
-export arrayUpdate
-export boolNot
-export boolAnd
-export boolEq
-export boolOr
-export boolString
-export clock
-export cons
-export debug_print
-export equality
-export fail
-export getGlobalRoot
-export intAbs
-export intAdd
-export intBitLShift
-export intBitNot
-export intBitAnd
-export intBitOr
-export intBitRShift
-export intBitXor
-export intDiv
-export intEq
-export intGe
-export intGt
-export intLe
-export intLt
-export intMax
-export intMin
-export intMod
-export intMul
-export intMul
-export intNe
-export intNeg
-export intReal
-export intString
-export intStringChar
-export intSub
-export isNone
-export isPresent
-export isSome
-export listAppend
-export listArray
-export listDelete
-export listEmpty
-export listGet
-export listHead
-export listLength
-export listMember
-export listRest
-export listReverse
-export listStringCharString
-export printAny
-export realAbs
-export realAdd
-export realDiv
-export realEq
-export realGe
-export realGt
-export realInt
-export realLe
-export realLt
-export realMax
-export realMin
-export realMod
-export realMul
-export realNe
-export realNeg
-export realNeg
-export realPow
-export realString
-export realSub
-export referenceDebugString
-export referenceEq
-export referencePointerString
-export setGlobalRoot
-export setStackOverflowSignal
-export stringAppend
-export stringAppendList
-export stringCharInt
-export stringCharListString
-export stringCompare
-export stringDelimitList
-export stringEmpty
-export stringEqual
-export stringEq
-export stringGet
-export stringGetStringChar
-export stringHash
-export stringHashDjb2
-export stringHashDjb2Mod
-export stringHashSdbm
-export stringInt
-export stringLength
-export stringListStringChar
-export stringReal
-export stringUpdateStringChar
-export String
-export substring
-export tick
-export resetTick
-export valueCompare
-export valueConstructor
-export valueEq
-export valueHashMod
-export valueSlots
-export _listAppend
-export getInstanceName
-export StringFunction
+
+#= Arrays =#
+export arrayAppend, arrayCopy, arrayCreate, arrayEmpty, arrayGet, arrayLength, arrayList, arrayUpdate
+
+#= Booleans =#
+export boolNot, boolAnd, boolEq, boolOr, boolString
+
+#= Integers =#
+export intAbs, intAdd, intBitLShift, intBitNot, intBitAnd, intBitOr, intBitRShift, intBitXor, intDiv, intEq, intGe, intGt, intLe, intLt, intMax, intMin, intMod, intMul, intNe, intNeg, intReal, intString, intStringChar, intSub
+
+#= Reals =#
+export realAbs, realAdd, realDiv, realEq, realGe, realGt, realInt, realLe, realLt, realMax, realMin, realMod, realMul, realNe, realNeg, realPow, realString, realSub
+
+#= Strings =#
+export stringAppend, stringAppendList, stringCharInt, stringCharListString, stringCompare, stringDelimitList, stringEmpty, stringEqual, stringEq, stringGet, stringGetStringChar, stringHash, stringHashDjb2, stringHashDjb2Mod, stringHashSdbm, stringInt, stringLength, stringListStringChar, stringReal, stringUpdateStringChar
+
+#= Lists =#
+export listAppend, listArray, listDelete, listEmpty, listGet, listHead, listLength, listMember, listRest, listReverse, listStringCharString
+
+#= Values =#
+export valueCompare, valueConstructor, valueEq, valueHashMod, valueSlots
+
+#= References =#
+export referenceDebugString, referenceEq, referencePointerString
+
+#= Other builtins and helpers =#
+export anyString, clock, cons, debug_print, equality, fail, getGlobalRoot, isNone, isPresent, isSome, printAny, setGlobalRoot, setStackOverflowSignal, String, substring, tick, resetTick, _listAppend, getInstanceName, StringFunction

@@ -103,3 +103,33 @@ end
 
 
 end #= End module =#
+
+module MMDebugUser
+  using MetaModelica
+  using MetaModelica.MM_Debug: @matchcontinue
+  function pick(x::Int)::Int
+    @matchcontinue x begin
+      1 => fail()
+      1 => 10
+      _ => 20
+    end
+  end
+  function nothingMatches(x::Int)::Int
+    @matchcontinue x begin
+      1 => fail()
+    end
+  end
+end
+
+@testset "MM_Debug.@matchcontinue logs swallowed exceptions" begin
+  MetaModelica.MM_Debug.clear!()
+  @test MMDebugUser.pick(1) == 10
+  @test MMDebugUser.pick(2) == 20
+  @test length(MetaModelica.MM_Debug.LOG) == 1
+  @test MetaModelica.MM_Debug.LOG[1].case_num == 1
+  @test_throws MatchFailure MMDebugUser.nothingMatches(1)
+  @test MetaModelica.MM_Debug.LOG[end].case_num == 0
+  @test occursin("ALL CASES FAILED", MetaModelica.MM_Debug.LOG[end].source)
+  MetaModelica.MM_Debug.clear!()
+  @test isempty(MetaModelica.MM_Debug.LOG)
+end

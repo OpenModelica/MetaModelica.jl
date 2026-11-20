@@ -566,14 +566,26 @@ function subjectNarrowing(subject::Symbol, pattern, calling_module::Union{Module
 end
 
 """
+The pattern of a case as text of at most 60 characters, for the log of `MM_Debug`.
+"""
+function _shortPattern(pattern)::String
+  local text::String = string(pattern)
+  return length(text) > 60 ? string(first(text, 57), "...") : text
+end
+
+"""
 Handles match cases both for the matchcontinue and regular match case
 calls handle_destruct. See handle_destruct for more details.
 `subject`: the matched variable of a `@match` whose value is a plain variable, narrowed in each case's body
 (`subjectNarrowing`); `nothing` otherwise.
+`swallowHook`: a function called as `swallowHook(caseNumber, exception, caseText)` when a `@matchcontinue` case
+swallows an exception (`MM_Debug` passes its logger); `nothing` adds no code.
 """
-function handle_match_case(value, case, tail, asserts, matchcontinue::Bool; calling_module::Union{Module,Nothing}=nothing, source::Union{LineNumberNode,Nothing}=nothing, subject::Union{Symbol,Nothing}=nothing)
+function handle_match_case(value, case, tail, asserts, matchcontinue::Bool; calling_module::Union{Module,Nothing}=nothing, source::Union{LineNumberNode,Nothing}=nothing, subject::Union{Symbol,Nothing}=nothing, swallowHook=nothing, caseNumber::Int=0)
   if @capture(case, pattern_ => result_)
     bound = Set{Symbol}()
+    local swallowed = swallowHook === nothing ? nothing :
+      :($swallowHook($caseNumber, e, $(string(source === nothing ? "" : string(source.file, ":", source.line), " case ", _shortPattern(pattern)))))
     body = handle_destruct(:value, pattern, bound, asserts; calling_module=calling_module, source=source)
     local narrow = (matchcontinue || subject === nothing) ? nothing : subjectNarrowing(subject, pattern, calling_module)
     if narrow !== nothing
@@ -601,6 +613,7 @@ function handle_match_case(value, case, tail, asserts, matchcontinue::Bool; call
               $(GlobalRef(Base, :invokelatest))($(GlobalRef(@__MODULE__, :reportUnexpectedInMatch)), e, catch_backtrace())
               rethrow(e)
             end
+            $swallowed
             __omc_match_done = false
           end
         end
@@ -630,7 +643,7 @@ end
 """
 Top level function for all match macros except for the match equation macro.
 """
-function handle_match_cases(value, match::Expr; matchcontinue::Bool=false, calling_module::Union{Module,Nothing}=nothing, source::Union{LineNumberNode,Nothing}=nothing)
+function handle_match_cases(value, match::Expr; matchcontinue::Bool=false, calling_module::Union{Module,Nothing}=nothing, source::Union{LineNumberNode,Nothing}=nothing, swallowHook=nothing)
   tail = nothing
   if match.head != :block
     error("Unrecognized match syntax: Expected begin block $match")
@@ -659,7 +672,7 @@ function handle_match_cases(value, match::Expr; matchcontinue::Bool=false, calli
   local subject = value isa Symbol ? value : nothing
   for i in length(cases):-1:1
     case = cases[i]
-    tail = handle_match_case(:value, case, tail, asserts, matchcontinue; calling_module=calling_module, source=caseSources[i], subject=subject)
+    tail = handle_match_case(:value, case, tail, asserts, matchcontinue; calling_module=calling_module, source=caseSources[i], subject=subject, swallowHook=swallowHook, caseNumber=i)
     if line !== nothing
       replaceLineNum(tail, @__FILE__, line)
     end
@@ -677,6 +690,7 @@ function handle_match_cases(value, match::Expr; matchcontinue::Bool=false, calli
       local res
       $tail
       if !__omc_match_done
+        $(swallowHook === nothing ? nothing : :($swallowHook(0, MatchFailure("all cases exhausted", typeof(value)), $(string(source === nothing ? "" : string(source.file, ":", source.line), " ALL CASES FAILED")))))
         $(mm_throw)(MatchFailure("unfinished match for type", typeof(value)))
       end
       res
@@ -756,6 +770,9 @@ macro unsafematch(expr)
   res
 end
 
+"""The file of the match macros; line numbers from it are replaced by the call site's."""
+const MATCHCONTINUE_FILE = @__FILE__
+
 """
       @matchcontinue value begin
           pattern1 => result1
@@ -770,6 +787,7 @@ macro matchcontinue(value, cases)
   replaceLineNum(res, @__FILE__, __source__)
   res
 end
+
 
 """
       @match value begin

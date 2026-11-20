@@ -7,6 +7,7 @@ makedocs(
     MetaModelica,
     MetaModelica.UniontypeDef,
     MetaModelica.Dangerous,
+    MetaModelica.MM_Debug,
   ],
   format = Documenter.HTML(
     prettyurls = get(ENV, "CI", "false") == "true",
