@@ -4,7 +4,25 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE*'
+      - 'COPYING'
+      - 'CITATION.bib'
+      - '.gitignore'
+      - '.github/workflows/main.yml'
+      - '.github/workflows/omjl.yml'
   pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE*'
+      - 'COPYING'
+      - 'CITATION.bib'
+      - '.gitignore'
+      - '.github/workflows/main.yml'
+      - '.github/workflows/omjl.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
