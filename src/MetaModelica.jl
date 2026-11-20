@@ -25,8 +25,8 @@ include("utilityMacros.jl")
 
 export @match, @matchcontinue, @unsafematch, MatchFailure, ModelicaReal, ModelicaInteger
 export @Uniontype, @Record, @UniontypeDecl, @ExtendedFunction, @ExtendedAnonFunction
-export List, list, Nil, nil, Cons, cons, =>, Option, SOME, NONE, SourceInfo, SOURCEINFO
-export @do_threaded_for, <|, @shouldFail, sourceInfo, _cons
+export List, list, Nil, nil, Cons, cons, =>, Option, SOME, NONE
+export @do_threaded_for, <|, @shouldFail, _cons
 export @assign, @Mutable_Uniontype, @closure, @nospecialized
 export compacted_tag_info, @CUniontype, @T_Uniontype, isvariant, variantof
 export mm_throw, with_cheap_throws, @cheap_throws

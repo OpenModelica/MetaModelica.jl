@@ -11,7 +11,7 @@ const EXPORTED = split("""
 <| => @CUniontype @ExtendedAnonFunction @ExtendedFunction @Mutable_Uniontype @Record @T_Uniontype @Uniontype
 @UniontypeDecl @assign @cheap_throws @closure @do_threaded_for @fastmatch @match @matchcontinue
 @nospecialized @shouldFail @unsafematch Cons List MatchFailure ModelicaInteger ModelicaReal NONE Nil Option
-SOME SOURCEINFO SourceInfo String StringFunction _cons _listAppend anyString arrayAppend arrayCopy
+SOME String StringFunction _cons _listAppend anyString arrayAppend arrayCopy
 arrayCreate arrayEmpty arrayGet arrayLength arrayList arrayUpdate boolAnd boolEq boolNot boolOr boolString
 clock compacted_tag_info cons debug_print equality fail getGlobalRoot getInstanceName intAbs intAdd intBitAnd
 intBitLShift intBitNot intBitOr intBitRShift intBitXor intDiv intEq intGe intGt intLe intLt intMax intMin
@@ -19,7 +19,7 @@ intMod intMul intNe intNeg intReal intString intStringChar intSub isNone isPrese
 listAppend listArray listDelete listEmpty listGet listHead listLength listMember listRest listReverse
 listStringCharString mm_throw nil printAny realAbs realAdd realDiv realEq realGe realGt realInt realLe realLt
 realMax realMin realMod realMul realNe realNeg realPow realString realSub referenceDebugString referenceEq
-referencePointerString resetTick setGlobalRoot setStackOverflowSignal sourceInfo stringAppend
+referencePointerString resetTick setGlobalRoot setStackOverflowSignal stringAppend
 stringAppendList stringCharInt stringCharListString stringCompare stringDelimitList stringEmpty stringEq
 stringEqual stringGet stringGetStringChar stringHash stringHashDjb2 stringHashDjb2Mod stringHashSdbm
 stringInt stringLength stringListStringChar stringReal stringUpdateStringChar substring tick valueCompare
