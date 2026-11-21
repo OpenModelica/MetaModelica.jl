@@ -28,7 +28,7 @@ export @Uniontype, @Record, @UniontypeDecl, @ExtendedFunction, @ExtendedAnonFunc
 export List, list, Nil, nil, Cons, cons, =>, Option, SOME, NONE
 export @do_threaded_for, <|, @shouldFail, _cons
 export @assign, @Mutable_Uniontype, @closure, @nospecialized
-export compacted_tag_info, @CUniontype, @T_Uniontype, isvariant, variantof
+export compacted_tag_info, @CUniontype, @T_Uniontype, @registerVariants, isvariant, variantof
 export mm_throw, with_cheap_throws, @cheap_throws
 
 function __init__()

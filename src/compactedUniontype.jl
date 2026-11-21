@@ -113,6 +113,86 @@ function _compacted_common_defs(structName::Symbol, variantNames::Vector{Symbol}
 end
 
 """
+    @registerVariants T begin
+      VARIANT_A(field1, field2)
+      VARIANT_B()
+      ...
+    end
+
+Register the variants of a hand-written tagged struct `T` for `@match`, `isvariant` and `variantof`.
+
+`@T_Uniontype` and `@CUniontype` generate a struct, its tag `@enum` and its constructors from a variant list. This
+macro is for a struct written out in plain Julia instead (fields and constructors documented where they are
+defined); it generates only the registration, which is the same for every such struct.
+
+What `T` must have:
+- a field `tag` holding a value of an `@enum` with one value per variant, named `<VARIANT>_TAG` (`VARIANT_A_TAG`),
+  declared in the order the variants are listed here (the first is 0);
+- per variant a function `VARIANT_A(...)` returning a `T` with that tag, defined before this macro (the
+  registration dispatches on `typeof(VARIANT_A)`).
+
+Each variant is listed with its own fields, in the order of its positional arguments: the fields a pattern binds
+(`VARIANT_A(x, y)` binds `field1` and `field2`; `VARIANT_A(field2 = y)` names one).
+
+It expands to:
+- per variant `MetaModelica.compacted_tag_info(::typeof(VARIANT_A)) = (T, :tag, VARIANT_A_TAG, (:field1, :field2))`,
+  what `@match` and `isvariant` read;
+- `MetaModelica.valueConstructor(v::T) = Int(v.tag)` and
+  `MetaModelica.variantof(v::T) = (VARIANT_A, VARIANT_B, ...)[Int(v.tag) + 1]`;
+- a check at load that `Int(VARIANT_A_TAG)` is the variant's position: an enum in another order is an error
+  instead of a wrong match.
+
+`T` is a type name; an alias of a concrete type (`const Modifier = ModifierImpl{Tree}`) works.
+
+# Example
+```julia
+@enum ShapeTag::UInt8 CIRCLE_TAG RECT_TAG
+
+\"\"\"A shape: `CIRCLE(r)` or `RECT(w, h)`.\"\"\"
+struct Shape
+  tag::ShapeTag
+  r::Float64
+  w::Float64
+  h::Float64
+end
+CIRCLE(r) = Shape(CIRCLE_TAG, r, 0.0, 0.0)
+RECT(w, h) = Shape(RECT_TAG, 0.0, w, h)
+
+@registerVariants Shape begin
+  CIRCLE(r)
+  RECT(w, h)
+end
+
+area(s::Shape) = @match s begin
+  CIRCLE(r = r) => pi * r^2
+  RECT(w, h) => w * h
+end
+```
+"""
+macro registerVariants(T, block)
+  T isa Symbol || error("@registerVariants: expected a type name, got: $T")
+  (block isa Expr && block.head === :block) ||
+    error("@registerVariants $T: expected a `begin ... end` block of `VARIANT(field, ...)` lines")
+  local variantNames = Symbol[]
+  local variantFields = Vector{Symbol}[]
+  for line in block.args
+    line isa LineNumberNode && continue
+    (line isa Expr && line.head === :call && line.args[1] isa Symbol && all(a -> a isa Symbol, line.args[2:end])) ||
+      error("@registerVariants $T: expected `VARIANT(field, ...)` with bare field names, got: $line")
+    push!(variantNames, line.args[1])
+    push!(variantFields, Symbol[a for a in line.args[2:end]])
+  end
+  isempty(variantNames) && error("@registerVariants $T: needs at least one variant")
+  local tagValues = Symbol[Symbol(v, "_TAG") for v in variantNames]
+  local checks = Expr[]
+  for (i, tagVal) in enumerate(tagValues)
+    local msg = "@registerVariants $T: $tagVal must be value $(i - 1) of its enum, the position of its variant"
+    push!(checks, :(Int($tagVal) == $(i - 1) || error($msg)))
+  end
+  esc(Expr(:block, checks..., _compacted_common_defs(T, variantNames, tagValues, variantFields)..., nothing))
+end
+
+"""
     @CUniontype Name begin
       VARIANT1(field1::Type1, field2::Type2, ...)
       VARIANT2(...)
