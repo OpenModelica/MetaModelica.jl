@@ -9,39 +9,22 @@ struct MetaModelicaGeneralException <: MetaModelicaException
 end
 
 """
-SOME
-Optional with a value T
+    SOME(x)
+
+An optional value that is present: Julia's `Some` (`SOME === Some`, the value is `x.value`). With `nothing` it forms
+[`Option`](@ref). Base converts a `Some{S}` to an `Option{T}` for `S <: T`.
 """
-struct SOME{T}
-  data::T
-end
+const SOME = Some
 
-"""The optional type is defined as the Union of SOME{T} and the Nothing type. """
-const Option{T} = Union{SOME{T},Nothing}
+"""
+    Option{T}
 
-""" NONE is defined as nothing. """
+MetaModelica's `Option<T>`: `Union{Some{T}, Nothing}`.
+"""
+const Option{T} = Union{Some{T}, Nothing}
+
+"""The absent value of an [`Option`](@ref): `nothing`."""
 const NONE() = Nothing()
-
-Base.convert(::Type{Option{S}}, x::SOME{T}) where {S,T<:S} =
-  let
-    SOME{S}(convert(S, x.data))
-  end
-
-Base.convert(::Type{Option{T}}, nothing) where {T} =
-  let
-    Nothing()
-  end
-
-""" Identity case """
-Base.convert(::Type{Union{Nothing,SOME{T}}}, x::Union{Nothing,SOME{T}}) where {T} =
-  let
-    x
-  end
-
-Base.convert(::Type{Union{Nothing,SOME{S}}}, x::SOME{S}) where {S} =
-  let
-    x
-  end
 
 """ Logically combine two Booleans with 'and' operator """
 @inline function boolAnd(b1::Bool, b2::Bool)::Bool
@@ -713,37 +696,6 @@ The code generated from the transpiler is correct however
 """
 @inline function isPresent(ident::T)::Bool where {T}
   true
-end
-
-#= The Info attribute provides location information for elements and classes. =#
-@Mutable_Uniontype SourceInfo begin
-  @Record SOURCEINFO begin
-    fileName::String #= File where the class is defined. =#
-    isReadOnly::Bool #= True for libraries. =#
-    lineNumberStart::Int
-    columnNumberStart::Int
-    lineNumberEnd::Int
-    columnNumberEnd::Int
-    lastModification::Float64 #= stat(2) mtime as Float64 for precision on 32-bit platforms. =#
-  end
-end
-
-SOURCEINFO(fileName::String, isReadOnly::Bool, lineNumberStart::Int,
-           columnNumberSTart::Int, lineNumberEnd::Int,
-           columnNumberEnd::Int) =
-  let
-    #= No source info. =#
-    SOURCEINFO(fileName, isReadOnly, lineNumberStart, columnNumberSTart, lineNumberEnd,
-               columnNumberEnd, 0.0)
-  end
-
-const DEFAULT_INFO = SOURCEINFO("", true, 1, 2, 3, 4, 0.0)
-
-"""
-Returns the default source info.
-"""
-@inline function sourceInfo()::SOURCEINFO
-  DEFAULT_INFO
 end
 
 Base.:+(x::String, y::String) =
