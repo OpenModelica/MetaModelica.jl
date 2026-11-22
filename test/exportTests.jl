@@ -10,7 +10,7 @@ using Test
 const EXPORTED = split("""
 <| => @CUniontype @ExtendedAnonFunction @ExtendedFunction @Mutable_Uniontype @Record @T_Uniontype @Uniontype
 @UniontypeDecl @assign @cheap_throws @closure @do_threaded_for @fastmatch @match @matchcontinue
-@nospecialized @shouldFail @unsafematch Cons List MatchFailure ModelicaInteger ModelicaReal NONE Nil Option
+@nospecialized @registerVariants @shouldFail @unsafematch Cons List MatchFailure ModelicaInteger ModelicaReal NONE Nil Option
 SOME String StringFunction _cons _listAppend anyString arrayAppend arrayCopy
 arrayCreate arrayEmpty arrayGet arrayLength arrayList arrayUpdate boolAnd boolEq boolNot boolOr boolString
 clock compacted_tag_info cons debug_print equality fail getGlobalRoot getInstanceName intAbs intAdd intBitAnd
