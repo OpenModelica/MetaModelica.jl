@@ -185,4 +185,43 @@ end
   @test isvariant(Inner.NEG(1), Inner.NEG)
 end
 
+#= @registerVariants: a tagged struct written by hand, registered for @match. =#
+@enum FigureTag::UInt8 DOT_TAG BOX_TAG
+struct Figure
+  tag::FigureTag
+  r::Float64
+  w::Float64
+  h::Float64
+end
+DOT(r) = Figure(DOT_TAG, r, 0.0, 0.0)
+BOX(w, h) = Figure(BOX_TAG, 0.0, w, h)
+@registerVariants Figure begin
+  DOT(r)
+  BOX(w, h)
+end
+figureArea(f::Figure)::Float64 = @match f begin
+  DOT(r = r) => pi * r^2
+  BOX(w, h) => w * h
+end
+
+@enum MisorderedTag::UInt8 SECOND_TAG FIRST_TAG
+struct Misordered
+  tag::MisorderedTag
+end
+FIRST() = Misordered(FIRST_TAG)
+SECOND() = Misordered(SECOND_TAG)
+
+@testset "@registerVariants" begin
+  @test figureArea(DOT(2.0)) == 4.0 * pi
+  @test figureArea(BOX(2.0, 3.0)) == 6.0
+  @test isvariant(BOX(1.0, 1.0), BOX) && !isvariant(BOX(1.0, 1.0), DOT)
+  @test variantof(DOT(1.0)) === DOT
+  @test MetaModelica.valueConstructor(BOX(1.0, 1.0)) == 1
+  # The enum's order must be the variants' order.
+  @test_throws ErrorException @eval @registerVariants Misordered begin
+    FIRST()
+    SECOND()
+  end
+end
+
 end
