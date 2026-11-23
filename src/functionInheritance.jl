@@ -54,7 +54,15 @@ function getSignatureAsArrayFor(func::Function)::Vector
   @assert(forwardingCall !== nothing,
           "Could not locate the default-forwarding call in getSignatureAsArrayFor().")
   #= Skip the forwarded function/self; remaining args align with the full signature. =#
-  local forwardedArgs = forwardingCall.args[2:end]
+  local forwardedArgs::Vector{Any} = map(a -> resolveConstantDefault(a, defaultCarrier.code), forwardingCall.args[2:end])
+  #= Only literal and constant defaults can be read back. A default that is an expression (of another argument,
+     a call) is lowered into statements before the forwarding call: refuse it instead of reading a wrong value. =#
+  local callee = forwardingCall.args[1]
+  if !(callee isa Core.SlotNumber || callee isa Core.Argument) ||
+     any(a -> a isa Core.SSAValue || a isa GlobalRef || a isa Expr, forwardedArgs)
+    error("@ExtendedFunction: $(func) has a default value that is not a literal or a constant. ",
+          "Supported defaults: literals (numbers, strings, symbols, true/false) and constants (nothing, const globals).")
+  end
   for i = 1:nArgumentSymbols
     local val = forwardedArgs[i]
     if val isa Core.SlotNumber || val isa Core.Argument
@@ -64,6 +72,16 @@ function getSignatureAsArrayFor(func::Function)::Vector
     end
   end
   signatureArray
+end
+
+#= A forwarded default that names a constant (`nothing`, a `const` global) is lowered to a statement holding the
+   GlobalRef, and the argument is that statement's SSAValue: the constant's value. Anything else is returned as is. =#
+function resolveConstantDefault(arg::Any, code::Vector{Any})::Any
+  local ref::Any = arg isa Core.SSAValue ? code[arg.id] : arg
+  if ref isa GlobalRef && isdefined(ref.mod, ref.name) && isconst(ref.mod, ref.name)
+    return getglobal(ref.mod, ref.name)
+  end
+  return arg
 end
 
 function getNewFunctionArgs(functionToExtend, func::Function)::Vector{Tuple}
@@ -132,22 +150,31 @@ end
 #= Creates a lambda that extends an existing function. =#
 function makeExtendedLambdaFunction(functionToExtend::Expr, __module__::Module)
   (func, newFuncArgs, argSymArr) = makeFunctionHelper(functionToExtend, __module__)
-  if size(newFuncArgs, 1) == 0
-    :(() -> $func($(argSymArr...))) |> esc
-  else
-    quote
-      $((newFuncArgs...)) -> $func($(argSymArr...))
-    end |> esc
-  end
+  #= A lambda's optional argument is written `b = 1` in its argument tuple, not as a keyword (`:kw`) expression. =#
+  local lambdaArgs::Vector{Any} = Any[a isa Expr && a.head === :kw ? Expr(:(=), a.args...) : a for a in newFuncArgs]
+  Expr(:->, Expr(:tuple, lambdaArgs...), Expr(:block, :($func($(argSymArr...))))) |> esc
 end
 
+"""
+    @ExtendedFunction new old(arg = value, ...)
+
+Define `new`: the positional arguments of `old`, with new defaults for the named ones, passed on to `old`.
+The Julia version of MetaModelica's `function new = old(arg = value);`, for the MetaModelica-to-Julia translator.
+`old` must be defined before the macro, and its defaults must be literals or constants.
+"""
 macro ExtendedFunction(newFunction, functionToExtend)
   local nf::Symbol = newFunction
   local fte = functionToExtend
   makeExtendedFunction(nf, fte, __module__)
-end |> esc
+end
 
+"""
+    @ExtendedAnonFunction old(arg = value, ...)
+
+An anonymous function: `old` with new defaults for the named arguments, as [`@ExtendedFunction`](@ref).
+The Julia version of MetaModelica's `function old(arg = value)` passed as an argument.
+"""
 macro ExtendedAnonFunction(functionToExtend)
   local fte = functionToExtend
   makeExtendedLambdaFunction(fte, __module__)
-end |> esc
+end

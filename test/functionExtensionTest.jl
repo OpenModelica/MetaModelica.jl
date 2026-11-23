@@ -112,4 +112,21 @@ end
 
 @test fooFoo() == 2
 
+#= Constant defaults (`nothing`, a const global) are read back; an expression default is refused. =#
+const SEPARATOR = "::"
+joinPath(path::String, delimiter::String = SEPARATOR, prefix = nothing) = (prefix, replace(path, "/" => delimiter))
+
+@ExtendedFunction joinPathA joinPath(path = "a/b")
+@test joinPathA() == (nothing, "a::b")
+
+@ExtendedFunction joinPathP joinPath(prefix = :p)
+@test joinPathP("a/b") == (:p, "a::b")
+
+#= An anonymous extension of a function with several arguments, some optional. =#
+@test map(@ExtendedAnonFunction(joinPath(prefix = :q)), ["a/b", "c/d"]) == [(:q, "a::b"), (:q, "c::d")]
+@test (@ExtendedAnonFunction joinPath(path = "x/y"))() == (nothing, "x::y")
+
+dependentDefault(a, b = a + 1) = (a, b)
+@test_throws "not a literal or a constant" @eval @ExtendedFunction dependentDefault5 dependentDefault(a = 5)
+
 end
