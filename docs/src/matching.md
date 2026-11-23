@@ -203,17 +203,28 @@ The variant name in a pattern is the constructor function, not a type: `CIRCLE(r
 A failure is a `MetaModelicaException` or an
 `ImmutableListException`:
 
-- `fail()`, and the builtins that fail on bad input (`stringInt("2.5")`, `listHead(nil)`, ...);
-- a `MatchFailure`: an inner `@match` with no matching case, or a match equation that does not match.
+- `fail()`;
+- a `MatchFailure`: an inner `@match` with no matching case, or a match equation that does not match;
+- a failing [runtime builtin](@ref "Runtime builtins") (`stringInt("2.5")`, `listHead(nil)`, ...), in code
+  translated from MetaModelica.
 
-Any other exception (`BoundsError`, `MethodError`, ...) is a bug, not a failure: `@matchcontinue` prints it and
-rethrows it.
+Any other exception is a bug, not a failure: `@matchcontinue` prints it and rethrows it. That includes Julia's own
+errors (`ArgumentError` from `parse(Int, "x")`, `BoundsError`, `MethodError`). To reject a case from plain Julia
+code, call `fail()`:
 
 ```@example match
 function describe(s::String)::String
   @matchcontinue s begin
-    _ => "integer " * intString(stringInt(s))
-    _ => "real " * realString(stringReal(s))
+    _ => begin
+      local n = tryparse(Int, s)
+      n === nothing && fail()
+      "integer $n"
+    end
+    _ => begin
+      local x = tryparse(Float64, s)
+      x === nothing && fail()
+      "real $x"
+    end
     _ => "text"
   end
 end

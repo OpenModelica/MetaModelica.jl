@@ -11,7 +11,17 @@ It includes:
 - Pattern matching macros such as `@match`, `@matchcontinue`, and `@unsafematch`: see [Pattern matching](@ref).
 - Union and record helpers such as `@Uniontype`, `@Mutable_Uniontype`, and `@Record`.
 - Compacted uniontypes, one concrete tagged struct per uniontype: `@CUniontype` and `@T_Uniontype`, with `isvariant` and `variantof` in place of `isa` and `typeof`; `@registerVariants` registers a hand-written tagged struct the same way.
-- Runtime compatibility functions for MetaModelica booleans, integers, reals, strings, arrays, lists, options, and values.
+- Runtime builtins: Julia versions of MetaModelica's builtin functions (see below).
+
+## Runtime builtins
+
+The functions for MetaModelica booleans, integers, reals, strings, arrays, lists, options and values (`intAdd`,
+`stringInt`, `listHead`, `arrayGet`, `valueEq`, ...) mimic MetaModelica's builtin functions: same names, same
+arguments, same semantics, including failing with `fail()` where MetaModelica fails. They exist so that code
+translated from MetaModelica, such as the OpenModelica frontend in OMFrontend.jl, runs unchanged.
+
+They are not needed to use pattern matching. Julia code that only uses `@match` and `@matchcontinue` calls Julia's
+own functions (`+`, `parse`, `first`, ...), and `fail()` to reject a `@matchcontinue` case.
 
 ## Example
 
