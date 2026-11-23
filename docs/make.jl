@@ -14,6 +14,7 @@ makedocs(
   ),
   pages = [
     "Home" => "index.md",
+    "Pattern matching" => "matching.md",
     "API Reference" => "api.md",
   ],
 )
