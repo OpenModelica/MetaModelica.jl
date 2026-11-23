@@ -87,7 +87,7 @@ A value that no case matches throws `MatchFailure`. End with a `_ => ...` case t
 | `p::T`                     | a value of type `T` that matches `p`                                                   |
 | `p1 || p2`                 | `p1` or `p2`; only the variables bound in both are bound                               |
 | `p1 && p2`                 | `p1` and `p2`                                                                          |
-| `p where cond`             | `p`, if `cond` (which may use `p`'s variables) is true                                 |
+| `p where cond`             | `p`, if `cond` (which may use `p`'s variables) is true. Write `p where (a && b)`: without the parentheses the `&&` joins patterns |
 
 Patterns nest:
 
@@ -132,6 +132,70 @@ value. A value that does not match throws `MatchFailure`.
 @match ADD(INT(a), INT(b)) = ADD(INT(1), INT(2))
 a + b
 ```
+
+## Matching your own types
+
+### Plain structs
+
+Any Julia struct matches without registration. The name is the type; positional patterns follow the field order,
+named patterns the field names.
+
+```@example match
+struct Point
+  x::Float64
+  y::Float64
+end
+
+quadrant(p::Point)::Int = @match p begin
+  Point(0.0, 0.0) => 0
+  Point(x = x, y = y) where (x > 0 && y > 0) => 1
+  Point(__) => -1
+end
+
+quadrant.([Point(0, 0), Point(1, 2), Point(-1, 2)])
+```
+
+`@Uniontype` with `@Record` (above) gives one struct per record, so a record matches the same way.
+
+### Tagged structs: `@registerVariants`
+
+A tagged struct is one concrete type for all variants, with a `tag` field that says which variant a value is.
+`@T_Uniontype` and `@CUniontype` generate such a struct together with its variants. For a struct written by hand,
+[`@registerVariants`](@ref) adds what `@match`, `isvariant` and `variantof` need:
+
+- a `tag` field holding an `@enum` with one value per variant, named `<VARIANT>_TAG`, in the order of the
+  variants (the first is 0);
+- per variant a constructor function returning a value with that tag, defined before `@registerVariants`;
+- per variant the fields its pattern binds, in the order of its positional arguments.
+
+```@example match
+@enum ShapeTag::UInt8 CIRCLE_TAG RECT_TAG
+
+struct Shape
+  tag::ShapeTag
+  r::Float64
+  w::Float64
+  h::Float64
+end
+CIRCLE(r) = Shape(CIRCLE_TAG, r, 0.0, 0.0)
+RECT(w, h) = Shape(RECT_TAG, 0.0, w, h)
+
+@registerVariants Shape begin
+  CIRCLE(r)
+  RECT(w, h)
+end
+
+area(s::Shape)::Float64 = @match s begin
+  CIRCLE(r) => pi * r^2
+  RECT(w, h) => w * h
+end
+
+(area(CIRCLE(1.0)), area(RECT(2.0, 3.0)), isvariant(RECT(1.0, 1.0), RECT))
+```
+
+The variant name in a pattern is the constructor function, not a type: `CIRCLE(r)` matches a `Shape` whose tag is
+`CIRCLE_TAG` and binds its field `r`. An `@enum` in another order than the variant list is an error when
+`@registerVariants` runs, not a wrong match.
 
 ## `@matchcontinue`
 
