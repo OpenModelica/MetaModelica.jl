@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="referrer" content="no-referrer"/><title>Pattern matching · MetaModelica.jl</title><meta name="title" content="Pattern matching · MetaModelica.jl"/><meta property="og:title" content="Pattern matching · MetaModelica.jl"/><meta property="twitter:title" content="Pattern matching · MetaModelica.jl"/><meta name="description" content="Documentation for MetaModelica.jl."/><meta property="og:description" content="Documentation for MetaModelica.jl."/><meta property="twitter:description" content="Documentation for MetaModelica.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.63.2/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">MetaModelica.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li class="is-active"><a class="tocitem" href>Pattern matching</a><ul class="internal"><li><a class="tocitem" href="#The-example-types"><span>The example types</span></a></li><li><a class="tocitem" href="#@match-value-begin-...-end"><span><code>@match value begin ... end</code></span></a></li><li><a class="tocitem" href="#Patterns"><span>Patterns</span></a></li><li><a class="tocitem" href="#@match-pattern-value"><span><code>@match pattern = value</code></span></a></li><li><a class="tocitem" href="#Matching-your-own-types"><span>Matching your own types</span></a></li><li><a class="tocitem" href="#@matchcontinue"><span><code>@matchcontinue</code></span></a></li><li><a class="tocitem" href="#Debugging-@matchcontinue:-MM_Debug"><span>Debugging <code>@matchcontinue</code>: <code>MM_Debug</code></span></a></li></ul></li><li><a class="tocitem" href="../uniontypes/">Uniontypes</a></li><li><a class="tocitem" href="../functionExtension/">Function extension</a></li><li><a class="tocitem" href="../api/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Pattern matching</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Pattern matching</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/OpenModelica/MetaModelica.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/OpenModelica/MetaModelica.jl/blob/master/docs/src/matching.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Pattern-matching"><a class="docs-heading-anchor" href="#Pattern-matching">Pattern matching</a><a id="Pattern-matching-1"></a><a class="docs-heading-anchor-permalink" href="#Pattern-matching" title="Permalink"></a></h1><p>MetaModelica.jl has two match macros. Both try the cases in order and return the result of the first case that matches.</p><table><tr><th style="text-align: right"></th><th style="text-align: right"><a href="../api/#MetaModelica.@match"><code>@match</code></a></th><th style="text-align: right"><a href="../api/#MetaModelica.@matchcontinue"><code>@matchcontinue</code></a></th></tr><tr><td style="text-align: right">Case taken</td><td style="text-align: right">first pattern that matches</td><td style="text-align: right">first pattern that matches and whose result does not fail</td></tr><tr><td style="text-align: right">Result expression fails</td><td style="text-align: right">the failure propagates</td><td style="text-align: right">the next case is tried</td></tr><tr><td style="text-align: right">No case left</td><td style="text-align: right">throws <code>MatchFailure</code></td><td style="text-align: right">throws <code>MatchFailure</code></td></tr><tr><td style="text-align: right">Cost per case</td><td style="text-align: right">type checks and field loads</td><td style="text-align: right">the same, plus a <code>try</code>/<code>catch</code></td></tr></table><p>Use <code>@match</code> unless a case can only be rejected by running its result expression.</p><h2 id="The-example-types"><a class="docs-heading-anchor" href="#The-example-types">The example types</a><a id="The-example-types-1"></a><a class="docs-heading-anchor-permalink" href="#The-example-types" title="Permalink"></a></h2><p>The examples on this page use this uniontype:</p><pre><code class="language-julia hljs">using MetaModelica
+
+@Uniontype Exp begin
+  @Record INT begin
+    value::Int
+  end
+  @Record ADD begin
+    lhs::Exp
+    rhs::Exp
+  end
+  @Record NEG begin
+    exp::Exp
+  end
+end</code></pre><h2 id="@match-value-begin-...-end"><a class="docs-heading-anchor" href="#@match-value-begin-...-end"><code>@match value begin ... end</code></a><a id="@match-value-begin-...-end-1"></a><a class="docs-heading-anchor-permalink" href="#@match-value-begin-...-end" title="Permalink"></a></h2><p>Each case is <code>pattern =&gt; result</code>. The variables a pattern binds are local to the case&#39;s result.</p><pre><code class="language-julia hljs">function evaluate(e::Exp)::Int
+  @match e begin
+    INT(v) =&gt; v
+    ADD(l, r) =&gt; evaluate(l) + evaluate(r)
+    NEG(x) =&gt; -evaluate(x)
+  end
+end
+
+evaluate(ADD(INT(1), NEG(INT(3))))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">-2</code></pre><p>When the subject is a variable, <code>@match</code> narrows its type in each case&#39;s result. In <code>ADD(__) =&gt; e.lhs</code>, <code>e</code> is known to be an <code>ADD</code>, so the field access is type-stable.</p><pre><code class="language-julia hljs">lhsOrSelf(e::Exp)::Exp = @match e begin
+  ADD(__) =&gt; e.lhs
+  _ =&gt; e
+end
+
+lhsOrSelf(ADD(INT(7), INT(1)))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Main.INT(7)</code></pre><p>A value that no case matches throws <code>MatchFailure</code>. End with a <code>_ =&gt; ...</code> case to give a default.</p><h2 id="Patterns"><a class="docs-heading-anchor" href="#Patterns">Patterns</a><a id="Patterns-1"></a><a class="docs-heading-anchor-permalink" href="#Patterns" title="Permalink"></a></h2><table><tr><th style="text-align: right">Pattern</th><th style="text-align: right">Matches</th></tr><tr><td style="text-align: right"><code>_</code></td><td style="text-align: right">anything; binds nothing</td></tr><tr><td style="text-align: right"><code>x</code></td><td style="text-align: right">anything; binds <code>x</code> (a name used twice in a pattern must match equal values)</td></tr><tr><td style="text-align: right"><code>1</code>, <code>&quot;a&quot;</code>, <code>:s</code>, <code>nothing</code></td><td style="text-align: right">a value <code>===</code> to the literal</td></tr><tr><td style="text-align: right"><code>C</code></td><td style="text-align: right">the value of <code>C</code>, if <code>C</code> is a <code>const</code> <code>Integer</code>, float, <code>Bool</code> or <code>Char</code> of the module</td></tr><tr><td style="text-align: right"><code>REC(p1, p2)</code></td><td style="text-align: right">a <code>REC</code> whose first fields match <code>p1</code>, <code>p2</code> in order</td></tr><tr><td style="text-align: right"><code>REC(field = p)</code></td><td style="text-align: right">a <code>REC</code> whose named fields match; other fields are not checked</td></tr><tr><td style="text-align: right"><code>REC(__)</code></td><td style="text-align: right">any <code>REC</code></td></tr><tr><td style="text-align: right">`h &lt;</td><td style="text-align: right">t`</td></tr><tr><td style="text-align: right"><code>nil()</code></td><td style="text-align: right">the empty list. Write <code>nil()</code>: a bare <code>nil</code> is a variable that binds anything</td></tr><tr><td style="text-align: right"><code>SOME(p)</code>, <code>NONE()</code></td><td style="text-align: right">an <a href="../api/#MetaModelica.Option"><code>Option</code></a> holding a value that matches <code>p</code>; no value</td></tr><tr><td style="text-align: right"><code>(p1, p2)</code></td><td style="text-align: right">a tuple of that length</td></tr><tr><td style="text-align: right"><code>[p1, p2]</code>, <code>[p1, rest...]</code></td><td style="text-align: right">an array of that length; one <code>...</code> takes the remaining elements</td></tr><tr><td style="text-align: right"><code>p::T</code></td><td style="text-align: right">a value of type <code>T</code> that matches <code>p</code></td></tr><tr><td style="text-align: right">`p1</td><td style="text-align: right"></td></tr><tr><td style="text-align: right"><code>p1 &amp;&amp; p2</code></td><td style="text-align: right"><code>p1</code> and <code>p2</code></td></tr><tr><td style="text-align: right"><code>p where cond</code></td><td style="text-align: right"><code>p</code>, if <code>cond</code> (which may use <code>p</code>&#39;s variables) is true. Write <code>p where (a &amp;&amp; b)</code>: without the parentheses the <code>&amp;&amp;</code> joins patterns</td></tr></table><p>Patterns nest:</p><pre><code class="language-julia hljs">function firstPositive(lst::List{Int})::Int
+  @match lst begin
+    x &lt;| _ where x &gt; 0 =&gt; x
+    _ &lt;| rest =&gt; firstPositive(rest)
+    nil() =&gt; 0
+  end
+end
+
+firstPositive(list(-1, 0, 5, 3))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">5</code></pre><pre><code class="language-julia hljs">either(t::Tuple{Int, Int})::Int = @match t begin
+  (a, 1) || (1, a) =&gt; a
+  _ =&gt; 0
+end
+
+(either((5, 1)), either((1, 6)), either((2, 2)))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(5, 6, 0)</code></pre><pre><code class="language-julia hljs">simplify(e::Exp)::Exp = @match e begin
+  NEG(NEG(x)) =&gt; x
+  ADD(INT(0), x) || ADD(x, INT(0)) =&gt; x
+  ADD(lhs = INT(a), rhs = INT(b)) =&gt; INT(a + b)
+  _ =&gt; e
+end
+
+(simplify(NEG(NEG(INT(4)))), simplify(ADD(INT(0), NEG(INT(1)))), simplify(ADD(INT(2), INT(3))))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(Main.INT(4), Main.NEG(Main.INT(1)), Main.INT(5))</code></pre><h2 id="@match-pattern-value"><a class="docs-heading-anchor" href="#@match-pattern-value"><code>@match pattern = value</code></a><a id="@match-pattern-value-1"></a><a class="docs-heading-anchor-permalink" href="#@match-pattern-value" title="Permalink"></a></h2><p>The match equation of MetaModelica: it binds the pattern&#39;s variables in the enclosing scope and returns the value. A value that does not match throws <code>MatchFailure</code>.</p><pre><code class="language-julia hljs">@match ADD(INT(a), INT(b)) = ADD(INT(1), INT(2))
+a + b</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3</code></pre><h2 id="Matching-your-own-types"><a class="docs-heading-anchor" href="#Matching-your-own-types">Matching your own types</a><a id="Matching-your-own-types-1"></a><a class="docs-heading-anchor-permalink" href="#Matching-your-own-types" title="Permalink"></a></h2><h3 id="Plain-structs"><a class="docs-heading-anchor" href="#Plain-structs">Plain structs</a><a id="Plain-structs-1"></a><a class="docs-heading-anchor-permalink" href="#Plain-structs" title="Permalink"></a></h3><p>Any Julia struct matches without registration. The name is the type; positional patterns follow the field order, named patterns the field names.</p><pre><code class="language-julia hljs">struct Point
+  x::Float64
+  y::Float64
+end
+
+quadrant(p::Point)::Int = @match p begin
+  Point(0.0, 0.0) =&gt; 0
+  Point(x = x, y = y) where (x &gt; 0 &amp;&amp; y &gt; 0) =&gt; 1
+  Point(__) =&gt; -1
+end
+
+quadrant.([Point(0, 0), Point(1, 2), Point(-1, 2)])</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3-element Vector{Int64}:
+  0
+  1
+ -1</code></pre><p><code>@Uniontype</code> with <code>@Record</code> (above) gives one struct per record, so a record matches the same way.</p><h3 id="Tagged-structs:-@registerVariants"><a class="docs-heading-anchor" href="#Tagged-structs:-@registerVariants">Tagged structs: <code>@registerVariants</code></a><a id="Tagged-structs:-@registerVariants-1"></a><a class="docs-heading-anchor-permalink" href="#Tagged-structs:-@registerVariants" title="Permalink"></a></h3><p>A tagged struct is one concrete type for all variants, with a <code>tag</code> field that says which variant a value is. <code>@T_Uniontype</code> and <code>@CUniontype</code> generate such a struct together with its variants. For a struct written by hand, <a href="../api/#MetaModelica.@registerVariants-Tuple{Any, Any}"><code>@registerVariants</code></a> adds what <code>@match</code>, <code>isvariant</code> and <code>variantof</code> need:</p><ul><li>a <code>tag</code> field holding an <code>@enum</code> with one value per variant, named <code>&lt;VARIANT&gt;_TAG</code>, in the order of the variants (the first is 0);</li><li>per variant a constructor function returning a value with that tag, defined before <code>@registerVariants</code>;</li><li>per variant the fields its pattern binds, in the order of its positional arguments.</li></ul><pre><code class="language-julia hljs">@enum ShapeTag::UInt8 CIRCLE_TAG RECT_TAG
+
+struct Shape
+  tag::ShapeTag
+  r::Float64
+  w::Float64
+  h::Float64
+end
+CIRCLE(r) = Shape(CIRCLE_TAG, r, 0.0, 0.0)
+RECT(w, h) = Shape(RECT_TAG, 0.0, w, h)
+
+@registerVariants Shape begin
+  CIRCLE(r)
+  RECT(w, h)
+end
+
+area(s::Shape)::Float64 = @match s begin
+  CIRCLE(r) =&gt; pi * r^2
+  RECT(w, h) =&gt; w * h
+end
+
+(area(CIRCLE(1.0)), area(RECT(2.0, 3.0)), isvariant(RECT(1.0, 1.0), RECT))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(3.141592653589793, 6.0, true)</code></pre><p>The variant name in a pattern is the constructor function, not a type: <code>CIRCLE(r)</code> matches a <code>Shape</code> whose tag is <code>CIRCLE_TAG</code> and binds its field <code>r</code>. An <code>@enum</code> in another order than the variant list is an error when <code>@registerVariants</code> runs, not a wrong match.</p><h2 id="@matchcontinue"><a class="docs-heading-anchor" href="#@matchcontinue"><code>@matchcontinue</code></a><a id="@matchcontinue-1"></a><a class="docs-heading-anchor-permalink" href="#@matchcontinue" title="Permalink"></a></h2><p><code>@matchcontinue</code> has the syntax of <code>@match</code>. A case whose result fails sends the match on to the next case. A failure is a <code>MetaModelicaException</code> or an <code>ImmutableListException</code>:</p><ul><li><code>fail()</code>;</li><li>a <code>MatchFailure</code>: an inner <code>@match</code> with no matching case, or a match equation that does not match;</li><li>a failing <a href="../#Runtime-builtins">runtime builtin</a> (<code>stringInt(&quot;2.5&quot;)</code>, <code>listHead(nil)</code>, ...), in code translated from MetaModelica.</li></ul><p>Any other exception is a bug, not a failure: <code>@matchcontinue</code> prints it and rethrows it. That includes Julia&#39;s own errors (<code>ArgumentError</code> from <code>parse(Int, &quot;x&quot;)</code>, <code>BoundsError</code>, <code>MethodError</code>). To reject a case from plain Julia code, call <code>fail()</code>:</p><pre><code class="language-julia hljs">function describe(s::String)::String
+  @matchcontinue s begin
+    _ =&gt; begin
+      local n = tryparse(Int, s)
+      n === nothing &amp;&amp; fail()
+      &quot;integer $n&quot;
+    end
+    _ =&gt; begin
+      local x = tryparse(Float64, s)
+      x === nothing &amp;&amp; fail()
+      &quot;real $x&quot;
+    end
+    _ =&gt; &quot;text&quot;
+  end
+end
+
+describe.([&quot;42&quot;, &quot;2.5&quot;, &quot;x&quot;])</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">3-element Vector{String}:
+ &quot;integer 42&quot;
+ &quot;real 2.5&quot;
+ &quot;text&quot;</code></pre><p>A match equation in a case states what the case needs. When it does not hold, the case fails and the next case runs:</p><pre><code class="language-julia hljs">function addInts(e::Exp)::Int
+  @matchcontinue e begin
+    _ =&gt; begin
+      @match ADD(INT(a), INT(b)) = e
+      a + b
+    end
+    _ =&gt; 0
+  end
+end
+
+(addInts(ADD(INT(1), INT(2))), addInts(NEG(INT(1))))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">(3, 0)</code></pre><p>A failed case is not undone: what it changed before it failed (an array, a dictionary, a global root) stays changed.</p><h3 id="@match-or-@matchcontinue"><a class="docs-heading-anchor" href="#@match-or-@matchcontinue"><code>@match</code> or <code>@matchcontinue</code></a><a id="@match-or-@matchcontinue-1"></a><a class="docs-heading-anchor-permalink" href="#@match-or-@matchcontinue" title="Permalink"></a></h3><ul><li>If a pattern can decide, use <code>@match</code> with a pattern or a <code>where</code> guard. <code>@match</code> checks patterns without exceptions.</li><li>Use <code>@matchcontinue</code> when only the result can decide, as in <code>describe</code> above. Each failed case costs a thrown exception, much more than a pattern that does not match.</li><li>A <code>@matchcontinue</code> whose cases never fail is a <code>@match</code> with the cost of the <code>try</code>/<code>catch</code>.</li></ul><h2 id="Debugging-@matchcontinue:-MM_Debug"><a class="docs-heading-anchor" href="#Debugging-@matchcontinue:-MM_Debug">Debugging <code>@matchcontinue</code>: <code>MM_Debug</code></a><a id="Debugging-@matchcontinue:-MM_Debug-1"></a><a class="docs-heading-anchor-permalink" href="#Debugging-@matchcontinue:-MM_Debug" title="Permalink"></a></h2><p><code>MetaModelica.MM_Debug</code> has a <code>@matchcontinue</code> that logs each failure it swallows. Swap it in with one import; the explicit import wins over <code>using MetaModelica</code>:</p><pre><code class="language-julia hljs">using MetaModelica
+using MetaModelica.MM_Debug: @matchcontinue
+
+MetaModelica.MM_Debug.clear!()
+# ... run the code ...
+MetaModelica.MM_Debug.summarize()   # failures per exception type
+MetaModelica.MM_Debug.print_log()   # the last entries: case number, exception, source line</code></pre><p>Remove the import to return to the plain macro.</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../uniontypes/">Uniontypes »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.20.0 on <span class="colophon-date" title="Monday 23 November 2026 14:23">Monday 23 November 2026</span>. Using Julia version 1.13.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
