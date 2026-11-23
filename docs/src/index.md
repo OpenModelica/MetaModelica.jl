@@ -12,6 +12,8 @@ It includes:
 - Union and record helpers such as `@Uniontype`, `@Mutable_Uniontype`, and `@Record`.
 - Compacted uniontypes, one concrete tagged struct per uniontype: `@CUniontype` and `@T_Uniontype`, with `isvariant` and `variantof` in place of `isa` and `typeof`; `@registerVariants` registers a hand-written tagged struct the same way.
 - Runtime builtins: Julia versions of MetaModelica's builtin functions (see below).
+- Function extension, `@ExtendedFunction` and `@ExtendedAnonFunction`, written for the MetaModelica-to-Julia
+  translator: see [Function extension](@ref).
 
 ## Runtime builtins
 
