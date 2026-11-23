@@ -9,8 +9,8 @@ MetaModelica.jl provides Julia implementations of MetaModelica runtime concepts 
 It includes:
 
 - Pattern matching macros such as `@match`, `@matchcontinue`, and `@unsafematch`: see [Pattern matching](@ref).
-- Union and record helpers such as `@Uniontype`, `@Mutable_Uniontype`, and `@Record`.
-- Compacted uniontypes, one concrete tagged struct per uniontype: `@CUniontype` and `@T_Uniontype`, with `isvariant` and `variantof` in place of `isa` and `typeof`; `@registerVariants` registers a hand-written tagged struct the same way.
+- Uniontypes, MetaModelica's data types with a fixed set of record variants: `@Uniontype` with `@Record`, and the
+  compacted forms `@T_Uniontype` and `@CUniontype` (one concrete struct per uniontype): see [Uniontypes](@ref).
 - Runtime builtins: Julia versions of MetaModelica's builtin functions (see below).
 - Function extension, `@ExtendedFunction` and `@ExtendedAnonFunction`, written for the MetaModelica-to-Julia
   translator: see [Function extension](@ref).

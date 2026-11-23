@@ -15,6 +15,7 @@ makedocs(
   pages = [
     "Home" => "index.md",
     "Pattern matching" => "matching.md",
+    "Uniontypes" => "uniontypes.md",
     "Function extension" => "functionExtension.md",
     "API Reference" => "api.md",
   ],
