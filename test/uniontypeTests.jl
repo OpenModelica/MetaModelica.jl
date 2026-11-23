@@ -79,5 +79,19 @@ end
 
 @test_nowarn REAL1(CONCRETE_NICE_NUMBER(BASE(4)))
 
+#= The short @Record form keeps every field; a record may have none. =#
+@Uniontype ShortForm begin
+  @Record SHORT_ONE a::Int
+  @Record SHORT_TWO a::Int b::String
+  @Record SHORT_NONE
+end
+
+@testset "Short @Record form" begin
+  @test fieldnames(SHORT_TWO) == (:a, :b)
+  @test SHORT_TWO(1, "x").b == "x"
+  @test fieldnames(SHORT_ONE) == (:a,)
+  @test fieldnames(SHORT_NONE) == ()
+  @test SHORT_NONE() isa ShortForm
+end
 
 end
