@@ -5,6 +5,9 @@ using Test
 
   @testset "@match" begin
     include("./matchTests.jl")
+    @testset "Tuple, array and or-patterns, @unsafematch" begin
+      include("./patternTests.jl")
+    end
     @testset "@matchcontinue" begin
       include("./matchcontinueTests.jl")
     end
@@ -32,11 +35,15 @@ using Test
   end #=End of uniontype =#
 
   @testset "Function extension test" begin
-    #    include("./functionExtensionTest.jl") Disabled for now. Julia 1.6 broke something..
+    include("./functionExtensionTest.jl")
   end #= Function extension test =#
 
   @testset "Runtime tests" begin
     include("./runtimeTest.jl")
+  end
+
+  @testset "Runtime builtins" begin
+    include("./runtimeBuiltinsTests.jl")
   end
 
   @testset "Cross module match" begin

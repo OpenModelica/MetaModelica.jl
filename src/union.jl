@@ -55,7 +55,9 @@ function makeRecord(recordExpr::Expr)
       sourceInfo = i
     end
   end
-  return [(el[1].args[3], el[1].args[4], el[2]) for el in arr]
+  #= `@Record NAME begin fields end`, or the short form `@Record NAME field1 field2 ...`: all fields. =#
+  return [(el[1].args[3], length(el[1].args) == 4 ? el[1].args[4] : Expr(:block, el[1].args[4:end]...), el[2])
+          for el in arr]
 end
 
 function makeTuple(name, fields)
@@ -228,12 +230,27 @@ macro Mutable_Uniontype(args...)
   end)
 end
 
-""" Creates a record belonging to a Uniontype """
+"""
+    @Record NAME begin
+      field1::Type1
+      field2::Type2
+    end
+    @Record NAME field1::Type1 field2::Type2
+
+A record of a [`@Uniontype`](@ref) or [`@Mutable_Uniontype`](@ref), written inside its block: a struct `NAME` with
+these fields, a subtype of the uniontype. A record may have no fields (`@Record NAME`).
+"""
 macro Record(name, fields...)
   makeTuple(name, fields)
 end
 
-#= Declares a module-level abstract type for mutually recursive uniontypes. =#
+"""
+    @UniontypeDecl Name
+
+Declare the abstract type `Name` of a uniontype before its definition, so that uniontypes defined earlier can
+have fields of type `Name` (mutually recursive uniontypes). The later `@Uniontype Name` or `@T_Uniontype Name`
+uses this declaration.
+"""
 macro UniontypeDecl(uDecl)
   esc(quote
         abstract type $uDecl end

@@ -347,13 +347,14 @@ end
 
 """ O(n) """
 function stringUpdateStringChar(str::String, newch::String, index::Int)::String
-  local news::String = str
   if index < 0
     println("stringUpdateStringChar: index < 0!")
     fail()
   end
-  news[index] = newch[1]
-  news
+  #= A String is immutable: build the new one from its characters. =#
+  local chars::Vector{Char} = collect(str)
+  chars[index] = newch[1]
+  String(chars)
 end
 
 """ O(s1+s2) """
@@ -515,22 +516,22 @@ end
 """ Appends arr2 to arr1. O(length(arr1) + length(arr2)).
 Note that this operation is *not* destructive, i.e. a new array is created. """
 function arrayAppend(arr1::Array{A}, arr2::Array{A})::Array{A} where {A}
-  local arr::Array{A}
-  @error "Defined in the runtime"
-  fail()
+  local arr::Array{A} = vcat(arr1, arr2)
+  arr
 end
 
 """
 Returns the string representation of any value.
 Rather slow; only use this for debugging!
 """
-function anyString(a::A) where {A}
-  string(dump(a))
+function anyString(a::A)::String where {A}
+  sprint(dump, a)
 end
 
 """ print(anyString(a)), but to stderr """
-function printAny(a::A) where {A}
-  println(dump(a))
+function printAny(a::A)::Nothing where {A}
+  print(stderr, anyString(a))
+  return nothing
 end
 
 """ For RML compatibility """
@@ -633,15 +634,14 @@ end
 """ Returns the pointer address of a reference as a hexadecimal string that can
 be used for debugging. """
 function referencePointerString(ref::A)::String where {A}
-  local str::String
-  @assert false "not implemented"
+  #= Julia has no stable address for an immutable value: its objectid identifies it instead. =#
+  local str::String = "0x" * string(objectid(ref); base = 16)
   str
 end
 
 """ Use the diff to compare two time samples to each other. Not very accurate. """
 function clock()::Float64
-  local t::Float64
-  @assert false "not implemented"
+  local t::Float64 = time()
   t
 end
 
@@ -656,8 +656,7 @@ end
 end
 
 function listStringCharString(strs::List{String})::String
-  local str::String
-  @assert false "not implemented"
+  local str::String = stringCharListString(strs)
   str
 end
 
@@ -685,8 +684,7 @@ end
 end
 
 function referenceDebugString(functionSymbol::A)::String where {A}
-  local name::String
-  @assert false "not implemented"
+  local name::String = string(functionSymbol)
   name
 end
 

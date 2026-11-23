@@ -130,6 +130,25 @@ end
   @test_throws MatchFailure MMDebugUser.nothingMatches(1)
   @test MetaModelica.MM_Debug.LOG[end].case_num == 0
   @test occursin("ALL CASES FAILED", MetaModelica.MM_Debug.LOG[end].source)
+  #= summarize() counts per exception type, print_log() lists the last entries. =#
+  local report = mktemp() do path, io
+    redirect_stdout(io) do
+      MetaModelica.MM_Debug.summarize()
+      MetaModelica.MM_Debug.print_log(last_n = 1)
+    end
+    flush(io)
+    read(path, String)
+  end
+  #= pick(1) swallowed one failure, nothingMatches(1) one failure and the final MatchFailure. =#
+  @test occursin("3 swallowed exceptions", report)
+  @test occursin(r"MetaModelicaGeneralException +2", report) && occursin(r"MatchFailure +1", report)
+  @test occursin("[case 0]", report) && !occursin("[case 1]", report)
   MetaModelica.MM_Debug.clear!()
   @test isempty(MetaModelica.MM_Debug.LOG)
+  local empty = mktemp() do path, io
+    redirect_stdout(MetaModelica.MM_Debug.summarize, io)
+    flush(io)
+    read(path, String)
+  end
+  @test occursin("Log is empty.", empty)
 end
